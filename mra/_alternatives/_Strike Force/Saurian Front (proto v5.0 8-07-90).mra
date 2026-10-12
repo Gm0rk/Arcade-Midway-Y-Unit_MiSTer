@@ -1,0 +1,63 @@
+<misterromdescription>
+	<name>Saurian Front (proto v5.0 8/07/90)</name>
+	<mratimestamp>20261012</mratimestamp>
+	<mameversion>0289</mameversion>
+	<setname>saurnfrnt</setname>
+	<year>1991</year>
+	<manufacturer>Williams</manufacturer>
+	<category>Shooter / Flying</category>
+	<rbf>Arcade-Midway-Y-Unit</rbf>
+	<remark>2 players</remark>
+	<switches default="FF,36,00">
+		<dip bits="0" name="Coin Meter" ids="Shared,Independent" values="1,0"/>
+		<dip bits="8,13" name="Coinage" ids="USA 1,USA 2,USA 3,Australia 1,Austria,Belgium 1,Belgium 2,Denmark,France 1,France 2,France 3,Findland,German 1,German 2,German 3,Italy 1,Japan 1,Japan 2,Netherlands,New Zealand,Norway,Spain 1,Sweden 1,Swiss 1,U.K. 1,U.K. 2,U.K. 3,Swiss 1" values="54,55,56,42,45,46,47,53,60,61,62,51,57,58,59,37,43,44,50,49,52,41,48,63,38,39,40,36"/>
+		<dip bits="1" name="Credits to Start" ids="1,2" values="1,0"/>
+		<dip bits="5,7" name="Difficulty" ids="Level 0,Level 1,Level 2,Level 3,Level 4,Level 5,Level 6,Level 7" values="3,1,2,0,4,5,6,7"/>
+		<dip bits="15" name="Free Play" ids="Off,On"/>
+		<dip bits="4" name="Lives" ids="3,4"/>
+		<dip bits="2,3" name="Points for Extra Ship" ids="40000,50000,750000,100000" values="1,0,2,3"/>
+		<dip bits="16" name="Service Credit" ids="Press,Press"/>
+		<dip bits="14" name="Test Switch" ids="Off,On"/>
+		<dip bits="17" name="Tilt" ids="Press,Press"/>
+	</switches>
+	<buttons names="Fire,Weapon,Weapon Select,-,-,-,Start/Transform,Coin,Test,Pause" default="A,B,X,-,-,-,Start,Select,-,-"/>
+	<romstruct>
+0x000000 program ROM (1 MB, 16-bit little endian)
+0x100000 graphics ROM (8 MB, MAME gfx region)
+0x900000 sound CPU ROM (MAME region from 0x10000)
+	</romstruct>
+	<rom index="1">
+		<part>05</part>
+	</rom>
+	<rom index="0" zip="saurnfrnt.zip|strkforc.zip" md5="ba10c037529dfb85a01d5762bcb7075e" type="merged">
+		<!-- program ROM -->
+		<part repeat="0xC0000">00</part>
+		<interleave output="16">
+			<part crc="6cd469f3" name="pa1_saurian_front_game_rom_u105.u105" map="01"/>
+			<part crc="bf5188df" name="pa1_saurian_front_game_rom_u89.u89" map="10"/>
+		</interleave>
+		<!-- graphics -->
+		<part crc="ee7a733d" name="pa1_saurian_front_game_rom_u111.u111"/>
+		<part crc="3a1a0656" name="pa1_saurian_front_game_rom_u112.u112"/>
+		<part crc="0cba3a22" name="pa1_saurian_front_game_rom_u113.u113"/>
+		<part crc="1cce75a8" name="pa1_saurian_front_game_rom_u114.u114"/>
+		<part crc="5d6a6c39" name="pa1_saurian_front_game_rom_u106.u106"/>
+		<part crc="5d178b62" name="pa1_saurian_front_game_rom_u107.u107"/>
+		<part repeat="0x140000">00</part>
+		<part crc="8918d0c3" name="pa1_saurian_front_game_rom_u95.u95"/>
+		<part crc="6de6e648" name="pa1_saurian_front_game_rom_u96.u96"/>
+		<part crc="6fba9290" name="pa1_saurian_front_game_rom_u97.u97"/>
+		<part crc="298939f9" name="pa1_saurian_front_game_rom_u98.u98"/>
+		<part crc="ff87ab13" name="pa1_saurian_front_game_rom_u90.u90"/>
+		<part crc="67bd128a" name="pa1_saurian_front_game_rom_u91.u91"/>
+		<part repeat="0x540000">00</part>
+		<!-- sound CPU -->
+		<part crc="f22a09b8" name="pa1_saurian_front_sound_rom_u4.u4"/>
+		<part crc="f22a09b8" name="pa1_saurian_front_sound_rom_u4.u4"/>
+		<part crc="a2dfce0f" name="pa1_saurian_front_sound_rom_u19.u19"/>
+		<part crc="a2dfce0f" name="pa1_saurian_front_sound_rom_u19.u19"/>
+		<part crc="b0e8f6fd" name="pa1_saurian_front_sound_rom_u20.u20"/>
+		<part crc="b0e8f6fd" name="pa1_saurian_front_sound_rom_u20.u20"/>
+	</rom>
+	<nvram index="2" size="32768"/>
+</misterromdescription>
