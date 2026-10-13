@@ -103,9 +103,9 @@ hacks are in the `_alternatives` folder of the MRAs.
 | Item | |
 |---|---|
 | Video Settings | Aspect ratio, scandoubler, scale, Video Timing, CRT Adjust (Auto-Width, H-Size, H-Position, V-Shift, V-Size, V-Size Mode) |
-| Move List | Mortal Kombat: Off or a fighter; shows that fighter's special moves, fatality and The Pit with the distance they need over the game, which waits until it is Off |
+| Move List | Mortal Kombat: Off or a fighter; shows the move list page with that fighter (two pages, four fighters then three: special moves, fatality and the distance it needs, The Pit) over the game, which waits until it is Off |
 | Finishing Moves | Mortal Kombat: each fighter's fatality and The Pit, entered for you at the next FINISH HIM |
-| DIP Switches | The game's DIP switches with Service Credit and Tilt (select "Press" to drop a service credit or close the slam switch; the switch closes once the game runs again) and any game-specific entries, in alphabetical order |
+| DIP Switches | The game's DIP switches with Service Credit and Tilt (select "Press" to drop a service credit or close the slam switch; the switch closes once the game runs again) and any game-specific entries; the switches and each one's settings in alphabetical order |
 | Hidden Items | Hidden developer menus, only for the games that have one |
 | Service Mode | The cabinet's test switch |
 | Pause when OSD is open | On by default |
