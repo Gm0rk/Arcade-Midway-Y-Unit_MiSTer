@@ -10,9 +10,9 @@ data the core needs for them and for the Hidden Items page's messages
 The OSD's "Finishing Moves" page picks a fighter and one of the fighter's
 moves; rtl/yunit_fmoves.sv enters it on the winner's controls at the next
 FINISH HIM it fits. The main page's "Move List" option (Off or a fighter)
-shows that fighter's special moves and finishing moves with the distance
-they need in a window over the picture (tools/yunit_window.py makes its
-pages from the lists here, rtl/yunit_window.sv draws them). This script
+shows the page with that fighter's special moves and fatality, with the
+distance it needs, in a window over the picture (tools/yunit_window.py
+makes its two pages from the lists here, rtl/yunit_window.sv draws them). This script
 holds the lists and makes from them:
 
   - rtl/yunit_fmoves_tab.svh: the move records and their programs (the
