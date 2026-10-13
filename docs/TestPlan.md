@@ -26,7 +26,7 @@ Core tested (rbf date): ____________
 | [High Impact Football](#high-impact-football) | 12 | 2 / 12 passed |
 | [Super High Impact](#super-high-impact) | 12 | 2 / 12 passed |
 | [Strike Force](#strike-force) | 10 | 1 / 10 passed |
-| [Mortal Kombat](#mortal-kombat) | 24 | 2 / 24 passed |
+| [Mortal Kombat](#mortal-kombat) | 29 | 2 / 29 passed |
 | [Terminator 2 - Judgment Day](#terminator-2---judgment-day) | 13 | 1 / 13 passed |
 | [Total Carnage](#total-carnage) | 10 | 2 / 10 passed |
 | [Y-Unit Test ROM](#y-unit-test-rom) | 3 | 1 / 3 passed |
@@ -161,7 +161,7 @@ Main MRA: Strike Force (rev 1). [Controls](StrikeForce.md).
 
 ## Mortal Kombat
 
-Main MRA: Mortal Kombat (rev 4.0). [Controls, move list, finishing moves and hidden menu](MortalKombat.md).
+Main MRA: Mortal Kombat (rev 4.0). [Controls, move list, finishing moves, hidden menu and Reptile](MortalKombat.md).
 
 | # | Test | Expected | Result | Notes |
 |---|---|---|---|---|
@@ -184,11 +184,16 @@ Main MRA: Mortal Kombat (rev 4.0). [Controls, move list, finishing moves and hid
 | MK-17 | Set a move before the match | Message "Finishing move set: it plays at the next FINISH HIM"; it plays at FINISH HIM | | |
 | MK-18 | Stand too far for Johnny Cage, then walk in | Message "Too far: step closer"; the move plays once close | | |
 | MK-19 | Clear the set move | Message "Finishing move cleared"; nothing plays | | |
-| MK-20 | Move List, each fighter | Page 1/2 (Johnny Cage to Sonya) or 2/2 (Raiden to Scorpion) over the dimmed title screen: special moves, fatality with its distance, The Pit at the bottom; the text reads clearly | | |
+| MK-20 | Move List: Page 1, then Page 2 | Over the dimmed title screen, MOVE LIST 1/2 (Johnny Cage to Sonya) and 2/2 (Raiden to Scorpion): special moves, fatality with its distance, The Pit at the bottom; the text reads clearly | | |
 | MK-21 | Hidden Items → EJB Menu in the attract mode | EJB Menu opens; message "EJB Menu: code entered" | | |
 | MK-22 | The same during a fight | Nothing is pressed; message "Not now: the code works in the attract mode" | | |
 | MK-23 | Each MRA in `_alternatives/_Mortal Kombat` | Boots to attract and plays; prototype 4.0's EJB Menu says "Not in this revision of the game" | Pass | |
-| MK-24 | Set Move List to a fighter during a fight, close the OSD, then set it Off | The fight waits behind the page and goes on where it was once Off | | |
+| MK-24 | Set Move List to a page during a fight, close the OSD, then set it Off | The fight waits behind the page and goes on where it was once Off | | |
+| MK-25 | Hidden Items → Reptile Fight Next, then win a match in a 1-player game | Message "Reptile fight set: win a match in a 1-player game"; after the win "YOU HAVE FOUND ME", then the fight with Reptile below The Pit | | |
+| MK-26 | Reptile Fight Next twice | Message "Reptile fight cleared"; the next win goes on as usual | | |
+| MK-27 | Moon Silhouettes Always On, play to The Pit | Silhouettes cross the moon in every round there | | |
+| MK-28 | Reptile Hints Always On, start a match | Reptile drops in with a hint before each round's "FIGHT!"; the EJB Menu's game audits are not cleared | | |
+| MK-29 | Hidden Items on rev 2.0 or a prototype | Only EJB Menu (no Reptile lines); on rev 3.0 and the Turbo hacks the Reptile lines show | | |
 
 ## Terminator 2 - Judgment Day
 
