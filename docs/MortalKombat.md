@@ -69,11 +69,12 @@ Messages (shown after the OSD closes):
 ## Move List
 
 **OSD → Move List** (Off, then the fighters in the select screen's order)
-shows that fighter's page over the game: the title screen, dimmed, with the
-fighter's special moves, the fatality and The Pit, and the distance each
-finishing move needs. The game waits while the page is on (the OSD can stay
-open over it; pick another fighter to see theirs); set Move List to **Off**
-to play on. It is for reference: the core does not enter these moves
+shows the move list page with that fighter over the game, on the title
+screen dimmed: two pages, Johnny Cage to Sonya and Raiden to Scorpion, as in
+the Midway T-Unit core. Each fighter has the special moves and the fatality
+with the distance it needs; The Pit, the same for all, is at the bottom. The
+game waits while the page is on (the OSD can stay open over it; pick a
+fighter on the other page to turn it); set Move List to **Off** to play on. It is for reference: the core does not enter these moves
 (Finishing Moves does that for the fatality and The Pit).
 
 Commands as the game reads them: F toward the opponent, B away; (BL B F)

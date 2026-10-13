@@ -31,4 +31,4 @@ order):
 | Entry | |
 |---|---|
 | Gun Control | Joystick or Mouse (player 1) |
-| Crosshair | On or Off |
+| Crosshair | Off or On |
