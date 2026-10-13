@@ -141,8 +141,8 @@ def dsw_fields(ports, name):
 	return fields
 
 # MiSTer entries added to the OSD DIP Switches menu with the board's own
-# switches (the menu is in alphabetical order), in DIP bits 16-19 (default
-# 0; see Arcade-Midway-Y-Unit.sv):
+# switches (the menu and each switch's settings are in alphabetical order),
+# in DIP bits 16-19 (default 0; see Arcade-Midway-Y-Unit.sv):
 # Service Credit and Tilt are buttons (each selection flips the bit, which
 # the core takes as one press, so both values read "Press"); Terminator 2
 # also gets its gun control and crosshair settings.
@@ -151,6 +151,19 @@ def mister_dips(gid):
 	if gid in (9, 10, 11, 12):
 		d += [('18', 'Gun Control', 'Joystick,Mouse'), ('19', 'Crosshair', 'On,Off')]
 	return d
+
+def natural_key(text):
+	"""A to Z, the numbers in a name by value ("2 Players" before "10 ...")."""
+	return [int(t) if t.isdigit() else t for t in re.split(r'(\d+)', text.casefold())]
+
+def dip_xml(bits, name, sets):
+	"""A <dip> line; sets: [(value, label)] put in alphabetical order (the
+	values attribute keeps each label on its own value)."""
+	sets = sorted(sets, key=lambda s: natural_key(s[1]))
+	ids = ','.join(lb.replace(',', ' ') for _, lb in sets)
+	vals = [v for v, _ in sets]
+	valattr = '' if vals == list(range(len(sets))) else f' values="{",".join(str(v) for v in vals)}"'
+	return f'\t\t<dip bits="{bits}" name={quoteattr(name)} ids={quoteattr(ids)}{valattr}/>'
 
 def switches_xml(fields, extra=()):
 	default = 0xFFFF
@@ -166,15 +179,12 @@ def switches_xml(fields, extra=()):
 		if mask != ((1 << (hi + 1)) - (1 << lo)):
 			raise ValueError(f'non-contiguous dip {name} {mask:x}')
 		bits = f'{lo}' if lo == hi else f'{lo},{hi}'
-		ids = ','.join(s[1].replace(',', ' ') for s in sets)
-		vals = [(s[0] & mask) >> lo for s in sets]
-		natural = list(range(len(sets)))
-		valattr = '' if vals == natural else f' values="{",".join(str(v) for v in vals)}"'
-		dips.append((name, f'\t\t<dip bits="{bits}" name={quoteattr(name)} ids={quoteattr(ids)}{valattr}/>'))
+		dips.append((name, dip_xml(bits, name, [((v & mask) >> lo, lb) for v, lb in sets])))
 	for bits, name, ids in extra:
-		dips.append((name, f'\t\t<dip bits="{bits}" name={quoteattr(name)} ids={quoteattr(ids)}/>'))
-	# the OSD lists them in this order: alphabetical (the bits say where each is)
-	lines += [d for _, d in sorted(dips, key=lambda d: d[0].casefold())]
+		dips.append((name, dip_xml(bits, name, list(enumerate(ids.split(','))))))
+	# the OSD lists the switches and each one's settings in the MRA's order:
+	# both alphabetical (the bits and values say where each is)
+	lines += [d for _, d in sorted(dips, key=lambda d: natural_key(d[0]))]
 	lines.append('\t</switches>')
 	return '\n'.join(lines)
 
