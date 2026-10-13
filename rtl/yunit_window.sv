@@ -1,10 +1,11 @@
 //============================================================================
 //  yunit_window - Mortal Kombat's Move List window
 //
-//  With the OSD's "Move List" set to a fighter, this draws the fighter's page
-//  over the picture: the game's title screen, dimmed, and on it a grid of
-//  56 x 30 characters (7 x 8 dots each, the MiSTer OSD's font), centred in
-//  the 400 x 254 picture. tools/yunit_window.py writes the pages and the
+//  With the OSD's "Move List" set to a fighter, this draws the page with that
+//  fighter over the picture: the game's title screen, dimmed, and on it a
+//  grid of 56 x 30 characters (7 x 8 dots each, the MiSTer OSD's font),
+//  centred in the 400 x 254 picture. Two pages, four fighters then three, as
+//  in the T-Unit core. tools/yunit_window.py writes the pages and the
 //  background as ROM images. A row is a list of segments, runs of text in
 //  one colour at a column:
 //
@@ -48,7 +49,7 @@ module yunit_window #(
 	input            clk,
 	input            ce_pix,
 	input            enable,         // the window is shown
-	input      [2:0] page,           // the page: the fighter (Move List option order)
+	input      [2:0] page,           // the page (rtl/yunit_window_pages.svh)
 
 	input      [7:0] r_in,
 	input      [7:0] g_in,
