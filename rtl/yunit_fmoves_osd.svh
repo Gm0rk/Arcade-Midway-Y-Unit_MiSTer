@@ -5,7 +5,7 @@
 // Copyright (C) 2026 Gm0rk - GPL-3.0-or-later
 
 `define FMOVES_MENU \
-	"H5O[43:41],Move List,Off,Johnny Cage,Kano,Sub-Zero,Sonya,Raiden,Liu Kang,Scorpion;", \
+	"H5O[42:41],Move List,Off,Page 1,Page 2;", \
 	"H5P3,Finishing Moves;"
 
 `define FMOVES_PAGES \
@@ -32,7 +32,7 @@
 	"P3-,The move plays at the;", \
 	"P3-,winner's FINISH HIM;"
 
-`define CORE_INFO "I,Finishing move set: it plays\nat the next FINISH HIM,Not this fighter's FINISH HIM:\nthe move waits for a later one,Too far: step closer,Too close: step back,Stage move: The Pit only,FINISH HIM is over: the move\nwaits for the next one,Move not taken,Finishing move cleared,EJB Menu: code entered,Octopus Bookkeeping:\ncode entered,Code not taken: try again,Not now: the code works in\nthe attract mode,Not now: the code works while\nthe attract mode shows\nHIGHEST PAID SUPERSTARS,Not in this revision\nof the game;"
+`define CORE_INFO "I,Finishing move set: it plays\nat the next FINISH HIM,Not this fighter's FINISH HIM:\nthe move waits for a later one,Too far: step closer,Too close: step back,Stage move: The Pit only,FINISH HIM is over: the move\nwaits for the next one,Move not taken,Finishing move cleared,EJB Menu: code entered,Octopus Bookkeeping:\ncode entered,Code not taken: try again,Not now: the code works in\nthe attract mode,Not now: the code works while\nthe attract mode shows\nHIGHEST PAID SUPERSTARS,Not in this revision\nof the game,Reptile fight set: win a match\nin a 1-player game,Reptile fight cleared;"
 
 // message numbers (the I line's fields)
 localparam [4:0] MSG_SET = 5'd1;
@@ -49,3 +49,5 @@ localparam [4:0] MSG_CODE_FAIL = 5'd11;
 localparam [4:0] MSG_WHEN_ATTRACT = 5'd12;
 localparam [4:0] MSG_WHEN_SHI = 5'd13;
 localparam [4:0] MSG_NOT_HERE = 5'd14;
+localparam [4:0] MSG_REPT_SET = 5'd15;
+localparam [4:0] MSG_REPT_CLEARED = 5'd16;
