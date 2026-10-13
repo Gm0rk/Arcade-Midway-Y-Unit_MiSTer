@@ -16,7 +16,8 @@
 //  (34010 bit addresses; unmapped reads return 0 as in MAME)
 //
 //  The program ROM is read through a 16 KB direct-mapped cache of 8-byte
-//  SDRAM lines so the CPU rarely waits on SDRAM. VRAM writes from the CPU are
+//  SDRAM lines so the CPU rarely waits on SDRAM. Up to eight ROM words can be
+//  replaced as the CPU fetches them as opcodes (the OSD's Reptile options). VRAM writes from the CPU are
 //  posted; reads wait for DDR3.
 //
 //  Copyright (C) 2026 Gm0rk - GPL-3.0-or-later
@@ -38,6 +39,14 @@ module midway_yunit
 	input             mk_turbo,      // MK Turbo hacks: counter GAL at 0xFFFFF400
 	input             flip_x,
 	input       [1:0] vtiming,       // MiSTer option: 0 native frame (54.7 Hz), 1 277 lines
+
+	// program ROM patches (Mortal Kombat's Reptile options, ROM index 1
+	// words 0x40-0x5F; see "Program ROM patches" below)
+	input             patch_clr,     // a new ROM index 1 starts: no patches
+	input             patch_we,
+	input       [4:0] patch_wa,      // {slot, word}
+	input      [15:0] patch_wd,
+	input       [2:0] patch_en,      // options 1-3 on
 	                                 // (57.1 Hz), 2 263 lines (60.1 Hz); see "Video timing"
 
 	// inputs (active low as the CPU reads them), port 0-5
@@ -464,6 +473,60 @@ always @(posedge clk) begin
 	cd_q <= cache_data[rom_line[10:0]];
 	ct_q <= cache_tag[rom_line[10:0]];
 end
+
+//----------------------------------------------------------------------------
+// Program ROM patches: eight slots of {ROM word [18:0], option, new word,
+// original word}. While a slot's option is on, an opcode fetch of that ROM
+// word gets the new word, provided the ROM holds the original there (a wrong
+// or stale table changes nothing). Only opcode fetches (the CPU's PC is the
+// address read): the games' ROM checksums (power-up, test menu) read the
+// ROM as data and still see it unchanged. The cache keeps the ROM's own
+// words, so an option takes effect, and goes, on the next fetch. The match
+// is registered from the bus address and PC, which hold for the whole
+// access: it is ready when S_ROM looks at the cache (one clock after
+// S_IDLE).
+//   word 0: ROM word [15:0]; 1: {option [10:8], ROM word [18:16]};
+//   2: new word; 3: original word (option 0: slot empty)
+//----------------------------------------------------------------------------
+
+reg  [18:0] p_addr [0:7];
+reg   [2:0] p_opt  [0:7];
+reg  [15:0] p_new  [0:7];
+reg  [15:0] p_orig [0:7];
+reg         p_hit;
+reg  [15:0] p_hit_new, p_hit_orig;
+
+integer pi;
+always @(posedge clk) begin
+	if (patch_clr) begin
+		for (pi = 0; pi < 8; pi = pi + 1)
+			p_opt[pi] <= 3'd0;
+	end
+	else if (patch_we) begin
+		case (patch_wa[1:0])
+			2'd0: p_addr[patch_wa[4:2]][15:0] <= patch_wd;
+			2'd1: begin
+				p_addr[patch_wa[4:2]][18:16] <= patch_wd[2:0];
+				p_opt[patch_wa[4:2]]         <= patch_wd[10:8];
+			end
+			2'd2: p_new[patch_wa[4:2]]  <= patch_wd;
+			default: p_orig[patch_wa[4:2]] <= patch_wd;
+		endcase
+	end
+
+	p_hit <= 1'b0;
+	for (pi = 7; pi >= 0; pi = pi - 1)
+		if (p_opt[pi] != 3'd0 && patch_en[2'(p_opt[pi] - 3'd1)] && wa[18:0] == p_addr[pi] &&
+		    b_pc[22:4] == wa[18:0]) begin
+			p_hit      <= 1'b1;
+			p_hit_new  <= p_new[pi];
+			p_hit_orig <= p_orig[pi];
+		end
+end
+
+function automatic [15:0] patched(input [15:0] w, input hit, input [15:0] orig, input [15:0] nw);
+	patched = (hit && w == orig) ? nw : w;
+endfunction
 
 // the cache is cleared by walking it after reset (a ROM reload is followed
 // by a reset, so stale lines never survive a game change)
@@ -1004,7 +1067,7 @@ always @(posedge clk) begin
 			S_ROM: begin
 				if (ct_q == {1'b1, rom_line[16:11]}) begin
 					mem_ack   <= 1'b1;
-					mem_rdata <= cd_q[{wa[1:0], 4'b0000} +: 16];
+					mem_rdata <= patched(cd_q[{wa[1:0], 4'b0000} +: 16], p_hit, p_hit_orig, p_hit_new);
 					bstate    <= S_IDLE;
 				end
 				else begin
@@ -1020,7 +1083,7 @@ always @(posedge clk) begin
 				c_wd      <= cpu_sd_data;
 				c_wt      <= {1'b1, rom_line[16:11]};
 				mem_ack   <= 1'b1;
-				mem_rdata <= cpu_sd_data[{wa[1:0], 4'b0000} +: 16];
+				mem_rdata <= patched(cpu_sd_data[{wa[1:0], 4'b0000} +: 16], p_hit, p_hit_orig, p_hit_new);
 				bstate    <= S_IDLE;
 			end
 
