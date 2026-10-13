@@ -50,7 +50,6 @@ assign BUTTONS   = 0;
 
 `include "build_id.v"
 `include "rtl/yunit_fmoves_osd.svh"
-`include "rtl/yunit_window_pages.svh"
 localparam CONF_STR = {
 	"A.MIDWAYY;;",
 	"P1,Video Settings;",
@@ -75,6 +74,9 @@ localparam CONF_STR = {
 	"P2-;",
 	"H2P2T[16],EJB Menu;",
 	"H3P2T[16],Octopus Bookkeeping;",
+	"H6P2T[17],Reptile Fight Next;",
+	"H6P2O[18],Moon Silhouettes Always,Off,On;",
+	"H6P2O[19],Reptile Hints Always,Off,On;",
 	"O[9],Service Mode,Off,On;",
 	"O[8],Pause when OSD is open,On,Off;",
 	`FMOVES_PAGES,
@@ -112,6 +114,7 @@ reg   [4:0] game_id;
 wire        is_t2;
 wire        sec_ejb, sec_octo;              // the game has a hidden menu (see secret_menu.sv)
 wire        is_mk;                          // Mortal Kombat: Move List and Finishing Moves
+wire        rep_items;                      // Mortal Kombat with Reptile: his Hidden Items lines
 wire        info_req;
 wire  [7:0] info;
 
@@ -127,7 +130,7 @@ hps_io #(.CONF_STR(CONF_STR), .CONF_STR_BRAM(1), .WIDE(1)) hps_io
 
 	.buttons             (buttons),
 	.status              (status),
-	.status_menumask     ({5'd0, status[30:28], 2'd0, ~is_mk, ~(sec_ejb | sec_octo), ~sec_octo, ~sec_ejb, ~status[101], 1'b0}),
+	.status_menumask     ({5'd0, status[30:28], 1'b0, ~rep_items, ~is_mk, ~(sec_ejb | sec_octo), ~sec_octo, ~sec_ejb, ~status[101], 1'b0}),
 	.info_req            (info_req),
 	.info                (info),
 
@@ -668,8 +671,8 @@ always @(posedge clk_sys) begin
 end
 
 // Mortal Kombat's Move List window (see Video) holds the game too
-wire [2:0] movelist_sel = status[43:41];         // Off, then a fighter
-wire       movelist_on  = is_mk && movelist_sel != 3'd0;
+wire [1:0] movelist_sel = status[42:41];         // Off, Page 1, Page 2
+wire       movelist_on  = is_mk && (movelist_sel == 2'd1 || movelist_sel == 2'd2);
 wire pause = pause_toggle | (OSD_STATUS & ~status[8]) | movelist_on;
 
 //////////////////////////////////////////////////////////////////
@@ -742,7 +745,7 @@ wire [15:0] cpu_wd, cpu_rdata;
 
 // ROM index 1 (tools/yunit_fmoves.py): word 0 the game id, words 0x10-0x2F
 // the finishing moves' fight variables, 0x30-0x34 the Hidden Items page's
-// state word
+// state word, 0x40-0x61 Reptile (program patches, his flag)
 reg  cfg1_dl_d = 1'b0;
 wire cfg1_dl   = ioctl_download && ioctl_index == 16'd1;
 always @(posedge clk_sys) cfg1_dl_d <= cfg1_dl;
@@ -782,12 +785,60 @@ secret_menu secret_menu
 );
 
 //////////////////////////////////////////////////////////////////
+// Reptile (Mortal Kombat rev 3.0, 4.0 and the Turbo hacks)
+//
+// Three Hidden Items lines, shown when the MRA gives the set's Reptile
+// patches (ROM index 1 words 0x40-0x5F, tools/yunit_fmoves.py): "Reptile
+// Fight Next" (T[17]) sets or clears a one-time Reptile fight after the next
+// match won in a 1-player game; it is used up when his fight starts (the
+// CPU writes 1 to his flag, words 0x60-0x61; other code writes other values
+// there in attract mode). "Moon Silhouettes Always" (O[18]) and "Reptile
+// Hints Always" (O[19]) stay on. Each turns on its program patches in the
+// board (rtl/midway_yunit.sv, "Program ROM patches").
+//////////////////////////////////////////////////////////////////
+
+reg         rep_has = 1'b0;      // the set has Reptile patches
+reg  [27:0] rep_flag;            // his flag's word address
+reg         rep_arm;             // Reptile Fight Next set
+reg         rep_trig_d;
+reg         rep_msg_set, rep_msg_clr;
+
+wire cfg1_rep = cfg1_wr && ioctl_addr[26:9] == 18'd0 && cfg1_word >= 8'h40 && cfg1_word <= 8'h5F;
+
+always @(posedge clk_sys) begin
+	rep_trig_d  <= status[17];
+	rep_msg_set <= 1'b0;
+	rep_msg_clr <= 1'b0;
+
+	if (cfg1_start)
+		rep_has <= 1'b0;
+	else if (cfg1_rep && cfg1_word[1:0] == 2'd1 && ioctl_dout[10:8] != 3'd0)
+		rep_has <= 1'b1;
+	if (cfg1_wr && ioctl_addr[26:9] == 18'd0 && cfg1_word == 8'h60) rep_flag[15:0]  <= ioctl_dout;
+	if (cfg1_wr && ioctl_addr[26:9] == 18'd0 && cfg1_word == 8'h61) rep_flag[27:16] <= ioctl_dout[11:0];
+
+	if (reset)
+		rep_arm <= 1'b0;
+	else if (status[17] & ~rep_trig_d & rep_items) begin
+		rep_arm     <= ~rep_arm;
+		rep_msg_set <= ~rep_arm;
+		rep_msg_clr <= rep_arm;
+	end
+	else if (cpu_wr && cpu_wa == rep_flag && cpu_wd == 16'd1)
+		rep_arm <= 1'b0;             // his fight has started (the game sets the flag to 1)
+end
+
+assign rep_items = is_mk & rep_has;
+
+wire [2:0] rep_patch_en = {3{rep_items}} & {status[19], status[18], rep_arm};
+
+//////////////////////////////////////////////////////////////////
 // Finishing moves (Mortal Kombat)
 //
 // The Finishing Moves page picks a fighter (O[30:28]; the menu mask's bits
 // 8-10 show that fighter's lines) and one of its moves (R[32] the fatality,
 // R[33] The Pit; R[40] clears the set move). (The main page's Move List,
-// O[43:41], is a window over the picture: see Video.) rtl/yunit_fmoves.sv
+// O[42:41], is a window over the picture: see Video.) rtl/yunit_fmoves.sv
 // plays the set move at the winner's next FINISH HIM, following the fight
 // through the CPU's accesses to the variables the MRA gives (ROM index 1
 // words 0x10-0x2F).
@@ -872,6 +923,8 @@ always @(posedge clk_sys) begin
 	if (sec_when)     msg_pend[MSG_WHEN_ATTRACT] <= 1'b1;
 	if (sec_when_shi) msg_pend[MSG_WHEN_SHI] <= 1'b1;
 	if (sec_not_here) msg_pend[MSG_NOT_HERE] <= 1'b1;
+	if (rep_msg_set) begin msg_pend[MSG_REPT_SET] <= 1'b1; msg_pend[MSG_REPT_CLEARED] <= 1'b0; end
+	if (rep_msg_clr) begin msg_pend[MSG_REPT_CLEARED] <= 1'b1; msg_pend[MSG_REPT_SET] <= 1'b0; end
 
 	if (rom_download)
 		msg_pend <= 31'd0;
@@ -907,6 +960,12 @@ midway_yunit board
 	.mk_turbo       (cfg_turbo),
 	.flip_x         (is_t2),
 	.vtiming        (status[15:14]),    // 54.7 / 57 / 60 Hz frames (see midway_yunit.sv)
+
+	.patch_clr      (cfg1_start),
+	.patch_we       (cfg1_rep),
+	.patch_wa       (5'(cfg1_word - 8'h40)),
+	.patch_wd       (ioctl_dout),
+	.patch_en       (rep_patch_en),
 
 	.in_ports       (in_ports),
 	.gun_p1_x       (~gun_x[0]),
@@ -1095,18 +1154,17 @@ wire ch_on1 = is_t2 && !xhair_off && xhair(out_x, out_y, ch_x1[17:8], ch_y1[17:8
 
 // ---- Move List window (rtl/yunit_window.sv) ----
 //
-// Mortal Kombat's Move List (O[43:41]: Off, then a fighter in the Fighter
-// option's order) draws the page with that fighter over the game's dimmed
-// title screen in place of the picture: two pages, four fighters then three,
-// as in the T-Unit core (win_page: rtl/yunit_window_pages.svh). The game
-// waits behind it (pause above).
+// Mortal Kombat's Move List (O[42:41]: Off, Page 1, Page 2) draws that page
+// over the game's dimmed title screen in place of the picture: four
+// fighters, then three, as in the T-Unit core. The game waits behind it
+// (pause above).
 
 yunit_window yunit_window
 (
 	.clk     (clk_sys),
 	.ce_pix  (ce_pix),
 	.enable  (movelist_on),
-	.page    (win_page(movelist_sel - 3'd1)),
+	.page    ({2'd0, movelist_sel[1]}),
 
 	.r_in    (brd_r),
 	.g_in    (brd_g),
