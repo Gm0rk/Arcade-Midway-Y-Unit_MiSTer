@@ -2,13 +2,13 @@
 """
 yunit_window.py - the pages of Mortal Kombat's Move List window
 
-With the OSD's "Move List" set to a fighter, rtl/yunit_window.sv draws that
-fighter's page over the picture, on the game's title screen dimmed so the
-text reads (the T-Unit core's Move List window, Arcade-Midway-T-Unit
-tools/tunit_window.py): the fighter's special moves, then the fatality and
-The Pit with the distance each needs, in words (Close, Sweep, Jump; tools/
-yunit_fmoves.py has the moves and the distances). A page per fighter, in
-the Move List option's order.
+With the OSD's "Move List" set to a fighter, rtl/yunit_window.sv draws the
+page with that fighter over the picture, on the game's title screen dimmed
+so the text reads. The pages are the T-Unit core's for MK (Arcade-Midway-
+T-Unit tools/tunit_window.py): each fighter's special moves and fatality
+with the distance it needs, in words (Close, Sweep, Jump; tools/
+yunit_fmoves.py has the moves and the distances), as many fighters to a
+page as fit (four, then three), The Pit in the footer.
 
 A page is 30 rows of 56 characters; a row is a list of segments, runs of
 text in one colour (the blanks between them are not stored). ROM images
@@ -30,6 +30,7 @@ for $readmemh:
                                at half the picture's resolution, a palette
                                index each
     rtl/yunit_window_pal.hex   32 x 24 bits: its palette (RGB, already dimmed)
+    rtl/yunit_window_pages.svh each fighter's page (top level)
 
 The background comes from a capture of the title screen (--bg; the 4:3
 picture is taken from the middle of the image, so a 1920 x 1080 capture
@@ -55,6 +56,7 @@ import yunit_fmoves as fm   # noqa: E402
 
 OUT = {k: os.path.join(REPO, 'rtl', 'yunit_window_%s.hex' % k)
        for k in ('row', 'seg', 'text', 'font', 'bg', 'pal')}
+OUT['svh'] = os.path.join(REPO, 'rtl', 'yunit_window_pages.svh')
 
 COLS, ROWS = 56, 30
 LEFT, RIGHT = 1, 54                 # the columns text uses
@@ -151,60 +153,78 @@ NOTATION = [
     [('Distance', YELLOW), (': ', GRAY), ('Sweep', YELLOW), (" = a sweep's reach, ", GRAY),
      ('Jump', YELLOW), (' = a jump away', GRAY)],
 ]
-PAUSED = [('The game waits: set ', GRAY), ('Move List', YELLOW), (' to ', GRAY), ('Off', YELLOW),
-          (' to play on', GRAY)]
 
 
-def finish_name(mname, kind):
-    return ('Fatality: ' + mname) if kind == fm.K_FATAL else mname
+def pit_footer():
+    """The Pit, the same for every fighter: in the footer."""
+    mname, kind, cmd, prog, dmin, dmax = fm.PIT
+    return [(mname, YELLOW), (' (all): %s, %s, %s' % (cmd, fm.dist_words(dmin, dmax).lower(),
+                                                       fm.FINISH_NOTES[(None, mname)]), GRAY)]
 
 
-def note_rows(note, col, cmd_col, cmd, name_col):
-    """A note after the command when it fits, else under it (or under the name)."""
-    if cmd_col + len(cmd) + 2 + len(note) - 1 <= RIGHT:
-        return None, (cmd_col + len(cmd) + 2, note, GRAY)
-    return at((cmd_col if cmd_col + len(note) - 1 <= RIGHT else name_col + 2, note, GRAY)), None
+def special_rows(name, sp, col, cmd_col):
+    """A fighter's special moves: name at col, command at cmd_col, a note
+    after the command, under it, or under the name."""
+    out = []
+    for m, c in sp:
+        note = fm.SPECIAL_NOTES.get((name, m))
+        r = at((col, m, WHITE), (cmd_col, c, YELLOW))
+        if note and width(r) + 2 + len(note) <= RIGHT:
+            r = at((col, m, WHITE), (cmd_col, c, YELLOW), (cmd_col + len(c) + 2, note, GRAY))
+            note = None
+        out.append(r)
+        if note:
+            out.append(at((cmd_col if cmd_col + len(note) - 1 <= RIGHT else col + 2, note, GRAY)))
+    return out
 
 
 def pages():
-    """[(label, rows)]: a page per fighter, the Move List option's order."""
-    fighters = fm.fighters()
-    assert [n for n, _, _ in fighters] == [n for n, _, _ in fm.FIGHTERS]
-    # one layout for all pages: the commands in one column, the distances
-    # right-aligned
+    """The Move List as the T-Unit core has it for MK: as many fighters to a
+    page as fit (the Move List option's order), each with the special moves
+    and the fatality; The Pit, the same for all, in the footer. PAGE_OF
+    [fighter] is the fighter's page."""
+    foot = [row(*f) for f in NOTATION] + [row(*pit_footer())]
+    fighters = [(n, [m for m in moves if m[1] != fm.K_MKPIT]) for n, _, moves in fm.fighters()]
+    c_name = LEFT + 2
     w_name = max(len(m) for sp in fm.SPECIALS for m, _ in sp)
-    w_name = max([w_name] + [len(finish_name(m[0], m[1])) for _, _, mv in fighters for m in mv])
-    c_cmd = LEFT + w_name + 2
-    foot = [row(*PAUSED), None] + [row(*f) for f in NOTATION]
+    w_name = max([w_name] + [len('Fatality: ' + m[0]) for _, fat in fighters for m in fat])
+    c_cmd = c_name + w_name + 2
+    dists = [fm.dist_words(m[4], m[5]) for _, fat in fighters for m in fat]
+    c_dist = RIGHT + 1 - max(max(len(d) for d in dists), len('DISTANCE'))
+    blocks = []
+    for (name, fat), sp in zip(fighters, fm.SPECIALS):
+        b = [row((name.upper(), CYAN))] + special_rows(name, sp, c_name, c_cmd)
+        for mname, kind, cmd, prog, dmin, dmax in fat:
+            b.append(at((c_name, 'Fatality: ' + mname, WHITE), (c_cmd, cmd, YELLOW),
+                        (c_dist, fm.dist_words(dmin, dmax), GRAY)))
+            note = fm.FINISH_NOTES.get((name, mname))
+            if note:
+                b.append(at((c_cmd, note, GRAY)))
+        blocks.append((name, b))
+    room = ROWS - 3 - 1 - len(foot)          # title, blank, header ... blank, footer
+    groups, cur = [], []
+    for name, b in blocks:
+        rows_ = sum(len(x) + 1 for _, x in cur) + len(b)
+        if cur and rows_ > room:
+            groups.append(cur)
+            cur = []
+        cur.append((name, b))
+    groups.append(cur)
     out = []
-    for (name, cid, moves), sp in zip(fighters, fm.SPECIALS):
-        head = [at((LEFT, name.upper(), CYAN), (RIGHT + 1 - len(TITLE), TITLE, GRAY)), None,
-                at((LEFT, 'SPECIAL MOVES', CYAN), (c_cmd, 'COMMAND', GRAY))]
+    PAGE_OF.clear()
+    for k, g in enumerate(groups):
         body = []
-        for m, c in sp:
-            cells = [(LEFT, m, WHITE), (c_cmd, c, YELLOW)]
-            note = fm.SPECIAL_NOTES.get((name, m))
-            under = None
-            if note:
-                under, after = note_rows(note, LEFT, c_cmd, c, LEFT)
-                if after:
-                    cells.append(after)
-            body.append(at(*cells))
-            if under:
-                body.append(under)
-        body += [None, at((LEFT, 'FINISHING MOVES', CYAN), (c_cmd, 'COMMAND', GRAY),
-                         (RIGHT + 1 - len('DISTANCE'), 'DISTANCE', GRAY))]
-        for mname, kind, cmd, prog, dmin, dmax in moves:
-            d = fm.dist_words(dmin, dmax)
-            body.append(at((LEFT, finish_name(mname, kind), WHITE), (c_cmd, cmd, YELLOW),
-                           (RIGHT + 1 - len(d), d, GRAY)))
-            note = fm.FINISH_NOTES.get((name, mname)) or fm.FINISH_NOTES.get((None, mname))
-            if note:
-                if c_cmd + len(note) - 1 > RIGHT + 1 - len(d) - 2 and c_cmd + len(note) - 1 > RIGHT:
-                    raise SystemExit('%s %s: note too long' % (name, mname))
-                body.append(at((c_cmd, note, GRAY)))
-        out.append(compose(name, head, body, foot))
+        for name, b in g:
+            PAGE_OF.append(k)
+            body += ([None] if body else []) + b
+        head = [at((LEFT, 'MOVE LIST' + ('  %d/%d' % (k + 1, len(groups)) if len(groups) > 1 else ''), CYAN),
+                   (RIGHT + 1 - len(TITLE), TITLE, GRAY)), None,
+                at((c_name, 'MOVE', GRAY), (c_cmd, 'COMMAND', GRAY), (c_dist, 'DISTANCE', GRAY))]
+        out.append(compose(', '.join(n for n, _ in g), head, body, foot))
     return out
+
+
+PAGE_OF = []                         # fighter (Move List option order) -> its page
 
 
 # ----------------------------------------------------------------------------
@@ -250,10 +270,22 @@ def images():
     seg += [0] * (SEG_SIZE - len(seg))
     codes = [ord(ch) - 32 for ch in text] + [0] * (TEXT_SIZE - len(text))
     font = [b for ch in font_rows() for b in ch]
+    svh = ['// yunit_window_pages.svh - the Move List window page of each fighter',
+           '// Generated by tools/yunit_window.py --write; do not edit.',
+           '//',
+           '// Copyright (C) 2026 Gm0rk - GPL-3.0-or-later',
+           '',
+           '// fighter: the Move List option\'s order (0 Johnny Cage ... 6 Scorpion)',
+           'function automatic [2:0] win_page(input [2:0] fighter);',
+           '\tcase (fighter)']
+    for f, k in enumerate(PAGE_OF):
+        svh.append("\t\t3'd%d: win_page = 3'd%d;    // %s" % (f, k, fm.FIGHTERS[f][0]))
+    svh += ["\t\tdefault: win_page = 3'd0;", '\tendcase', 'endfunction']
     return {'row': '\n'.join('%03X' % w for w in rows) + '\n',
             'seg': '\n'.join('%07X' % w for w in seg) + '\n',
             'text': '\n'.join('%02X' % w for w in codes) + '\n',
-            'font': '\n'.join('%02X' % w for w in font) + '\n'}, used
+            'font': '\n'.join('%02X' % w for w in font) + '\n',
+            'svh': '\n'.join(svh) + '\n'}, used
 
 
 def background(path):
