@@ -9,11 +9,11 @@
 	<rbf>Arcade-Midway-Y-Unit</rbf>
 	<remark>4 players</remark>
 	<switches default="FE,FF,00">
-		<dip bits="0" name="Card Dispenser" ids="On,Off" values="1,0"/>
+		<dip bits="0" name="Card Dispenser" ids="Off,On"/>
 		<dip bits="12" name="Coin Counters" ids="One,Two" values="1,0"/>
-		<dip bits="3,6" name="Coinage" ids="1 Coin/1 Credit,2 Coins/1 Credit,2 Coins/1 Credit 4/3,2 Coins/1 Credit 4/4,ECA,1DM/1 Credit 6/5,1DM/1 Credit 7/5,1DM/1 Credit 8/5,1DM/1 Credit,ECA,5F/2 Credits 10/5,5F/2 Credits,5F/1 Credit 10/3,5F/1 Credit,ECA,Free Play" values="15,11,13,9,14,15,11,13,9,14,15,11,13,9,14,8"/>
-		<dip bits="14,15" name="Country" ids="USA,German,French,Unused" values="3,1,2,0"/>
-		<dip bits="7" name="Players" ids="4,2" values="1,0"/>
+		<dip bits="3,6" name="Coinage" ids="1 Coin/1 Credit,1DM/1 Credit,1DM/1 Credit 6/5,1DM/1 Credit 7/5,1DM/1 Credit 8/5,2 Coins/1 Credit,2 Coins/1 Credit 4/3,2 Coins/1 Credit 4/4,5F/1 Credit,5F/1 Credit 10/3,5F/2 Credits,5F/2 Credits 10/5,ECA,ECA,ECA,Free Play" values="15,9,15,11,13,11,13,9,9,13,11,15,14,14,14,8"/>
+		<dip bits="14,15" name="Country" ids="French,German,Unused,USA" values="2,1,0,3"/>
+		<dip bits="7" name="Players" ids="2,4"/>
 		<dip bits="13" name="Power-Up Test" ids="Off,On"/>
 		<dip bits="16" name="Service Credit" ids="Press,Press"/>
 		<dip bits="8" name="Test Switch" ids="Off,On" values="1,0"/>

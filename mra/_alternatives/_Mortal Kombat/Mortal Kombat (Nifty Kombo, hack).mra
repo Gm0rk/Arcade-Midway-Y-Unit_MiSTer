@@ -11,8 +11,8 @@
 	<switches default="FF,DF,00">
 		<dip bits="4" name="Attract Sound" ids="Off,On"/>
 		<dip bits="6" name="Blood" ids="Off,On"/>
-		<dip bits="10,14" name="Coinage" ids="USA-1,USA-2,USA-3,USA-4,USA-ECA,USA-Free Play,German-1,German-2,German-3,German-4,German-5,German-ECA,German-Free Play,French-1,French-2,French-3,French-4,French-ECA,French-Free Play" values="31,15,23,7,27,3,29,13,21,5,25,9,1,30,14,22,6,26,2"/>
-		<dip bits="15" name="Coinage Source" ids="Dipswitch,CMOS" values="1,0"/>
+		<dip bits="10,14" name="Coinage" ids="French-1,French-2,French-3,French-4,French-ECA,French-Free Play,German-1,German-2,German-3,German-4,German-5,German-ECA,German-Free Play,USA-1,USA-2,USA-3,USA-4,USA-ECA,USA-Free Play" values="30,14,22,6,26,2,29,13,21,5,25,9,1,31,15,23,7,27,3"/>
+		<dip bits="15" name="Coinage Source" ids="CMOS,Dipswitch"/>
 		<dip bits="3" name="Comic Book Offer" ids="Off,On"/>
 		<dip bits="9" name="Counters" ids="One,Two" values="1,0"/>
 		<dip bits="5" name="Low Blows" ids="Off,On"/>

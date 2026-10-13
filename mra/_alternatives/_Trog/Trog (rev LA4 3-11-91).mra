@@ -9,12 +9,12 @@
 	<rbf>Arcade-Midway-Y-Unit</rbf>
 	<remark>4 players</remark>
 	<switches default="FF,DF,00">
-		<dip bits="7" name="Cabinet" ids="Upright,Cocktail" values="1,0"/>
+		<dip bits="7" name="Cabinet" ids="Cocktail,Upright"/>
 		<dip bits="12" name="Coin Counters" ids="One,Two" values="1,0"/>
 		<dip bits="3,5" name="Coinage" ids="1,2,3,4,ECA,Free Play" values="7,3,5,1,6,0"/>
-		<dip bits="6" name="Coinage Source" ids="Dipswitch,CMOS" values="1,0"/>
-		<dip bits="14,15" name="Country" ids="USA,French,German,Unused" values="3,2,1,0"/>
-		<dip bits="10,11" name="Players" ids="4 Players,3 Players,2 Players,1 Player" values="3,1,2,0"/>
+		<dip bits="6" name="Coinage Source" ids="CMOS,Dipswitch"/>
+		<dip bits="14,15" name="Country" ids="French,German,Unused,USA" values="2,1,0,3"/>
+		<dip bits="10,11" name="Players" ids="1 Player,2 Players,3 Players,4 Players" values="0,2,1,3"/>
 		<dip bits="13" name="Power-Up Test" ids="Off,On"/>
 		<dip bits="16" name="Service Credit" ids="Press,Press"/>
 		<dip bits="8" name="Test Switch" ids="Off,On" values="1,0"/>

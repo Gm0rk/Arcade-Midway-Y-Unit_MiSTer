@@ -9,13 +9,13 @@
 	<rbf>Arcade-Midway-Y-Unit</rbf>
 	<remark>2 players</remark>
 	<switches default="FF,36,00">
-		<dip bits="0" name="Coin Meter" ids="Shared,Independent" values="1,0"/>
-		<dip bits="8,13" name="Coinage" ids="USA 1,USA 2,USA 3,Australia 1,Austria,Belgium 1,Belgium 2,Denmark,France 1,France 2,France 3,Findland,German 1,German 2,German 3,Italy 1,Japan 1,Japan 2,Netherlands,New Zealand,Norway,Spain 1,Sweden 1,Swiss 1,U.K. 1,U.K. 2,U.K. 3,Swiss 1" values="54,55,56,42,45,46,47,53,60,61,62,51,57,58,59,37,43,44,50,49,52,41,48,63,38,39,40,36"/>
+		<dip bits="0" name="Coin Meter" ids="Independent,Shared"/>
+		<dip bits="8,13" name="Coinage" ids="Australia 1,Austria,Belgium 1,Belgium 2,Denmark,Findland,France 1,France 2,France 3,German 1,German 2,German 3,Italy 1,Japan 1,Japan 2,Netherlands,New Zealand,Norway,Spain 1,Sweden 1,Swiss 1,Swiss 1,U.K. 1,U.K. 2,U.K. 3,USA 1,USA 2,USA 3" values="42,45,46,47,53,51,60,61,62,57,58,59,37,43,44,50,49,52,41,48,63,36,38,39,40,54,55,56"/>
 		<dip bits="1" name="Credits to Start" ids="1,2" values="1,0"/>
 		<dip bits="5,7" name="Difficulty" ids="Level 0,Level 1,Level 2,Level 3,Level 4,Level 5,Level 6,Level 7" values="3,1,2,0,4,5,6,7"/>
 		<dip bits="15" name="Free Play" ids="Off,On"/>
 		<dip bits="4" name="Lives" ids="3,4"/>
-		<dip bits="2,3" name="Points for Extra Ship" ids="40000,50000,750000,100000" values="1,0,2,3"/>
+		<dip bits="2,3" name="Points for Extra Ship" ids="40000,50000,100000,750000" values="1,0,3,2"/>
 		<dip bits="16" name="Service Credit" ids="Press,Press"/>
 		<dip bits="14" name="Test Switch" ids="Off,On"/>
 		<dip bits="17" name="Tilt" ids="Press,Press"/>

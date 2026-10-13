@@ -11,13 +11,13 @@
 	<switches default="FF,FF,00">
 		<dip bits="6" name="CMOS Test" ids="Off,On" values="1,0"/>
 		<dip bits="1" name="Coin Counter Test" ids="Off,On" values="1,0"/>
-		<dip bits="14,15" name="Display Type" ids="Auto Sense,4 Bit Y-Unit,6 Bit Y-Unit,8 Bit Y-Unit" values="3,1,2,0"/>
+		<dip bits="14,15" name="Display Type" ids="4 Bit Y-Unit,6 Bit Y-Unit,8 Bit Y-Unit,Auto Sense" values="1,2,0,3"/>
 		<dip bits="4" name="Harsh DMA Test" ids="Off,On" values="1,0"/>
 		<dip bits="5" name="Quick DMA Test" ids="Off,On" values="1,0"/>
 		<dip bits="7" name="RAM Test" ids="Off,On" values="1,0"/>
 		<dip bits="3" name="ROM Checksums" ids="Off,On" values="1,0"/>
 		<dip bits="13" name="Screen Alignment" ids="Off,On" values="1,0"/>
-		<dip bits="11,12" name="Screen Fills" ids="Nothing,Red,Green,Blue" values="3,1,2,0"/>
+		<dip bits="11,12" name="Screen Fills" ids="Blue,Green,Nothing,Red" values="0,2,3,1"/>
 		<dip bits="16" name="Service Credit" ids="Press,Press"/>
 		<dip bits="0" name="Sound Port Test" ids="Off,On" values="1,0"/>
 		<dip bits="2" name="Switch Input Test" ids="Off,On" values="1,0"/>

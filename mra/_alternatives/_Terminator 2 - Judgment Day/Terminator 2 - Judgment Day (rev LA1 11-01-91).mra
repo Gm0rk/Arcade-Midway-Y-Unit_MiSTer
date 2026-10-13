@@ -13,12 +13,12 @@
 		<dip bits="3,5" name="Coinage" ids="1,2,3,4,ECA,Free Play" values="7,3,5,1,6,0"/>
 		<dip bits="6" name="Coinage Source" ids="CMOS,Dipswitch"/>
 		<dip bits="12" name="Counters" ids="One,Two" values="1,0"/>
-		<dip bits="14,15" name="Country" ids="USA,French,German,Unused" values="3,2,1,0"/>
-		<dip bits="0,2" name="Credits" ids="2 Start/1 Continue,4 Start/1 Continue,2 Start/2 Continue,4 Start/2 Continue,1 Start/1 Continue,3 Start/2 Continue,3 Start/1 Continue,3 Start/3 Continue" values="7,6,5,4,3,2,1,0"/>
-		<dip bits="19" name="Crosshair" ids="On,Off"/>
-		<dip bits="7" name="Display" ids="Normal,Mirrored" values="1,0"/>
+		<dip bits="14,15" name="Country" ids="French,German,Unused,USA" values="2,1,0,3"/>
+		<dip bits="0,2" name="Credits" ids="1 Start/1 Continue,2 Start/1 Continue,2 Start/2 Continue,3 Start/1 Continue,3 Start/2 Continue,3 Start/3 Continue,4 Start/1 Continue,4 Start/2 Continue" values="3,7,5,1,2,0,6,4"/>
+		<dip bits="19" name="Crosshair" ids="Off,On" values="1,0"/>
+		<dip bits="7" name="Display" ids="Mirrored,Normal"/>
 		<dip bits="18" name="Gun Control" ids="Joystick,Mouse"/>
-		<dip bits="11" name="Players" ids="2 Players,1 Player" values="1,0"/>
+		<dip bits="11" name="Players" ids="1 Player,2 Players"/>
 		<dip bits="13" name="Power-Up Test" ids="Off,On"/>
 		<dip bits="16" name="Service Credit" ids="Press,Press"/>
 		<dip bits="8" name="Test Switch" ids="Off,On" values="1,0"/>
