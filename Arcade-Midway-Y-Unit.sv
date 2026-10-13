@@ -50,6 +50,7 @@ assign BUTTONS   = 0;
 
 `include "build_id.v"
 `include "rtl/yunit_fmoves_osd.svh"
+`include "rtl/yunit_window_pages.svh"
 localparam CONF_STR = {
 	"A.MIDWAYY;;",
 	"P1,Video Settings;",
@@ -1095,15 +1096,17 @@ wire ch_on1 = is_t2 && !xhair_off && xhair(out_x, out_y, ch_x1[17:8], ch_y1[17:8
 // ---- Move List window (rtl/yunit_window.sv) ----
 //
 // Mortal Kombat's Move List (O[43:41]: Off, then a fighter in the Fighter
-// option's order) draws that fighter's page over the game's dimmed title
-// screen in place of the picture; the game waits behind it (pause above).
+// option's order) draws the page with that fighter over the game's dimmed
+// title screen in place of the picture: two pages, four fighters then three,
+// as in the T-Unit core (win_page: rtl/yunit_window_pages.svh). The game
+// waits behind it (pause above).
 
 yunit_window yunit_window
 (
 	.clk     (clk_sys),
 	.ce_pix  (ce_pix),
 	.enable  (movelist_on),
-	.page    (movelist_sel - 3'd1),
+	.page    (win_page(movelist_sel - 3'd1)),
 
 	.r_in    (brd_r),
 	.g_in    (brd_g),
