@@ -9,10 +9,10 @@ data the core needs for them and for the Hidden Items page's messages
 
 The OSD's "Finishing Moves" page picks a fighter and one of the fighter's
 moves; rtl/yunit_fmoves.sv enters it on the winner's controls at the next
-FINISH HIM it fits. The main page's "Move List" option (Off or a fighter)
-shows the page with that fighter's special moves and fatality, with the
-distance it needs, in a window over the picture (tools/yunit_window.py
-makes its two pages from the lists here, rtl/yunit_window.sv draws them). This script
+FINISH HIM it fits. The main page's "Move List" option (Off, Page 1, Page 2)
+shows a page of the fighters' special moves and fatalities, with the
+distance each needs, in a window over the picture (tools/yunit_window.py
+makes the two pages from the lists here, rtl/yunit_window.sv draws them). This script
 holds the lists and makes from them:
 
   - rtl/yunit_fmoves_tab.svh: the move records and their programs (the
@@ -21,8 +21,9 @@ holds the lists and makes from them:
     page and the core's info messages (CONF_STR lines), included by the
     top level
   - for tools/mra_gen.py, each set's ROM index 1 words (build()): the RAM
-    addresses the move player follows and the game state word the Hidden
-    Items page's messages look at
+    addresses the move player follows, the game state word the Hidden
+    Items page's messages look at, and the program patches of the Hidden
+    Items page's Reptile options (see "Reptile" below)
 
 The finishing-move player is the T-Unit core's (Arcade-Midway-T-Unit,
 rtl/tunit_fmoves.sv, written for MK rev 5.0, the T-Unit port of the same
@@ -323,9 +324,20 @@ def scan(prog_bytes):
 #   0x30-0x34    Hidden Items page (rtl/secret_menu.sv): word addresses of
 #                the game state and the attract page (0 = none); 1 the set
 #                has the hidden menu, 2 it does not (0: no data, older MRAs)
+#   0x40-0x5F    Reptile (Mortal Kombat, the sets that have him): 8 program
+#                ROM patches of 4 words, {ROM word [15:0]}, {option [10:8],
+#                ROM word [18:16]}, new word, original word (option 0: no
+#                patch, 1 Reptile Fight Next, 2 Moon Silhouettes Always, 3
+#                Reptile Hints Always; rtl/midway_yunit.sv applies them)
+#   0x60-0x61    the word address of the Reptile flag (set when his fight
+#                starts: Reptile Fight Next is then used up)
+# Only as many words as hold data are written (at least up to 0x34).
 CFG_FM = 0x10
 CFG_SEC = 0x30
-CFG_WORDS = 0x35
+CFG_REP = 0x40
+CFG_REP_FLAG = 0x60
+CFG_WORDS = 0x62
+CFG_MIN_WORDS = 0x35
 
 # sets whose program has the hidden menu's code (the others of the family
 # show the OSD item, which then says so)
@@ -333,9 +345,136 @@ NO_MENU = {'mkprot4', 'shimpactp4', 'shimpactp5', 'shimpactp6', 'hiimpactp', 'yu
 FORMAT = 1
 
 
+# --------------------------------------------------------------------------
+# Reptile (Hidden Items page: Reptile Fight Next, Moon Silhouettes Always,
+# Reptile Hints Always)
+# --------------------------------------------------------------------------
+#
+# Rev 3.0, 4.0 and the Turbo hacks have Reptile; the older revisions, the
+# prototypes and Nifty Kombo do not. In rev 4.0 (mkla4; rev 3.0 the same
+# with other addresses):
+#
+#   - After each match the player wins, the next-stage routine (FFCB1050)
+#     advances the stage (@0104D540, 3 = The Pit) and counts down the
+#     Reptile cooldown @0104D6C0 (40 matches after power-up; reloaded with
+#     40 when it has reached 0 and the match just won was on The Pit), then
+#     calls the Reptile check (FFCB1BE0): one player (FFCA5030), the match
+#     just won on The Pit, the cooldown just reloaded, no block pressed
+#     (@0104E670), two flawless rounds (@0104D040 / @0104D320), a fatality
+#     (@0104D5A0). Carry set: the Reptile fight (FFCB5140, which sets
+#     @0104E660 to 1 and counts REPTILE BATTLES, audit 0x24).
+#   - The Pit's background (FFCB8820) starts the silhouettes crossing the
+#     moon (process FFCB8B80) when the cooldown is 0, outside attract mode:
+#     the silhouette is the sign that the check can pass.
+#   - Before each round (FFCA11A0) the GREEN NINJA COUNTER (audit 0x10)
+#     counts up; at 2000 Reptile drops in with one of nine hints (process
+#     FFCA14F0, table FFCA1FA0), and the game clears all the audits (FFE12910,
+#     audits 1-0x2C; rev 3.0 FFE12540) and counts REPTILE APPEARANCES (0x23).
+#
+# The options patch the program as the CPU reads it:
+#   Reptile Fight Next      the check returns "yes" right after its
+#                           one-player test (SETC, RETS): Reptile comes after
+#                           the next match won in a one-player game
+#   Moon Silhouettes Always the moon's cooldown test and the check's are
+#                           NOPs: the silhouettes cross on every Pit match and
+#                           the check needs only its other conditions
+#   Reptile Hints Always    the counter's test is a NOP and a jump skips the
+#                           audit clearing: a hint before every round
+# Turbo 3.1 and 3.0 (hacks) changed the check (no one-player test, Turbo
+# 3.0 no cooldown or block test, Turbo 3.1 The Pit or the second stage, no
+# flawless rounds); the patches follow what is there. Checked in MAME 0.289
+# on mkla4, mkla3, mkyturbo and mkyturboe (work/reptile/rverify.py).
+
+OPT_NEXT, OPT_MOON, OPT_HINT = 1, 2, 3
+NOP, SETC, RETS = 0x0300, 0x0DE0, 0x0960
+
+
+def _find(p, pat, lo=0, hi=None):
+    w, n = p.w, len(pat)
+    hi = len(w) - n if hi is None else min(hi, len(w) - n)
+    return [i for i in range(lo, hi)
+            if (pat[0] is None or w[i] == pat[0]) and all(q is None or w[i + j] == q for j, q in enumerate(pat))]
+
+
+def _s16(v):
+    return v - 0x10000 if v & 0x8000 else v
+
+
+def reptile_scan(p):
+    """([(option, ROM word, new, original)], flag address) of an MK program
+    ROM, or None (no Reptile)."""
+    w = p.w
+    out = []
+    # the Reptile fight: MMFM SP,A0 / MOVI 24h,A0 / CALLA (REPTILE BATTLES),
+    # entered by CALLR check / JRC fight
+    chk = setup = None
+    for s in _find(p, [0x09AF, 0x0001, 0x09C0, 0x0024, 0x0D5F, X, X]):
+        for i in _find(p, [0xC800, X]):
+            if i + 2 + _s16(w[i + 1]) == s and w[i - 2] == 0x0D3F:
+                chk, setup = i + _s16(w[i - 1]), s
+    if chk is None:
+        return None
+    # check: CALLR one player / MOVE A0,A0 / JREQ (Turbo: NOP) / MOVE @stage,A0 ...
+    if not (w[chk] == 0x0D3F and w[chk + 2] == 0x4C00 and (w[chk + 3] >> 8 == 0xCA or w[chk + 3] == NOP)
+            and w[chk + 4] == 0x05A0):
+        return None
+    out += [(OPT_NEXT, chk + 4, SETC, w[chk + 4]), (OPT_NEXT, chk + 5, RETS, w[chk + 5])]
+    fl = _find(p, [0x1820, 0x0580, X, X], setup, setup + 80)      # MOVK 1,A0 / MOVE A0,@flag
+    if not fl:
+        return None
+    flag = p.u32(fl[0] + 2)
+    # moon: MOVE @state / CMPI 1 / JREQ / MOVE @cooldown / JRNE / MOVI 2000h,A1 / MOVI proc,A7 / CALLA
+    m = _find(p, [0x05A0, X, X, 0x0B40, 0xFFFE, X, 0x05A0, X, X, X, 0x09C1, 0x2000, 0x09E7, X, X, 0x0D5F])
+    if len(m) != 1 or w[m[0] + 9] >> 8 != 0xCB:
+        return None
+    out.append((OPT_MOON, m[0] + 9, NOP, w[m[0] + 9]))
+    for i in _find(p, [0x05A0, w[m[0] + 7], w[m[0] + 8], 0x0B40, 0xFFD7, X], chk, chk + 40):
+        if w[i + 5] >> 8 == 0xCB:                                  # check: CMPI 28h / JRNE
+            out.append((OPT_MOON, i + 5, NOP, w[i + 5]))
+    # hints: CMPI 7D0h,A1 / JRC / MMFM SP,A0 / MOVE A0,-*A12 / MOVI 10h,A0 / CALLA clear ...
+    # MOVI 201Eh,A1 (the hint process)
+    h = _find(p, [0x0B41, 0xF82F, X, 0x09AF, 0x0001, 0xA20C, 0x09C0, 0x0010])
+    if len(h) != 1 or w[h[0] + 2] >> 8 != 0xC8:
+        return None
+    out.append((OPT_HINT, h[0] + 2, NOP, w[h[0] + 2]))
+    t = _find(p, [0x09C1, 0x201E], h[0] + 6, h[0] + 30)
+    disp = t[0] - (h[0] + 7) if len(t) == 1 else 0
+    if not 0 < disp < 0x80:
+        return None
+    out.append((OPT_HINT, h[0] + 6, 0xC000 | disp, w[h[0] + 6]))   # JR over the clearing
+    return out, flag
+
+
+# What reptile_scan finds in each set (MAME 0.289), used when the ROMs are not
+# at hand: "option:ROM word=new:original ..." and the flag address
+REP_SETS = {
+    'mkla4': ('1:04B1C2=0DE0:05A0 1:04B1C3=0960:D540 2:04B88B=0300:CB08 2:04B1CD=0300:CB1A '
+              '3:04A130=0300:C81D 3:04A134=C009:09C0', 0x0104E660),
+    'mkla3': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 2:04B1AD=0300:CB1A '
+              '3:04A11C=0300:C81D 3:04A120=C009:09C0', 0x0104E660),
+    'mkyturbo': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 '
+                 '3:04A11C=0300:C81D 3:04A120=C009:09C0', 0x0104E660),
+    'mkyturboe': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 '
+                  '3:04A11C=0300:C81D 3:04A120=C009:09C0', 0x0104E660),
+}
+
+
+def reptile_stored(setname):
+    if setname not in REP_SETS:
+        return None
+    txt, flag = REP_SETS[setname]
+    out = []
+    for t in txt.split():
+        o, rest = t.split(':', 1)
+        a, nw = rest.split('=')
+        n, v = nw.split(':')
+        out.append((int(o), int(a, 16), int(n, 16), int(v, 16)))
+    return out, flag
+
+
 def build(gid, setname, prog_bytes=None):
-    """ROM index 1 words 0-0x34 (bytes) and notes. gid: the MRA game id
-    (6-8 MK, 3 High Impact, 4 Super High Impact)."""
+    """ROM index 1 words (bytes) and notes. gid: the MRA game id (6-8 MK, 3
+    High Impact, 4 Super High Impact)."""
     w = [0] * CFG_WORDS
     w[0] = gid
     notes = []
@@ -361,6 +500,18 @@ def build(gid, setname, prog_bytes=None):
         sec, page = SHI_STATE, SHI_PAGE
     elif gid == 3:
         sec = HI_STATE
+    if gid in (6, 7, 8):
+        rp = reptile_stored(setname)
+        if prog_bytes is not None:
+            sc = reptile_scan(Prog(prog_bytes))
+            if rp != sc and not (rp is None and sc is None):
+                raise ValueError('%s: Reptile patches differ from the stored ones' % setname)
+        if rp:
+            patches, flag = rp
+            for n, (o, a, nw, v) in enumerate(patches):
+                w[CFG_REP + 4 * n:CFG_REP + 4 * n + 4] = [a & 0xFFFF, o << 8 | a >> 16, nw, v]
+            w[CFG_REP_FLAG], w[CFG_REP_FLAG + 1] = (flag >> 4) & 0xFFFF, flag >> 20
+            notes.append('Reptile: %d program patches, flag %08X' % (len(patches), flag))
     if gid in (3, 4, 6, 7, 8):
         if setname in NO_MENU:
             w[CFG_SEC + 4] = 2
@@ -371,7 +522,8 @@ def build(gid, setname, prog_bytes=None):
                 w[CFG_SEC + 2], w[CFG_SEC + 3] = (page >> 4) & 0xFFFF, page >> 20
             w[CFG_SEC + 4] = 1
             notes.append('game state %08X' % sec)
-    return struct.pack('<%dH' % CFG_WORDS, *w), notes
+    n = max([CFG_MIN_WORDS] + [i + 1 for i, v in enumerate(w) if v])
+    return struct.pack('<%dH' % n, *w[:n]), notes
 
 
 # --------------------------------------------------------------------------
@@ -393,6 +545,8 @@ MESSAGES = [
     ('WHEN_ATTRACT', "Not now: the code works in\nthe attract mode"),
     ('WHEN_SHI', "Not now: the code works while\nthe attract mode shows\nHIGHEST PAID SUPERSTARS"),
     ('NOT_HERE', "Not in this revision\nof the game"),
+    ('REPT_SET', "Reptile fight set: win a match\nin a 1-player game"),
+    ('REPT_CLEARED', "Reptile fight cleared"),
 ]
 
 N_FM_MESSAGES = 8                # the move player's (rtl/yunit_fmoves.sv)
@@ -401,7 +555,8 @@ N_FM_MESSAGES = 8                # the move player's (rtl/yunit_fmoves.sv)
 SEL_BITS = (30, 28)              # O[30:28] fighter
 SLOT_BIT = 32                    # R[32] + slot: the fighter's moves
 CLEAR_BIT = 40                   # R[40]: clear the set move
-LIST_BITS = (43, 41)             # O[43:41] Move List: Off, then a fighter's page
+LIST_BITS = (42, 41)             # O[42:41] Move List: Off, Page 1, Page 2
+LIST_PAGES = 2                   # tools/yunit_window.py's pages (it checks)
 MASK_SEL = 8                     # status_menumask bits 8-10: the page's fighter
 PAGE_FM = 'P3'
 
@@ -432,7 +587,8 @@ def osd_lines():
     names = ','.join(n for n, _, _ in FIGHTERS)
     fopt = 'O[%d:%d],Fighter,%s;' % (SEL_BITS[0], SEL_BITS[1], names)
     out = []
-    out.append('H5O[%d:%d],Move List,Off,%s;' % (LIST_BITS[0], LIST_BITS[1], names))
+    out.append('H5O[%d:%d],Move List,Off,%s;' % (LIST_BITS[0], LIST_BITS[1],
+                                                ','.join('Page %d' % (k + 1) for k in range(LIST_PAGES))))
     out.append('H5%s,Finishing Moves;' % PAGE_FM)
     out.append('%s-;' % PAGE_FM)
     out.append(PAGE_FM + fopt)
