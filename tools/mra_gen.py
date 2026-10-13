@@ -352,7 +352,7 @@ def safe_dirname(s):
 def rom1_lines(gid, name, prog):
 	"""ROM index 1: the game id, and for Mortal Kombat, High Impact and
 	Super High Impact the words of tools/yunit_fmoves.py (finishing moves,
-	the Hidden Items page's state word)."""
+	the Hidden Items page's state word, Reptile's program patches)."""
 	data, notes = yunit_fmoves.build(gid, name, prog)
 	if not any(data[2:]):
 		return [f'\t<rom index="1">\n\t\t<part>{gid:02X}</part>\n\t</rom>']
