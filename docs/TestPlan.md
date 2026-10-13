@@ -67,7 +67,7 @@ Run with any game (Mortal Kombat or Smash T.V. covers them all).
 | C-14 | Trigger a Hidden Items item at the wrong time (e.g. EJB Menu during a fight) and close the OSD | A message shows for about 2 seconds after the OSD closes | | |
 | C-15 | Define joystick buttons for a game | The button names match the game's controls page | | |
 | C-16 | Play a game, then load another game from the menu | The screen stays black behind the loading box | | |
-| C-17 | Open DIP Switches in each game | Listed in alphabetical order, Service Credit and Tilt among them | | |
+| C-17 | Open DIP Switches in each game | The switches in alphabetical order (Service Credit and Tilt among them), and each switch's settings too | | |
 
 ## Trog
 
@@ -184,7 +184,7 @@ Main MRA: Mortal Kombat (rev 4.0). [Controls, move list, finishing moves and hid
 | MK-17 | Set a move before the match | Message "Finishing move set: it plays at the next FINISH HIM"; it plays at FINISH HIM | | |
 | MK-18 | Stand too far for Johnny Cage, then walk in | Message "Too far: step closer"; the move plays once close | | |
 | MK-19 | Clear the set move | Message "Finishing move cleared"; nothing plays | | |
-| MK-20 | Move List, each fighter | The fighter's page over the dimmed title screen: special moves, fatality and The Pit with their distance; the text reads clearly | | |
+| MK-20 | Move List, each fighter | Page 1/2 (Johnny Cage to Sonya) or 2/2 (Raiden to Scorpion) over the dimmed title screen: special moves, fatality with its distance, The Pit at the bottom; the text reads clearly | | |
 | MK-21 | Hidden Items → EJB Menu in the attract mode | EJB Menu opens; message "EJB Menu: code entered" | | |
 | MK-22 | The same during a fight | Nothing is pressed; message "Not now: the code works in the attract mode" | | |
 | MK-23 | Each MRA in `_alternatives/_Mortal Kombat` | Boots to attract and plays; prototype 4.0's EJB Menu says "Not in this revision of the game" | Pass | |
