@@ -18,6 +18,12 @@
 | Start / Coin | Players 1-4; the third and fourth controllers' Coin are coins 3 and 4 |
 | Test, Pause | Service mode switch, pause |
 
+The **Players** DIP switch (OSD, DIP Switches) sets a 4-player or 2-player
+cabinet. **Coinage** lists the USA settings: 1 Coin/1 Credit, 2 Coins/1
+Credit, 2C/1C - 4C/3C (2 coins for 1 credit, 4 coins for 3), 2C/1C - 4C/4C,
+ECA and Free Play. With **Country** at German or French the same positions
+give that country's coin values, as on the operator's DIP switch chart.
+
 ## Hidden developer menu: Octopus Bookkeeping
 
 Revisions LA2 and LA1 hide a page of developer audits behind a 27-press code.
