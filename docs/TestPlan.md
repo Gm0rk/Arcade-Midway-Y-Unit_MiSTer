@@ -23,9 +23,9 @@ Core tested (rbf date): ____________
 | [Core-wide](#core-wide) | 17 | |
 | [Trog](#trog) | 11 | 2 / 11 passed |
 | [Smash T.V.](#smash-tv) | 10 | 2 / 10 passed |
-| [High Impact Football](#high-impact-football) | 12 | 2 / 12 passed |
-| [Super High Impact](#super-high-impact) | 12 | 2 / 12 passed |
-| [Strike Force](#strike-force) | 10 | 1 / 10 passed |
+| [High Impact Football](#high-impact-football) | 13 | 2 / 13 passed |
+| [Super High Impact](#super-high-impact) | 13 | 2 / 13 passed |
+| [Strike Force](#strike-force) | 11 | 1 / 11 passed |
 | [Mortal Kombat](#mortal-kombat) | 29 | 2 / 29 passed |
 | [Terminator 2 - Judgment Day](#terminator-2---judgment-day) | 13 | 1 / 13 passed |
 | [Total Carnage](#total-carnage) | 10 | 2 / 10 passed |
@@ -67,7 +67,7 @@ Run with any game (Mortal Kombat or Smash T.V. covers them all).
 | C-14 | Trigger a Hidden Items item at the wrong time (e.g. EJB Menu during a fight) and close the OSD | A message shows for about 2 seconds after the OSD closes | | |
 | C-15 | Define joystick buttons for a game | The button names match the game's controls page | | |
 | C-16 | Play a game, then load another game from the menu | The screen stays black behind the loading box | | |
-| C-17 | Open DIP Switches in each game | The switches in alphabetical order (Service Credit and Tilt among them), and each switch's settings too | | |
+| C-17 | Open DIP Switches in each game | The switches in alphabetical order (Service Credit and Tilt among them), and each switch's settings too; every value shows on its line | | |
 
 ## Trog
 
@@ -122,6 +122,7 @@ Main MRA: High Impact Football (rev LA5). [Controls and hidden menu](HighImpactF
 | HI-10 | HI-08 with the Players DIP switch at 2 | Pages open | | |
 | HI-11 | Prototype 8.6 MRA: Octopus Bookkeeping | Message "Not in this revision of the game" | | |
 | HI-12 | Each MRA in `_alternatives/_High Impact Football` | Boots to attract and plays | Pass | |
+| HI-13 | DIP Switches → Coinage: select it repeatedly, then Free Play and reset | Six settings in turn (1 Coin/1 Credit, 2 Coins/1 Credit, 2C/1C - 4C/3C, 2C/1C - 4C/4C, ECA, Free Play); after the reset the game is on free play | | |
 
 ## Super High Impact
 
@@ -141,6 +142,7 @@ Main MRA: Super High Impact (rev LA2). [Controls and hidden menu](SuperHighImpac
 | SH-10 | SH-08 with the Players DIP switch at 2 | Opens | | |
 | SH-11 | A prototype MRA: Octopus Bookkeeping | Message "Not in this revision of the game" | | |
 | SH-12 | Each MRA in `_alternatives/_Super High Impact` | Boots to attract and plays | Pass | |
+| SH-13 | DIP Switches → Coinage: select it repeatedly, then Free Play and reset | Six settings in turn (as HI-13); after the reset the game is on free play | | |
 
 ## Strike Force
 
@@ -158,6 +160,7 @@ Main MRA: Strike Force (rev 1). [Controls](StrikeForce.md).
 | SF-08 | Play to game over | Continue screen, initials entry | | |
 | SF-09 | Change a DIP switch, reset | Applied | | |
 | SF-10 | Saurian Front MRA (`_alternatives/_Strike Force`) | Boots to attract and plays | | |
+| SF-11 | DIP Switches → Coin A, then Extra Ship Points: select each repeatedly | All 16 Coin A settings and the 4 Extra Ship Points values show on their line (1C/1C - 2C/3C style for the two-step ones) | | |
 
 ## Mortal Kombat
 
