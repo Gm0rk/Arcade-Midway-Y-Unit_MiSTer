@@ -1,6 +1,6 @@
 <misterromdescription>
 	<name>Strike Force (rev 1 02/25/91)</name>
-	<mratimestamp>20261012</mratimestamp>
+	<mratimestamp>20261015</mratimestamp>
 	<mameversion>0289</mameversion>
 	<setname>strkforc</setname>
 	<year>1991</year>
@@ -9,13 +9,13 @@
 	<rbf>Arcade-Midway-Y-Unit</rbf>
 	<remark>2 players</remark>
 	<switches default="FF,FF,00">
-		<dip bits="11,14" name="Coin A" ids="1 Coin/1 Credit,1 Coin/1 Credit - 2 Coins/3 Credits,1 Coin/1 Credit - 3 Coins/4 Credits,1 Coin/1 Credit - 4 Coins/5 Credits,1 Coin/1 Credit - 5 Coins/6 Credits,1 Coin/2 Credits,1 Coin/2 Credits - 2 Coins/5 Credits,1 Coin/3 Credits,1 Coin/4 Credits,1 Coin/5 Credits,1 Coin/6 Credits,2 Coins/1 Credit,3 Coin/1 Credit - 5 Coins/2 Credits,3 Coins/1 Credit,4 Coins/1 Credit,5 Coins/1 Credit" values="15,5,4,3,2,14,0,13,12,11,10,9,1,8,7,6"/>
+		<dip bits="11,14" name="Coin A" ids="1 Coin/1 Credit,1 Coin/2 Credits,1 Coin/3 Credits,1 Coin/4 Credits,1 Coin/5 Credits,1 Coin/6 Credits,1C/1C - 2C/3C,1C/1C - 3C/4C,1C/1C - 4C/5C,1C/1C - 5C/6C,1C/2C - 2C/5C,2 Coins/1 Credit,3 Coins/1 Credit,3C/1C - 5C/2C,4 Coins/1 Credit,5 Coins/1 Credit" values="15,14,13,12,11,10,5,4,3,2,0,9,8,1,7,6"/>
 		<dip bits="8,10" name="Coin B" ids="1 Coin/1 Credit,1 Coin/2 Credits,1 Coin/3 Credits,1 Coin/4 Credits,1 Coin/5 Credits,1 Coin/6 Credits,Free Play,U.K. Elect." values="7,6,5,4,3,2,0,1"/>
 		<dip bits="0" name="Coin Meter" ids="Independent,Shared"/>
 		<dip bits="1" name="Credits to Start" ids="1,2" values="1,0"/>
 		<dip bits="5,7" name="Difficulty" ids="Level 1,Level 2,Level 3,Level 4,Level 5,Level 6,Level 7,Level 8" values="4,6,5,7,3,2,1,0"/>
+		<dip bits="2,3" name="Extra Ship Points" ids="40000,50000,75000,100000" values="2,3,1,0"/>
 		<dip bits="4" name="Lives" ids="3,4" values="1,0"/>
-		<dip bits="2,3" name="Points for Extra Ship" ids="40000,50000,75000,100000" values="2,3,1,0"/>
 		<dip bits="16" name="Service Credit" ids="Press,Press"/>
 		<dip bits="15" name="Test Switch" ids="Off,On" values="1,0"/>
 		<dip bits="17" name="Tilt" ids="Press,Press"/>

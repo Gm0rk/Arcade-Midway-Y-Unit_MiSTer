@@ -1,6 +1,6 @@
 <misterromdescription>
 	<name>High Impact Football (rev LA1 12/16/90)</name>
-	<mratimestamp>20261012</mratimestamp>
+	<mratimestamp>20261015</mratimestamp>
 	<mameversion>0289</mameversion>
 	<setname>hiimpact1</setname>
 	<year>1990</year>
@@ -10,7 +10,7 @@
 	<remark>4 players</remark>
 	<switches default="FF,FF,00">
 		<dip bits="12" name="Coin Counters" ids="One,Two" values="1,0"/>
-		<dip bits="3,6" name="Coinage" ids="1 Coin/1 Credit,1DM/1 Credit,1DM/1 Credit 6/5,1DM/1 Credit 7/5,1DM/1 Credit 8/5,2 Coins/1 Credit,2 Coins/1 Credit 4/3,2 Coins/1 Credit 4/4,5F/1 Credit,5F/1 Credit 10/3,5F/2 Credits,5F/2 Credits 10/5,ECA,ECA,ECA,Free Play" values="15,9,15,11,13,11,13,9,9,13,11,15,14,14,14,8"/>
+		<dip bits="3,6" name="Coinage" ids="1 Coin/1 Credit,2 Coins/1 Credit,2C/1C - 4C/3C,2C/1C - 4C/4C,ECA,Free Play" values="15,11,13,9,14,8"/>
 		<dip bits="14,15" name="Country" ids="French,German,Unused,USA" values="2,1,0,3"/>
 		<dip bits="7" name="Players" ids="2,4"/>
 		<dip bits="13" name="Power-Up Test" ids="Off,On"/>
