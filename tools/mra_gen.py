@@ -101,7 +101,36 @@ def parse_inputs(src):
 	return ports
 
 def dsw_fields(ports, name):
-	"""Return the DSW fields of an input definition: list of (mask, default, name, [(value, label)])."""
+	"""Return the DSW fields of an input definition: list of (mask, default,
+	name, [(value, label)]). Settings MAME shows only under a condition on
+	another switch (PORT_CONDITION: High Impact's coinage per Country) are
+	kept only when the condition holds for the switches' defaults: MiSTer's
+	DIP menu has no conditions, and settings that share a value make its
+	options unreachable (it steps on from the first option with the
+	current value)."""
+	fields = dsw_fields_all(ports, name)
+	dflt = 0xFFFF
+	for mask, d, _, _ in fields:
+		dflt = (dflt & ~mask) | (d & mask)
+	ops = {'EQUALS': lambda a, b: a == b, 'NOTEQUALS': lambda a, b: a != b,
+	       'GREATERTHAN': lambda a, b: a > b, 'NOTGREATERTHAN': lambda a, b: a <= b,
+	       'LESSTHAN': lambda a, b: a < b, 'NOTLESSTHAN': lambda a, b: a >= b}
+	out = []
+	for mask, d, fname, sets in fields:
+		keep = []
+		for v, lb, cond in sets:
+			if cond:
+				port, cmask, op, cval = cond
+				if port != 'DSW':
+					raise ValueError(f'{fname}: condition on port {port}')
+				if not ops[op](dflt & cmask, cval):
+					continue
+			keep.append((v, lb))
+		out.append((mask, d, fname, keep))
+	return out
+
+def dsw_fields_all(ports, name):
+	"""DSW fields with every setting: [mask, default, name, [(value, label, condition or None)]]."""
 	fields = []
 	cur_port = None
 	cur = None
@@ -111,7 +140,7 @@ def dsw_fields(ports, name):
 			continue
 		m = re.match(r'PORT_INCLUDE\(\s*(\w+)\s*\)', line)
 		if m:
-			fields = dsw_fields(ports, m.group(1))
+			fields = dsw_fields_all(ports, m.group(1))
 			continue
 		m = re.match(r'PORT_(START|MODIFY)\(\s*"(\w+)"\s*\)', line)
 		if m:
@@ -136,7 +165,11 @@ def dsw_fields(ports, name):
 			continue
 		m = re.match(r'PORT_DIPSETTING\(\s*(0x[0-9a-fA-F]+)\s*,\s*(.*?)\s*\)\s*(PORT_CONDITION.*)?$', line)
 		if m and cur is not None:
-			cur[3].append((int(m.group(1), 16), label(m.group(2))))
+			cond = None
+			if m.group(3):
+				c = re.match(r'PORT_CONDITION\(\s*"(\w+)"\s*,\s*(0x[0-9a-fA-F]+)\s*,\s*(\w+)\s*,\s*(0x[0-9a-fA-F]+)\s*\)', m.group(3))
+				cond = (c.group(1), int(c.group(2), 16), c.group(3), int(c.group(4), 16))
+			cur[3].append((int(m.group(1), 16), label(m.group(2)), cond))
 			continue
 	return fields
 
@@ -152,6 +185,36 @@ def mister_dips(gid):
 		d += [('18', 'Gun Control', 'Joystick,Mouse'), ('19', 'Crosshair', 'On,Off')]
 	return d
 
+# MiSTer's DIP menu (Main_MiSTer menu.cpp) right-aligns each value on a
+# 28-column line after " Name:": name + value must be at most 26 characters,
+# or the value is pushed off the line (the padding counter goes negative).
+# Main also keeps at most 31 characters of a name or value, 32 values a
+# switch, 63 switches. MAME's longer names and values are shortened here:
+# coin schedules with a second step ("1 Coin/1 Credit - 2 Coins/3 Credits",
+# "2 Coins/1 Credit 4/3") become "1C/1C - 2C/3C", "2C/1C - 4C/3C".
+OSD_LINE = 26
+OSD_TEXT = 31
+NAME_SHORT = {'Points for Extra Ship': 'Extra Ship Points'}     # Strike Force
+
+def short_label(lb):
+	m = (re.match(r'^(\d+) Coins?/(\d+) Credits? - (\d+) Coins?/(\d+) Credits?$', lb) or
+	     re.match(r'^(\d+) Coins?/(\d+) Credits? (\d+)/(\d+)$', lb))
+	if m:
+		a, b, c, d = m.groups()
+		return f'{a}C/{b}C - {c}C/{d}C'
+	return lb
+
+def check_osd(name, ids, vals):
+	if len(name) > OSD_TEXT:
+		raise ValueError(f'DIP name too long for MiSTer: {name}')
+	for lb in ids:
+		if len(name) + len(lb) > OSD_LINE:
+			raise ValueError(f'DIP line too long for the MiSTer OSD: {name}: {lb}')
+	if len(ids) > 32:
+		raise ValueError(f'{name}: more than 32 settings')
+	if len(set(vals)) != len(vals):
+		raise ValueError(f'{name}: settings share a value (the OSD cannot reach them all)')
+
 def natural_key(text):
 	"""A to Z, the numbers in a name by value ("2 Players" before "10 ...")."""
 	return [int(t) if t.isdigit() else t for t in re.split(r'(\d+)', text.casefold())]
@@ -159,9 +222,10 @@ def natural_key(text):
 def dip_xml(bits, name, sets):
 	"""A <dip> line; sets: [(value, label)] put in alphabetical order (the
 	values attribute keeps each label on its own value)."""
-	sets = sorted(sets, key=lambda s: natural_key(s[1]))
-	ids = ','.join(lb.replace(',', ' ') for _, lb in sets)
+	sets = sorted(((v, short_label(lb).replace(',', ' ')) for v, lb in sets), key=lambda s: natural_key(s[1]))
+	ids = ','.join(lb for _, lb in sets)
 	vals = [v for v, _ in sets]
+	check_osd(name, [lb for _, lb in sets], vals)
 	valattr = '' if vals == list(range(len(sets))) else f' values="{",".join(str(v) for v in vals)}"'
 	return f'\t\t<dip bits="{bits}" name={quoteattr(name)} ids={quoteattr(ids)}{valattr}/>'
 
@@ -179,6 +243,7 @@ def switches_xml(fields, extra=()):
 		if mask != ((1 << (hi + 1)) - (1 << lo)):
 			raise ValueError(f'non-contiguous dip {name} {mask:x}')
 		bits = f'{lo}' if lo == hi else f'{lo},{hi}'
+		name = NAME_SHORT.get(name, name)
 		dips.append((name, dip_xml(bits, name, [((v & mask) >> lo, lb) for v, lb in sets])))
 	for bits, name, ids in extra:
 		dips.append((name, dip_xml(bits, name, list(enumerate(ids.split(','))))))
