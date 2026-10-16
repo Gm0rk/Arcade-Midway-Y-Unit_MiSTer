@@ -68,7 +68,9 @@ localparam CONF_STR = {
 	"H1P1O[108],CRT V-Size Mode,PVM,Cabinet;",
 	"-;",
 	`FMOVES_MENU,
+	"H7O[44],Passwords,Off,On;",
 	"H5-;",
+	"H7-;",
 	"DIP;",
 	"H4P2,Hidden Items;",
 	"P2-;",
@@ -114,6 +116,7 @@ reg   [4:0] game_id;
 wire        is_t2;
 wire        sec_ejb, sec_octo;              // the game has a hidden menu (see secret_menu.sv)
 wire        is_mk;                          // Mortal Kombat: Move List and Finishing Moves
+wire        is_tc;                          // Total Carnage: Passwords
 wire        rep_items;                      // Mortal Kombat with Reptile: his Hidden Items lines
 wire        info_req;
 wire  [7:0] info;
@@ -130,7 +133,7 @@ hps_io #(.CONF_STR(CONF_STR), .CONF_STR_BRAM(1), .WIDE(1)) hps_io
 
 	.buttons             (buttons),
 	.status              (status),
-	.status_menumask     ({5'd0, status[30:28], 1'b0, ~rep_items, ~is_mk, ~(sec_ejb | sec_octo), ~sec_octo, ~sec_ejb, ~status[101], 1'b0}),
+	.status_menumask     ({5'd0, status[30:28], ~is_tc, ~rep_items, ~is_mk, ~(sec_ejb | sec_octo), ~sec_octo, ~sec_ejb, ~status[101], 1'b0}),
 	.info_req            (info_req),
 	.info                (info),
 
@@ -670,10 +673,12 @@ always @(posedge clk_sys) begin
 	else if ((joy0[13] | joy1[13]) & ~pause_btn_d) pause_toggle <= ~pause_toggle;
 end
 
-// Mortal Kombat's Move List window (see Video) holds the game too
+// Mortal Kombat's Move List window and Total Carnage's Passwords (see
+// Video) hold the game too
 wire [1:0] movelist_sel = status[42:41];         // Off, Page 1, Page 2
 wire       movelist_on  = is_mk && (movelist_sel == 2'd1 || movelist_sel == 2'd2);
-wire pause = pause_toggle | (OSD_STATUS & ~status[8]) | movelist_on;
+wire       passwords_on = is_tc && status[44];   // Off, On
+wire pause = pause_toggle | (OSD_STATUS & ~status[8]) | movelist_on | passwords_on;
 
 //////////////////////////////////////////////////////////////////
 // Y Unit board
@@ -736,6 +741,7 @@ end
 assign sec_ejb  = (game_id == G_MK) | (game_id == G_MKPROT) | (game_id == G_MKTURBO);
 assign sec_octo = (game_id == G_HIIMPACT) | (game_id == G_SHIMPACT);
 assign is_mk    = sec_ejb;
+assign is_tc    = (game_id == G_TOTCARN);
 
 // the board's completed CPU accesses (the menus and the fight, followed by
 // secret_menu.sv and yunit_fmoves.sv)
@@ -1152,19 +1158,21 @@ endfunction
 wire ch_on0 = is_t2 && !xhair_off && xhair(out_x, out_y, ch_x0[17:8], ch_y0[17:8]);
 wire ch_on1 = is_t2 && !xhair_off && xhair(out_x, out_y, ch_x1[17:8], ch_y1[17:8]);
 
-// ---- Move List window (rtl/yunit_window.sv) ----
+// ---- Information window (rtl/yunit_window.sv) ----
 //
-// Mortal Kombat's Move List (O[42:41]: Off, Page 1, Page 2) draws that page
-// over the game's dimmed title screen in place of the picture: four
-// fighters, then three, as in the T-Unit core. The game waits behind it
-// (pause above).
+// Mortal Kombat's Move List (O[42:41]: Off, Page 1, Page 2) and Total
+// Carnage's Passwords (O[44]: Off, On) draw their page over the game's
+// dimmed title screen in place of the picture: the Move List's four
+// fighters, then three, as in the T-Unit core (pages 0, 1); the warp codes
+// (page 2). The game waits behind it (pause above).
 
 yunit_window yunit_window
 (
 	.clk     (clk_sys),
 	.ce_pix  (ce_pix),
-	.enable  (movelist_on),
-	.page    ({2'd0, movelist_sel[1]}),
+	.enable  (movelist_on | passwords_on),
+	.page    (is_tc ? 3'd2 : {2'd0, movelist_sel[1]}),
+	.bg      (is_tc),
 
 	.r_in    (brd_r),
 	.g_in    (brd_g),
