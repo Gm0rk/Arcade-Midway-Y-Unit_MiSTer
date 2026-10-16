@@ -99,6 +99,8 @@ hacks are in the `_alternatives` folder of the MRAs.
   a move cannot be played; Reptile on demand: his fight next, the moon
   silhouettes and his hints every time (see the
   [Mortal Kombat page](docs/MortalKombat.md))
+- Total Carnage: a Passwords page, every warp code and where it takes you,
+  over the game (see the [Total Carnage page](docs/TotalCarnage.md))
 
 ## OSD
 
@@ -107,6 +109,7 @@ hacks are in the `_alternatives` folder of the MRAs.
 | Video Settings | Aspect ratio, scandoubler, scale, Video Timing, CRT Adjust (Auto-Width, H-Size, H-Position, V-Shift, V-Size, V-Size Mode) |
 | Move List | Mortal Kombat: Off, Page 1, Page 2; shows that page of the move list (four fighters, then three: special moves, fatality and the distance it needs, The Pit) over the game, which waits until it is Off |
 | Finishing Moves | Mortal Kombat: each fighter's fatality and The Pit, entered for you at the next FINISH HIM |
+| Passwords | Total Carnage: Off, On; shows the warp codes (how to enter one, where each takes you, the two warp bonuses) over the game, which waits until it is Off |
 | DIP Switches | The game's DIP switches with Service Credit and Tilt (select "Press" to drop a service credit or close the slam switch; the switch closes once the game runs again) and any game-specific entries; the switches and each one's settings in alphabetical order |
 | Hidden Items | Hidden developer menus, only for the games that have one; Mortal Kombat rev 3.0, 4.0 and Turbo also Reptile Fight Next, Moon Silhouettes Always and Reptile Hints Always |
 | Service Mode | The cabinet's test switch |
@@ -146,7 +149,7 @@ Put the zips in `games/mame`, the MRA files in `_Arcade` and the core in
 - SDRAM controller and MiSTer framework: Sorgelig and the MiSTer-devel team
 - CRT Adjust and CRT V-Size: Umberto Parisi (rmonic79), with Andrea Bogazzi
   (@asturur)
-- Finishing-move player and the Move List window: from the
+- Finishing-move player and the information window (Move List, Passwords): from the
   [Midway T-Unit core](https://github.com/Gm0rk/Arcade-Midway-T-Unit_MiSTer)
 - [Template_MiSTer](https://github.com/MiSTer-devel/Template_MiSTer),
   [MiSTer-CRT-Adjust](https://github.com/rmonic79/MiSTer-CRT-Adjust)
