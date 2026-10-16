@@ -1,13 +1,15 @@
 //============================================================================
-//  yunit_window - Mortal Kombat's Move List window
+//  yunit_window - the information window: Mortal Kombat's Move List,
+//  Total Carnage's Passwords
 //
-//  With the OSD's "Move List" set to a fighter, this draws the page with that
-//  fighter over the picture: the game's title screen, dimmed, and on it a
-//  grid of 56 x 30 characters (7 x 8 dots each, the MiSTer OSD's font),
-//  centred in the 400 x 254 picture. Two pages, four fighters then three, as
-//  in the T-Unit core. tools/yunit_window.py writes the pages and the
-//  background as ROM images. A row is a list of segments, runs of text in
-//  one colour at a column:
+//  With the OSD's "Move List" set to Page 1 or Page 2 (Mortal Kombat) or
+//  "Passwords" on (Total Carnage), this draws that page over the picture:
+//  the game's title screen, dimmed, and on it a grid of 56 x 30 characters
+//  (7 x 8 dots each, the MiSTer OSD's font), centred in the 400 x 254
+//  picture. Pages 0 and 1 are the Move List (four fighters, then three, as
+//  in the T-Unit core), page 2 the Passwords. tools/yunit_window.py writes
+//  the pages and the two backgrounds as ROM images. A row is a list of
+//  segments, runs of text in one colour at a column:
 //
 //    row   256 x 8: {page, row} -> the row's first segment (0: empty)
 //    seg   256 x 26: [10:0] the segment's first character in the text ROM,
@@ -15,9 +17,10 @@
 //          (0 white, 1 yellow, 2 cyan, 3 gray), [25] the row's last one
 //    text  2048 x 7: the character codes - 32
 //    font  768 x 8: {code - 32, glyph row} -> the row's dots, bit x column x
-//    bg    127 x 200 x 5: the background at half the picture's resolution,
-//          a palette index per 2 x 2 dots
-//    pal   32 x 24: index -> RGB, already dimmed
+//    bg    2 x 127 x 200 x 5: the backgrounds (0 Mortal Kombat, 1 Total
+//          Carnage) at half the picture's resolution, a palette index per
+//          2 x 2 dots
+//    pal   2 x 32 x 24: {background, index} -> RGB, already dimmed
 //
 //  The board's video changes with each ce_pix (every 12 clocks); the
 //  counters here follow it so that they always name the dot on the outputs
@@ -30,7 +33,7 @@
 //  is off, and the timing signals always do.
 //
 //  The T-Unit core's information window (Arcade-Midway-T-Unit,
-//  rtl/tunit_window.sv) with one background and the Move List's pages only.
+//  rtl/tunit_window.sv) with this core's pages and backgrounds.
 //
 //  Copyright (C) 2026 Gm0rk - GPL-3.0-or-later
 //============================================================================
@@ -49,7 +52,8 @@ module yunit_window #(
 	input            clk,
 	input            ce_pix,
 	input            enable,         // the window is shown
-	input      [2:0] page,           // the page (rtl/yunit_window_pages.svh)
+	input      [2:0] page,           // the page: 0, 1 the Move List, 2 the Passwords
+	input            bg,             // the background: 0 Mortal Kombat, 1 Total Carnage
 
 	input      [7:0] r_in,
 	input      [7:0] g_in,
@@ -76,9 +80,9 @@ reg  [7:0] row_rom  [0:255];
 reg [25:0] seg_rom  [0:255];
 reg  [6:0] text_rom [0:2047];
 reg  [7:0] font_rom [0:767];
-(* max_depth = 2048 *)                   // 2048 x 5 blocks: 13 M10K
-reg  [4:0] bg_rom   [0:BG_W * BG_H - 1];
-reg [23:0] pal_rom  [0:31];
+(* max_depth = 2048 *)                   // 2048 x 5 blocks: 25 M10K
+reg  [4:0] bg_rom   [0:2 * BG_W * BG_H - 1];
+reg [23:0] pal_rom  [0:63];
 
 initial begin
 	$readmemh(ROW_HEX, row_rom);
@@ -93,8 +97,8 @@ reg  [7:0] row_a;
 reg  [7:0] seg_a;
 reg [10:0] text_a;
 reg  [9:0] font_a;
-reg [14:0] bg_a;
-reg  [4:0] pal_a;
+reg [15:0] bg_a;
+reg  [5:0] pal_a;
 reg  [7:0] row_q;
 reg [25:0] seg_q;
 reg  [6:0] text_q;
@@ -240,22 +244,25 @@ end
 //----------------------------------------------------------------------------
 // Background: the next dot's (the first of the line while blanked) is read
 // every clock, line y / 2, dot / 2; its colour is taken over with the dot.
-// The line's start in the ROM (y / 2 x 200) is a stage of its own; it only
-// changes in the horizontal blanking.
+// The line's start in the ROM (the background's start + y / 2 x 200) is a
+// stage of its own; it only changes in the horizontal blanking.
 //----------------------------------------------------------------------------
 
 wire [8:0] nx_dx = hb_in ? 9'd0 : dx + 9'd1;
 reg  [6:0] by;
 reg  [7:0] bx;
-reg [14:0] by_base;
+reg [15:0] by_base;
+reg        bg_q1;                // the background, registered
 reg [23:0] nx_bg, cur_bg;
 
 always @(posedge clk) begin
+	bg_q1   <= bg;
 	by      <= (y[7:1] < 7'(BG_H)) ? y[7:1] : 7'(BG_H - 1);
 	bx      <= (nx_dx[8:1] < 8'(BG_W)) ? nx_dx[8:1] : 8'(BG_W - 1);
-	by_base <= {1'b0, by, 7'd0} + {2'b0, by, 6'd0} + {5'd0, by, 3'd0};   // y / 2 x 200
-	bg_a    <= by_base + {7'd0, bx};
-	pal_a   <= bg_q;
+	by_base <= {2'b0, by, 7'd0} + {3'b0, by, 6'd0} + {6'd0, by, 3'd0} +    // y / 2 x 200
+	           (bg_q1 ? 16'(BG_W * BG_H) : 16'd0);
+	bg_a    <= by_base + {8'd0, bx};
+	pal_a   <= {bg_q1, bg_q};
 	nx_bg   <= pal_q;
 	if (ce_pix)
 		cur_bg <= nx_bg;
