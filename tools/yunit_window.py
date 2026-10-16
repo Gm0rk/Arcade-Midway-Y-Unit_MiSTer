@@ -1,14 +1,26 @@
 #!/usr/bin/env python3
 """
-yunit_window.py - the pages of Mortal Kombat's Move List window
+yunit_window.py - the pages of the information window: Mortal Kombat's
+Move List and Total Carnage's Passwords
 
-With the OSD's "Move List" set to a fighter, rtl/yunit_window.sv draws the
-page with that fighter over the picture, on the game's title screen dimmed
-so the text reads. The pages are the T-Unit core's for MK (Arcade-Midway-
+With the OSD's "Move List" set to Page 1 or Page 2 (Mortal Kombat) or
+"Passwords" on (Total Carnage), rtl/yunit_window.sv draws the page over the
+picture, on the game's title screen dimmed so the text reads.
+
+Move List (pages 0 and 1): the T-Unit core's pages for MK (Arcade-Midway-
 T-Unit tools/tunit_window.py): each fighter's special moves and fatality
 with the distance it needs, in words (Close, Sweep, Jump; tools/
 yunit_fmoves.py has the moves and the distances), as many fighters to a
 page as fit (four, then three), The Pit in the footer.
+
+Passwords (page 2): Total Carnage's warp codes. The game checks the code
+entered at the warp disc at the start against a list in its program ROM
+(rev LA1 FFD719F0, "BOOF++++TOIDGOOBZULU...", FFD696A0 the compare; the
+"++++" entries cannot be entered): a match warps there, anything else
+costs a life. Each code's destination was checked in MAME 0.289 (code
+poked into the entry, 0x010FBAF0-0x010FBB20 letters A = 1, 0x010FBB30 done),
+and the entry itself (20-count timer, left stick the arrow, right stick
+up / down the letter, END) by playing it.
 
 A page is 30 rows of 56 characters; a row is a list of segments, runs of
 text in one colour (the blanks between them are not stored). ROM images
@@ -26,22 +38,25 @@ for $readmemh:
     rtl/yunit_window_font.hex  96 x 8 rows of 8 bits (bit x: column x),
                                characters 32-127: the MiSTer OSD's font
                                (Main_MiSTer charrom.cpp, GPL-3.0)
-    rtl/yunit_window_bg.hex    127 x 200 entries of 5 bits: the background
-                               at half the picture's resolution, a palette
-                               index each
-    rtl/yunit_window_pal.hex   32 x 24 bits: its palette (RGB, already dimmed)
-    rtl/yunit_window_pages.svh each fighter's page (top level)
+    rtl/yunit_window_bg.hex    2 x 127 x 200 entries of 5 bits: the
+                               backgrounds (Mortal Kombat, then Total
+                               Carnage) at half the picture's resolution, a
+                               palette index each
+    rtl/yunit_window_pal.hex   2 x 32 x 24 bits: their palettes (RGB,
+                               already dimmed)
 
-The background comes from a capture of the title screen (--bg; the 4:3
-picture is taken from the middle of the image, so a 1920 x 1080 capture
-with black bars works as it is): scaled to 200 x 127, dimmed to DIM, 32
-colours (median cut, no dither). The capture is not kept in the repo.
+A background comes from a capture of the game's title screen (--bg; the
+4:3 picture is taken from the middle of the image, so a 1920 x 1080
+capture with black bars works as it is): scaled to 200 x 127, dimmed to
+DIM (0.30 Mortal Kombat, 0.20 Total Carnage), 32 colours (median cut, no
+dither). The captures are not kept in the
+repo; --bg replaces one game's half of the two files.
 
 Usage:
-    yunit_window.py --write             write the text ROM images
-    yunit_window.py --bg capture.png    write the background
-    yunit_window.py --check             the ROM images against the sources
-    yunit_window.py --show [PAGE|all]   print pages as text
+    yunit_window.py --write                 write the text ROM images
+    yunit_window.py --bg mk|tc capture.png  write that game's background
+    yunit_window.py --check                 the ROM images against the sources
+    yunit_window.py --show [PAGE|all]       print pages as text
 
 Copyright (C) 2026 Gm0rk - GPL-3.0-or-later
 """
@@ -56,7 +71,6 @@ import yunit_fmoves as fm   # noqa: E402
 
 OUT = {k: os.path.join(REPO, 'rtl', 'yunit_window_%s.hex' % k)
        for k in ('row', 'seg', 'text', 'font', 'bg', 'pal')}
-OUT['svh'] = os.path.join(REPO, 'rtl', 'yunit_window_pages.svh')
 
 COLS, ROWS = 56, 30
 LEFT, RIGHT = 1, 54                 # the columns text uses
@@ -65,7 +79,9 @@ SEG_SIZE = 256                      # segment ROM entries
 TEXT_SIZE = 2048                    # text ROM characters
 WHITE, YELLOW, CYAN, GRAY = range(4)
 BG_W, BG_H, BG_COLOURS = 200, 127, 32
-DIM = 0.30                          # background brightness
+BG_GAMES = ['mk', 'tc']             # the backgrounds, in ROM order (yunit_window.sv input bg)
+DIM = {'mk': 0.30, 'tc': 0.20}      # background brightness (Total Carnage's title is brighter)
+TC_PAGE = 2                         # Total Carnage's page (the top level's window page)
 
 # Main_MiSTer charrom.cpp, characters 32-127: 8 bytes each, byte i column i,
 # bit b row b (the top row bit 0)
@@ -181,8 +197,8 @@ def special_rows(name, sp, col, cmd_col):
 def pages():
     """The Move List as the T-Unit core has it for MK: as many fighters to a
     page as fit (the Move List option's order), each with the special moves
-    and the fatality; The Pit, the same for all, in the footer. PAGE_OF
-    [fighter] is the fighter's page."""
+    and the fatality; The Pit, the same for all, in the footer. The OSD's
+    Move List option names the pages (yunit_fmoves.LIST_PAGES)."""
     foot = [row(*f) for f in NOTATION] + [row(*pit_footer())]
     fighters = [(n, [m for m in moves if m[1] != fm.K_MKPIT]) for n, _, moves in fm.fighters()]
     c_name = LEFT + 2
@@ -210,12 +226,12 @@ def pages():
             cur = []
         cur.append((name, b))
     groups.append(cur)
+    if len(groups) != fm.LIST_PAGES:
+        raise SystemExit('%d pages: set yunit_fmoves.LIST_PAGES and --gen' % len(groups))
     out = []
-    PAGE_OF.clear()
     for k, g in enumerate(groups):
         body = []
         for name, b in g:
-            PAGE_OF.append(k)
             body += ([None] if body else []) + b
         head = [at((LEFT, 'MOVE LIST' + ('  %d/%d' % (k + 1, len(groups)) if len(groups) > 1 else ''), CYAN),
                    (RIGHT + 1 - len(TITLE), TITLE, GRAY)), None,
@@ -224,7 +240,75 @@ def pages():
     return out
 
 
-PAGE_OF = []                         # fighter (Move List option order) -> its page
+# ----------------------------------------------------------------------------
+# Passwords (Total Carnage)
+# ----------------------------------------------------------------------------
+
+TC_TITLE = 'TOTAL CARNAGE'
+TC_HOW = ('At the start of a game walk onto the red and white disc (PASSWORD REQUIRED), '
+          'pick YES and press Start. Within 20 seconds: the left stick moves the arrow, '
+          'the right stick up or down changes the letter, END enters the code. A wrong '
+          'code costs a life.')
+# (group, code, where it warps to, note): the game's order; checked in MAME
+TC_CODES = [
+    ('MISSION 1', 'GOOB', 'The gate', ''),
+    ('', 'ZULU', 'The bunker', '+ Weasel Warp Bonus'),
+    ('', 'ORCS', 'Past Orcus', '+ Orcus Warp Bonus'),
+    ('MISSION 2', 'ROAD', 'The first road', ''),
+    ('', 'LIPS', 'The airport gate', ''),
+    ('', 'LICK', 'The airfield', ''),
+    ('', 'FIRE', 'The hangar', ''),
+    ('', 'SHOK', "Akhboob's electric chair", ''),
+    ('MISSION 3', 'FOOD', 'The second road', ''),
+    ('', 'EATS', 'The mutant transmission', ''),
+    ('', 'TOID', 'The road to the factory', ''),
+    ('', 'BOOF', 'The reactor', ''),
+    ('', 'MARK', 'The reactor basement', ''),
+    ('ENDINGS', 'DOME', 'Akhboob escapes', '(no keys)'),
+    ('', 'WORM', 'Akhboob is fried', '(no keys)'),
+    ('', 'AZAZ', 'The Pleasure Domes', '(500 keys)'),
+]
+TC_BONUS = [
+    ('ZULU', 'Weasel Warp Bonus: 40,000 points, 50 hostages,', '50 flags, 50 gems, 10 keys'),
+    ('ORCS', 'Orcus Warp Bonus: 50,000 points, 100 hostages,', '100 flags, 100 gems, 10 keys'),
+]
+# the codes in the program ROM's list (rev LA1 and the prototypes), in its
+# order; --check compares them with TC_CODES
+TC_ROM_LIST = 'BOOF++++TOIDGOOBZULUORCSROADLIPSLICKSHOK++++FIREFOODEATS++++MARKDOMEWORMAZAZ'
+
+
+def tc_page():
+    """Total Carnage's warp codes on one page: how to enter one, the codes
+    by mission and where each warps to, the two warp bonuses."""
+    codes = sorted(TC_ROM_LIST[i:i + 4] for i in range(0, len(TC_ROM_LIST), 4) if '+' not in TC_ROM_LIST[i:i + 4])
+    if codes != sorted(c for _, c, _, _ in TC_CODES):
+        raise SystemExit('TC_CODES and the ROM list differ')
+    c_grp, c_code = LEFT, LEFT + 11
+    c_where = c_code + 6
+    head = [at((LEFT, 'PASSWORDS', CYAN), (RIGHT + 1 - len(TC_TITLE), TC_TITLE, GRAY)), None]
+    import textwrap
+    head += [row((t, GRAY)) for t in textwrap.wrap(TC_HOW, RIGHT - LEFT + 1)] + [None]
+    head.append(at((c_code, 'CODE', GRAY), (c_where, 'WARPS TO', GRAY)))
+    body = []
+    for grp, code, where, note in TC_CODES:
+        cells = [(c_code, code, YELLOW), (c_where, where, WHITE)]
+        if grp:
+            cells.insert(0, (c_grp, grp, CYAN))
+        if note:
+            cells.append((c_where + len(where) + 1, note, GRAY))
+        body.append(at(*cells))
+    foot = []
+    for code, l1, l2 in TC_BONUS:
+        foot += [at((LEFT, code, YELLOW), (LEFT + 6, l1, GRAY)), at((LEFT + 6, l2, GRAY))]
+    return compose('Passwords', head, body, foot)
+
+
+def all_pages():
+    """Every page in ROM order: the Move List, then the Passwords."""
+    pg = pages()
+    if len(pg) != TC_PAGE:
+        raise SystemExit('Passwords page at %d: set TC_PAGE and the top level' % len(pg))
+    return pg + [tc_page()]
 
 
 # ----------------------------------------------------------------------------
@@ -244,7 +328,7 @@ def segments(r):
 
 def images():
     text, seg, rows, lists = '', [0], [], {}
-    pg = pages()
+    pg = all_pages()
     if len(pg) > PAGES:
         raise SystemExit('%d pages (room for %d)' % (len(pg), PAGES))
     for _, page_rows in pg:
@@ -270,44 +354,48 @@ def images():
     seg += [0] * (SEG_SIZE - len(seg))
     codes = [ord(ch) - 32 for ch in text] + [0] * (TEXT_SIZE - len(text))
     font = [b for ch in font_rows() for b in ch]
-    svh = ['// yunit_window_pages.svh - the Move List window page of each fighter',
-           '// Generated by tools/yunit_window.py --write; do not edit.',
-           '//',
-           '// Copyright (C) 2026 Gm0rk - GPL-3.0-or-later',
-           '',
-           '// fighter: the Move List option\'s order (0 Johnny Cage ... 6 Scorpion)',
-           'function automatic [2:0] win_page(input [2:0] fighter);',
-           '\tcase (fighter)']
-    for f, k in enumerate(PAGE_OF):
-        svh.append("\t\t3'd%d: win_page = 3'd%d;    // %s" % (f, k, fm.FIGHTERS[f][0]))
-    svh += ["\t\tdefault: win_page = 3'd0;", '\tendcase', 'endfunction']
     return {'row': '\n'.join('%03X' % w for w in rows) + '\n',
             'seg': '\n'.join('%07X' % w for w in seg) + '\n',
             'text': '\n'.join('%02X' % w for w in codes) + '\n',
-            'font': '\n'.join('%02X' % w for w in font) + '\n',
-            'svh': '\n'.join(svh) + '\n'}, used
+            'font': '\n'.join('%02X' % w for w in font) + '\n'}, used
 
 
-def background(path):
+def background(path, dim):
     """A title screen as BG_W x BG_H palette indices and BG_COLOURS dimmed colours."""
     from PIL import Image
     im = Image.open(path).convert('RGB')
     w, h = im.size
     pw = min(w, h * 4 // 3)                  # the 4:3 picture in the middle
     im = im.crop(((w - pw) // 2, 0, (w - pw) // 2 + pw, h)).resize((BG_W, BG_H), Image.LANCZOS)
-    im = im.point(lambda v: int(v * DIM + 0.5))
+    im = im.point(lambda v: int(v * dim + 0.5))
     q = im.quantize(colors=BG_COLOURS, method=Image.MEDIANCUT, dither=Image.NONE)
     pal = q.getpalette()[:3 * BG_COLOURS]
     pal += [0] * (3 * BG_COLOURS - len(pal))
     return list(q.tobytes()), [tuple(pal[3 * i:3 * i + 3]) for i in range(BG_COLOURS)]
 
 
-def write_bg(path):
-    idx, pal = background(path)
-    open(OUT['bg'], 'w', newline='\n').write(''.join('%02X\n' % v for v in idx))
-    open(OUT['pal'], 'w', newline='\n').write(''.join('%02X%02X%02X\n' % c for c in pal))
-    print('%s: %d entries, %s: %d colours' % (os.path.relpath(OUT['bg'], REPO), len(idx),
-                                               os.path.relpath(OUT['pal'], REPO), len(pal)))
+def read_hex(path, n, width):
+    """A ROM image's entries (missing or short: zeros)."""
+    try:
+        v = [int(l, 16) for l in open(path) if l.strip()]
+    except OSError:
+        v = []
+    return (v + [0] * n)[:n] if width else v
+
+
+def write_bg(game, path):
+    """Replace one game's background and palette in the two files."""
+    k = BG_GAMES.index(game)
+    idx, pal = background(path, DIM[game])
+    n_bg, n_pal = BG_W * BG_H, BG_COLOURS
+    bg = read_hex(OUT['bg'], n_bg * len(BG_GAMES), 1)
+    pl = read_hex(OUT['pal'], n_pal * len(BG_GAMES), 1)
+    bg[k * n_bg:(k + 1) * n_bg] = idx
+    pl[k * n_pal:(k + 1) * n_pal] = [r << 16 | g << 8 | b for r, g, b in pal]
+    open(OUT['bg'], 'w', newline='\n').write(''.join('%02X\n' % v for v in bg))
+    open(OUT['pal'], 'w', newline='\n').write(''.join('%06X\n' % c for c in pl))
+    print('%s background: %s %d entries, %s %d colours' % (game, os.path.relpath(OUT['bg'], REPO), len(bg),
+                                                          os.path.relpath(OUT['pal'], REPO), len(pl)))
 
 
 def show(rows):
@@ -339,11 +427,11 @@ def main():
         if a == ['--check']:
             print('ROM images: ' + ('OK' if not bad else 'differ: ' + ', '.join(bad)))
             sys.exit(1 if bad else 0)
-    elif a[:1] == ['--bg'] and len(a) == 2:
-        write_bg(a[1])
+    elif a[:1] == ['--bg'] and len(a) == 3 and a[1] in BG_GAMES:
+        write_bg(a[1], a[2])
     elif a[:1] == ['--show']:
         which = a[1] if len(a) > 1 else '0'
-        for k, (lb, rows) in enumerate(pages()):
+        for k, (lb, rows) in enumerate(all_pages()):
             if which == 'all' or which == str(k) or which.lower() in lb.lower():
                 print('page %d: %s' % (k, lb))
                 show(rows)
