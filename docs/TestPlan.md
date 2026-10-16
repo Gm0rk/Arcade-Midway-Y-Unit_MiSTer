@@ -28,7 +28,7 @@ Core tested (rbf date): ____________
 | [Strike Force](#strike-force) | 11 | 1 / 11 passed |
 | [Mortal Kombat](#mortal-kombat) | 29 | 2 / 29 passed |
 | [Terminator 2 - Judgment Day](#terminator-2---judgment-day) | 13 | 1 / 13 passed |
-| [Total Carnage](#total-carnage) | 10 | 2 / 10 passed |
+| [Total Carnage](#total-carnage) | 12 | 2 / 12 passed |
 | [Y-Unit Test ROM](#y-unit-test-rom) | 3 | 1 / 3 passed |
 
 ## What you need
@@ -51,7 +51,7 @@ Run with any game (Mortal Kombat or Smash T.V. covers them all).
 
 | # | Test | Expected | Result | Notes |
 |---|---|---|---|---|
-| C-01 | Open the OSD | Main page: Video Settings, Move List and Finishing Moves (Mortal Kombat only), DIP Switches, Hidden Items (games with a hidden menu only), Service Mode, Pause when OSD is open, Reset, Reset and close OSD | | |
+| C-01 | Open the OSD | Main page: Video Settings, Move List and Finishing Moves (Mortal Kombat only), Passwords (Total Carnage only), DIP Switches, Hidden Items (games with a hidden menu only), Service Mode, Pause when OSD is open, Reset, Reset and close OSD | | |
 | C-02 | Video Settings: Aspect Ratio, Scandoubler Fx, Scale | Each option changes the HDMI picture as named | | |
 | C-03 | Video Timing 54.7 Hz / 57 Hz / 60 Hz | Picture stable on HDMI and analog at each; at 57 / 60 Hz the game runs a little faster, music keeps its pitch | | |
 | C-04 | CRT Adjust: H-Size, H-Position, V-Shift, Auto-Width (analog) | The picture resizes and moves; Auto-Width fits it to the screen | | |
@@ -234,6 +234,8 @@ Main MRA: Total Carnage (rev LA1). [Controls](TotalCarnage.md).
 | TC-08 | Test menu: switch test, sound test | Every switch shows; sounds play | | |
 | TC-09 | Play to game over | Continue screen, initials entry | | |
 | TC-10 | Each MRA in `_alternatives/_Total Carnage` | Boots to attract and plays | Pass | |
+| TC-11 | Passwords On during a game, close the OSD, then set it Off | Over the dimmed title screen: how to enter a code, the 16 codes by mission and the two warp bonuses, all readable; the game waits behind it and goes on once Off | | |
+| TC-12 | Start a game, walk onto the warp disc, YES, enter ZULU, END | Weasel Warp Bonus (40,000 points, 50 hostages, flags and gems, 10 keys) in the bunker | | |
 
 ## Y-Unit Test ROM
 
