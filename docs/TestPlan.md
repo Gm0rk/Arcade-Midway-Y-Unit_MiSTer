@@ -20,7 +20,7 @@ Core tested (rbf date): ____________
 
 | Game | Tests | Result |
 |---|---|---|
-| [Core-wide](#core-wide) | 17 | |
+| [Core-wide](#core-wide) | 19 | |
 | [Trog](#trog) | 11 | 2 / 11 passed |
 | [Smash T.V.](#smash-tv) | 10 | 2 / 10 passed |
 | [High Impact Football](#high-impact-football) | 13 | 2 / 13 passed |
@@ -28,7 +28,7 @@ Core tested (rbf date): ____________
 | [Strike Force](#strike-force) | 11 | 1 / 11 passed |
 | [Mortal Kombat](#mortal-kombat) | 29 | 2 / 29 passed |
 | [Terminator 2 - Judgment Day](#terminator-2---judgment-day) | 13 | 1 / 13 passed |
-| [Total Carnage](#total-carnage) | 12 | 2 / 12 passed |
+| [Total Carnage](#total-carnage) | 13 | 2 / 13 passed |
 | [Y-Unit Test ROM](#y-unit-test-rom) | 3 | 1 / 3 passed |
 
 ## What you need
@@ -55,7 +55,7 @@ Run with any game (Mortal Kombat or Smash T.V. covers them all).
 | C-02 | Video Settings: Aspect Ratio, Scandoubler Fx, Scale | Each option changes the HDMI picture as named | | |
 | C-03 | Video Timing 54.7 Hz / 57 Hz / 60 Hz | Picture stable on HDMI and analog at each; at 57 / 60 Hz the game runs a little faster, music keeps its pitch | | |
 | C-04 | CRT Adjust: H-Size, H-Position, V-Shift, Auto-Width (analog) | The picture resizes and moves; Auto-Width fits it to the screen | | |
-| C-05 | CRT V-Size, PVM and Cabinet modes (analog) | "+" taller, "-" shorter in both modes; the screen keeps sync | | |
+| C-05 | CRT V-Size, PVM and Cabinet modes (analog) | "+" taller, "-" shorter in both modes; the screen keeps sync, also while V-Size is turned on, changed or set back to 0 (PVM: no roll or tear) | | |
 | C-06 | Pause when OSD is open: On, then Off | On: the game stops while the OSD is open. Off: it keeps running | | |
 | C-07 | Pause button on the controller | Pauses and resumes the game | | |
 | C-08 | Reset, then Reset and close OSD | Both restart the game; the first leaves the OSD open, the second closes it | | |
@@ -68,6 +68,8 @@ Run with any game (Mortal Kombat or Smash T.V. covers them all).
 | C-15 | Define joystick buttons for a game | The button names match the game's controls page | | |
 | C-16 | Play a game, then load another game from the menu | The screen stays black behind the loading box | | |
 | C-17 | Open DIP Switches in each game | The switches in alphabetical order (Service Credit and Tilt among them), and each switch's settings too; every value shows on its line | | |
+| C-18 | Video Timing 57 Hz, then 60 Hz, with CRT Adjust on: CRT V-Size "+7" in PVM and in Cabinet mode | The whole picture stays on screen (the bottom rows too); "+" makes it only as tall as the frame allows | | |
+| C-19 | Mortal Kombat: let the attract mode run into a demo fight and on; Smash T.V.: lose a game to GAME OVER | Each tune stops cleanly when the music changes or stops; no FM notes keep droning | | |
 
 ## Trog
 
@@ -236,6 +238,7 @@ Main MRA: Total Carnage (rev LA1). [Controls](TotalCarnage.md).
 | TC-10 | Each MRA in `_alternatives/_Total Carnage` | Boots to attract and plays | Pass | |
 | TC-11 | Passwords On during a game, close the OSD, then set it Off | Over the dimmed title screen: how to enter a code, the 16 codes by mission and the two warp bonuses, all readable; the game waits behind it and goes on once Off | | |
 | TC-12 | Start a game, walk onto the warp disc, YES, enter ZULU, END | Weasel Warp Bonus (40,000 points, 50 hostages, flags and gems, 10 keys) in the bunker | | |
+| TC-13 | Leave the attract mode running until the high score table (about 1 minute 40 seconds after a reset) | The table waves in line by line from the right and later waves out, as in MAME; the picture stays steady, no streaks or torn lines | | |
 
 ## Y-Unit Test ROM
 
