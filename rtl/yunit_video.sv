@@ -5,7 +5,9 @@
 //    - at the start of every displayed line the row the 34010 points at
 //      (DPYADR) is fetched from VRAM into a line buffer
 //    - pixels from HEBLNK to HSBLNK read consecutive entries of that row,
-//      starting at the column address and wrapping at 512
+//      starting at the column address and wrapping at 512. HEBLNK/HSBLNK are
+//      the line's own (games change them during the picture for effects);
+//      inside the screen window, pixels outside them are black
 //    - each 16-bit entry goes through the pen map (4 or 6 bpp boards wire the
 //      palette address lines differently) and the 15-bit palette
 //    - autoerase: once a row has been shown, row 510 or 511 (same parity) is
@@ -32,8 +34,10 @@ module yunit_video
 
 	// timing and display address from the 34010
 	input       [9:0] hcount,
-	input       [9:0] heblnk,
+	input       [9:0] heblnk,        // screen window (matches hblank_in)
 	input       [9:0] hsblnk,
+	input       [9:0] line_heblnk,   // this line's HEBLNK/HSBLNK (valid at line_start)
+	input       [9:0] line_hsblnk,
 	input       [9:0] vcount,
 	input       [9:0] vsblnk,
 	input             hsync_in,
@@ -107,7 +111,9 @@ end
 // Row fetch and autoerase scheduling
 //----------------------------------------------------------------------------
 
-reg   [8:0] col_start;           // first entry of the line
+reg   [8:0] col_base;            // column start less the line's HEBLNK (in pixels)
+reg  [10:0] line_lo, line_hi;    // the line's HEBLNK/HSBLNK in pixels
+reg  [10:0] mirror;              // flipped picture: position p shows p' = mirror - p
 reg         line_on;             // this line shows pixels
 reg  [11:0] last_row;            // row of the last displayed line
 reg         last_valid;
@@ -135,13 +141,16 @@ always @(posedge clk) begin
 	else begin
 		if (line_start) begin
 			line_on <= line_vis & disp_en;
+			line_lo <= {line_heblnk, 1'b0};
+			line_hi <= {line_hsblnk, 1'b0};
+			mirror  <= {heblnk, 1'b0} + {hsblnk, 1'b0} - 11'd1;
 			if (line_vis & disp_en) begin
 				// fetch this line's row; it is shown from this line's HEBLNK on
 				disp_row   <= line_row[8:0];
 				disp_req   <= ~disp_req;
 				fill_bank  <= ~fill_bank;
 				show_bank  <= ~fill_bank;
-				col_start  <= {line_col[7:0], 1'b0};
+				col_base   <= {line_col[7:0], 1'b0} - {line_heblnk[7:0], 1'b0};
 				last_row   <= line_row;
 				last_valid <= 1'b1;
 				// erase the row the previous line showed
@@ -185,10 +194,9 @@ reg         a_hs, a_vs, a_hb, a_vb, a_on;
 reg  [14:0] a_rgb;
 
 wire [10:0] pix_pos  = {hcount, ~vclk_d};                 // pixel within the line
-wire [10:0] act_x    = pix_pos - {heblnk, 1'b0};          // pixel within the active area
-wire [10:0] act_w    = {hsblnk, 1'b0} - {heblnk, 1'b0};
-wire [10:0] src_x    = flip_x ? (act_w - 11'd1 - act_x) : act_x;
-wire  [8:0] entry    = col_start + src_x[8:0];
+wire [10:0] pos      = flip_x ? (mirror - pix_pos) : pix_pos;  // the pixel drawn there
+wire        pos_in   = (pos >= line_lo) && (pos < line_hi);
+wire  [8:0] entry    = col_base + pos[8:0];
 
 wire [15:0] ent      = lb_q[{lane, 4'b0000} +: 16];
 wire [11:0] pen      = bpp6 ? {ent[11:8], ent[15:14], ent[5:0]} : {4'h0, ent[15:12], ent[3:0]};
@@ -208,7 +216,7 @@ always @(posedge clk) begin
 		a_vs     <= vsync_in;
 		a_hb     <= hblank_in;
 		a_vb     <= vblank_in;
-		a_on     <= line_on & ~hblank_in & ~vblank_in;
+		a_on     <= line_on & pos_in & ~hblank_in & ~vblank_in;
 		lb_raddr <= {show_bank, entry[8:2]};
 		lane     <= entry[1:0];
 		stage[0] <= 1'b1;
