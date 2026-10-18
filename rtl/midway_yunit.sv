@@ -216,7 +216,7 @@ reg  [15:0] mem_rdata;
 reg         mem_ack;
 
 wire        cpu_hs, cpu_vs, cpu_hb, cpu_vb, disp_en;
-wire  [9:0] hcount, vcount, heblnk, hsblnk, cpu_vsblnk;
+wire  [9:0] hcount, vcount, heblnk, hsblnk, cpu_vsblnk, line_heblnk, line_hsblnk;
 wire        line_start, line_vis;
 wire [11:0] line_row;
 wire [13:0] line_col;
@@ -260,6 +260,8 @@ tms34010 cpu
 	.line_vis   (line_vis),
 	.line_row   (line_row),
 	.line_col   (line_col),
+	.line_heblnk(line_heblnk),
+	.line_hsblnk(line_hsblnk),
 
 	.dbg_pc     (cpu_pc),
 	.dbg_st     (),
@@ -832,6 +834,8 @@ yunit_video video
 	.hcount       (hcount),
 	.heblnk       (heblnk),
 	.hsblnk       (hsblnk),
+	.line_heblnk  (line_heblnk),
+	.line_hsblnk  (line_hsblnk),
 	.vcount       (vcount),
 	.vsblnk       (cpu_vsblnk),
 	.hsync_in     (cpu_hs),
