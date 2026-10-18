@@ -63,6 +63,17 @@
 //   - Cabinet: the square root runs in four 2-step stages (phases 6-9)
 //     instead of two 4-step ones, for 96 MHz timing (needs >= 10 clocks a
 //     pixel; this core has 12). Same values.
+//   - "+" (taller, vsize < 0) is limited to the room the frame has, in both
+//     modes, so the picture is never cut (the 57/60 Hz video timings leave
+//     few blank lines: PVM sent no line past lines_out, Cabinet's window
+//     ran past the VSync it could delay).
+//   - PVM: each output frame keeps the parameters it started with (they were
+//     re-latched at the native VSync, 23 lines into the running output
+//     frame, which ended the frame with a short line during the slew).
+//   - PVM: switching on waits for the output frame's start with the native
+//     VSync of that frame held back (HSync carried on; it stopped for the 23
+//     lines up to the first output frame), and switching off lets the
+//     running output frame finish (HSync carried on; a line went missing).
 //============================================================================
 
 module crt_vsize #(
@@ -273,15 +284,45 @@ module crt_vsize #(
     reg  [3:0]       slew_cnt;
     initial begin vsize_eff = 0; slew_cnt = 0; end
 
+    // [Arcade-Midway-Y-Unit] The most "+" the frame has room for (as a
+    // vsize floor, <= 0), from the measured frame (the native line index in
+    // the frame is nl - 1; the picture's lines are nl_top - 1 ..
+    // nl_top + a_nat - 2):
+    //  - PVM replays native lines 0 .. lines_out - 1 from VSync: the last
+    //    picture line must be one of them, and one more, as crt_adjust after
+    //    this stage sends the picture a line late: lines_out >= nl_top + a_nat.
+    //  - Cabinet's window (from nl_top + 2, a_out_t lines) may end K lines
+    //    past the frame's last line but one, K being the VSync delay it can
+    //    take: at most 24 and the room above the window (t_cap2 below).
+    // The requested vsize is held to it; the slew and the engine follow the
+    // limited value, so with no room "+" leaves the picture as it is.
+    wire signed [11:0] s_lnat = $signed({2'b00, lines_nat});
+    wire signed [11:0] s_anat = $signed({2'b00, a_nat});
+    wire signed [11:0] s_ntop = $signed({2'b00, nl_top});
+    wire signed [11:0] s_vsl  = $signed({8'd0, vs_lines});
+    wire signed [11:0] fl_pvm = s_ntop + s_anat - s_lnat;
+    wire signed [11:0] c_ws   = s_ntop + 12'sd2;
+    wire signed [11:0] c_cap  = (c_ws > s_vsl + 12'sd8) ? (c_ws - s_vsl - 12'sd4) : 12'sd0;
+    wire signed [11:0] c_k    = (c_cap > 12'sd24) ? 12'sd24 : c_cap;
+    wire signed [11:0] fl_cab = s_anat - (s_lnat - 12'sd2 + c_k - c_ws);
+    wire signed [11:0] fl_any = tube_mode ? fl_cab : fl_pvm;
+    reg  signed [5:0]  vs_floor;    // -31 .. 0
+    reg  signed [5:0]  vsize_tgt;   // vsize, no further "+" than vs_floor
+    initial begin vs_floor = 0; vsize_tgt = 0; end
+    always @(posedge clk) begin
+        vs_floor  <= (fl_any >= 12'sd0) ? 6'sd0 : (fl_any < -12'sd31) ? -6'sd31 : fl_any[5:0];
+        vsize_tgt <= (vsize < vs_floor) ? vs_floor : vsize;
+    end
+
     always @(posedge clk) if (vs_rise) begin
         if (!active) begin
             vsize_eff <= 0;
             slew_cnt  <= 0;
-        end else if (vsize_eff != vsize) begin
+        end else if (vsize_eff != vsize_tgt) begin
             if (slew_cnt == SLEW_FRAMES-1) begin
                 slew_cnt  <= 0;
-                vsize_eff <= (vsize > vsize_eff) ? vsize_eff + 1'd1
-                                                 : vsize_eff - 1'd1;
+                vsize_eff <= (vsize_tgt > vsize_eff) ? vsize_eff + 1'd1
+                                                     : vsize_eff - 1'd1;
             end else slew_cnt <= slew_cnt + 1'd1;
         end else slew_cnt <= 0;
     end
@@ -372,9 +413,13 @@ module crt_vsize #(
     // Con vsize_eff=0 e target !=0 il motore parte gia` (replica del timing
     // nativo) e poi la rampa lo porta al valore: partenza senza scalino.
     // PVM (retimer) e Cabinet (tube sim) sono esclusivi: seleziona tube_mode.
-    wire vsize_req = (vsize != 0) || (vsize_eff != 0);
-    wire engine_on = active && ~tube_mode && vsize_req
-                     && meas_ok && meas_ok_prev;
+    wire vsize_req = (vsize_tgt != 0) || (vsize_eff != 0);   // [Arcade-Midway-Y-Unit] the limited target
+    // [Arcade-Midway-Y-Unit] pvm_sel: the output is the engine's (see below);
+    // once selected the engine runs until it hands back to the native stream
+    reg  pvm_sel, vs_hold;
+    initial begin pvm_sel = 0; vs_hold = 0; end
+    wire eng_base  = active && ~tube_mode && meas_ok && meas_ok_prev;
+    wire engine_on = eng_base && (vsize_req || pvm_sel);
     wire tube_on   = active &&  tube_mode && vsize_req
                      && meas_ok && meas_ok_prev && (a_out_t > 10'd32);
 
@@ -385,12 +430,35 @@ module crt_vsize #(
     reg  [5:0]  rl;             // ring slot being read
     initial begin start_cnt = 0; out_running = 0; bres_acc = 0; out_line = 0; rl = 0; end
 
+    // [Arcade-Midway-Y-Unit] the output frame's own parameters, taken at its
+    // start (lines_out, f_lat, period_out and hs_w_out change at the native
+    // VSync, 23 lines into the running output frame)
+    reg  [9:0]  run_lines, run_lnat;
+    reg  [21:0] run_flat, run_period;
+    reg  [11:0] run_hsw;
+    initial begin run_lines = 10'd264; run_lnat = 10'd264; run_flat = 22'd811008; run_period = 22'd3072; run_hsw = 12'd256; end
+
+    // [Arcade-Midway-Y-Unit] Switching the PVM engine's output in and out.
+    // Its output frames run START_LINES (23) native lines behind the native
+    // ones, from a native line start, so:
+    //  - in: at the first output frame's start (frame_go). The native VSync
+    //    of that frame is kept off the output (vs_hold), so the monitor sees
+    //    one frame 23 lines long instead of a 23-line one, and HSync goes on;
+    //    those 23 native lines are sent blank (the engine sends them again).
+    //  - out: at a native VSync, once V-Size has slewed back to 0 and the
+    //    running output frame has the native line count (its lines then
+    //    start with the native ones): one frame 23 lines short, HSync goes
+    //    on. Until then the engine keeps running (engine_on with pvm_sel).
+    // Without this, HSync stopped for the 23 lines before the first output
+    // frame, and switching back cut an output line short or long.
+    wire pvm_out = vs_rise && pvm_sel && !vsize_req && out_running && (run_lines == lines_nat);
+
     wire [5:0] rl_next = (rl == RING_LINES-1) ? 6'd0 : rl + 1'd1;
 
     // line tick: first at output-frame start, then every f_lat/lines_out clk
-    wire        frame_go  = (start_cnt == START_LINES) && hs_rise && engine_on;
-    wire [22:0] bres_sum  = {1'b0, bres_acc} + {13'd0, lines_out};
-    wire        line_tick = out_running && (bres_sum >= {1'b0, f_lat});
+    wire        frame_go  = (start_cnt == START_LINES) && hs_rise && engine_on && (pvm_sel || vs_hold);
+    wire [22:0] bres_sum  = {1'b0, bres_acc} + {13'd0, run_lines};
+    wire        line_tick = out_running && (bres_sum >= {1'b0, run_flat});
 
     always @(posedge clk) begin
         if (vs_rise)      start_cnt <= 0;
@@ -401,20 +469,39 @@ module crt_vsize #(
             bres_acc    <= 0;
             out_line    <= 0;
             rl          <= frame0_slot;
+            run_lines   <= lines_out;
+            run_lnat    <= lines_nat;
+            run_flat    <= f_lat;
+            run_period  <= period_out;
+            run_hsw     <= hs_w_out;
         end else if (out_running) begin
-            bres_acc <= line_tick ? (bres_sum - {1'b0, f_lat}) : bres_sum[21:0];
+            bres_acc <= line_tick ? (bres_sum - {1'b0, run_flat}) : bres_sum[21:0];
             if (line_tick) begin
-                if (out_line == lines_out - 1'd1) out_running <= 0;
+                if (out_line == run_lines - 1'd1) out_running <= 0;
                 else begin
                     out_line <= out_line + 1'd1;
                     rl       <= rl_next;
                 end
             end
         end
-        if (~engine_on) out_running <= 0;
+        if (~engine_on || pvm_out) out_running <= 0;
     end
 
-    wire line_start = frame_go || (line_tick && out_running && (out_line != lines_out - 1'd1));
+    always @(posedge clk) begin
+        if (~eng_base) begin
+            pvm_sel <= 0;
+            vs_hold <= 0;
+        end else begin
+            if (vs_rise) vs_hold <= vsize_req && !pvm_sel;
+            if (pvm_out) pvm_sel <= 0;
+            if (frame_go) begin
+                pvm_sel <= 1;
+                vs_hold <= 0;
+            end
+        end
+    end
+
+    wire line_start = frame_go || (line_tick && out_running && (out_line != run_lines - 1'd1));
 
     // [Arcade-Midway-Y-Unit] An output frame longer than the native one
     // (vsize > 0, smaller picture) runs past the native frame's last line;
@@ -422,7 +509,7 @@ module crt_vsize #(
     // reach its picture (more extra lines than blank lines above the
     // picture) the top of the picture was repeated under the bottom, just
     // before VSync. Lines past the native frame are sent blank.
-    wire o_blank_next = ~frame_go && ((out_line + 1'd1) >= lines_nat);
+    wire o_blank_next = ~frame_go && ((out_line + 1'd1) >= run_lnat);
 
     // ------------------------------------------------------------------
     //  Per-output-line state: DE window placement + pixel replay
@@ -442,8 +529,8 @@ module crt_vsize #(
     // clamp: if the native DE offset does not fit in the shortened line,
     // pull the window left leaving FRONT_MIN of front porch
     wire [21:0] need_end   = {10'd0, de_start_nat} + {7'd0, o_active_cyc} + FRONT_MIN;
-    wire [21:0] clamp_left = period_out - {7'd0, o_active_cyc} - FRONT_MIN;
-    wire [11:0] de_floor   = hs_w_out + 12'd16;
+    wire [21:0] clamp_left = run_period - {7'd0, o_active_cyc} - FRONT_MIN;
+    wire [11:0] de_floor   = run_hsw + 12'd16;
 
     // RAM read: porta unica condivisa (PVM: rd_addr / Cabinet: rd_addr_t).
     // Il mux di selezione viene REGISTRATO in rd_addr_m PRIMA di indicizzare
@@ -492,7 +579,7 @@ module crt_vsize #(
         if (o_cline == 22'd4)
             // clamp con pavimento: la finestra DE mai prima della fine
             // dell'impulso HSync (adattivo) + un margine di back porch
-            o_de_start <= (need_end <= period_out) ? de_start_nat
+            o_de_start <= (need_end <= run_period) ? de_start_nat
                         : (clamp_left > {10'd0, de_floor}) ? clamp_left[11:0] : de_floor;
 
         // pixel replay on the CE grid
@@ -762,10 +849,10 @@ module crt_vsize #(
                 if (t_out_v) {r_out, g_out, b_out} <= t_out;
                 else         {r_out, g_out, b_out} <= 24'd0;
             end
-        end else if (engine_on) begin
+        end else if (pvm_sel) begin
             // PVM: retimed line structure, pixels on the p_nat CE grid
             ce_out <= out_running && (o_ce_cnt == 0);
-            hs_out <= out_running && (o_cline <= {10'd0, hs_w_out});
+            hs_out <= out_running && (o_cline <= {10'd0, run_hsw});
             vs_out <= o_vs;
             vb_out <= o_vb;
             if (o_ce_cnt == 0) begin
@@ -778,7 +865,14 @@ module crt_vsize #(
             ce_out <= pxl_cen;
             if (pxl_cen) begin
                 r_out <= r_q;  g_out <= g_q;  b_out <= b_q;
-                hs_out <= hs_q; vs_out <= vs_q; de_out <= de_q; vb_out <= vb_q;
+                hs_out <= hs_q; vs_out <= vs_q & ~vs_hold; de_out <= de_q; vb_out <= vb_q;
+                // [Arcade-Midway-Y-Unit] while the engine's first output frame
+                // is awaited the native lines are blank: they are that frame's
+                // top lines, sent again by the engine after its VSync
+                if (vs_hold) begin
+                    r_out <= 8'd0; g_out <= 8'd0; b_out <= 8'd0;
+                    de_out <= 1'b0; vb_out <= 1'b1;
+                end
             end
         end
     end
