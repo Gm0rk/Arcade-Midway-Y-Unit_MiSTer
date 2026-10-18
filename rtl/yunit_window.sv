@@ -6,8 +6,10 @@
 //  "Passwords" on (Total Carnage), this draws that page over the picture:
 //  the game's title screen, dimmed, and on it a grid of 56 x 30 characters
 //  (7 x 8 dots each, the MiSTer OSD's font), centred in the 400 x 254
-//  picture. Pages 0 and 1 are the Move List (four fighters, then three, as
-//  in the T-Unit core), page 2 the Passwords. tools/yunit_window.py writes
+//  picture (Mortal Kombat; on Total Carnage's 256 lines the window starts a
+//  line lower, the background's first and last rows shown twice). Pages 0
+//  and 1 are the Move List (four fighters, then three, as in the T-Unit
+//  core), page 2 the Passwords. tools/yunit_window.py writes
 //  the pages and the two backgrounds as ROM images. A row is a list of
 //  segments, runs of text in one colour at a column:
 //
@@ -121,8 +123,9 @@ end
 // the picture ends a line.
 //----------------------------------------------------------------------------
 
-reg        hb_q;
+reg        hb_q, vb_q;
 reg  [8:0] y;                    // the line of the picture
+reg  [8:0] yoff;                  // (lines in the last picture - 254) / 2: the window's first line
 reg  [8:0] dx;                   // the dot of the line
 reg  [2:0] px;                   // the dot in the cell
 reg  [6:0] cx;                   // the cell (negative before the grid)
@@ -134,6 +137,9 @@ always @(posedge clk) begin
 	cell_start <= 1'b0;
 	if (ce_pix) begin
 		hb_q <= hb_in;
+		vb_q <= vb_in;
+		if (vb_in & ~vb_q)
+			yoff  <= (y > 9'(2 * BG_H)) ? (y - 9'(2 * BG_H)) >> 1 : 9'd0;
 		if (vb_in)
 			y <= 9'd0;
 		else if (hb_in & ~hb_q)
@@ -155,10 +161,11 @@ always @(posedge clk) begin
 	end
 end
 
-wire [8:0] gy  = y - 9'(Y0);
+wire [8:0] wy  = y - yoff;        // the line in the window (negative above it)
+wire [8:0] gy  = wy - 9'(Y0);
 wire [4:0] row = gy[7:3];
 wire [2:0] ly  = gy[2:0];
-wire       row_ok = (y >= 9'(Y0)) && (gy < 9'(ROWS * CH));
+wire       row_ok = (wy >= 9'(Y0)) && (gy < 9'(ROWS * CH));
 
 //----------------------------------------------------------------------------
 // Fetch the next cell. At a line's end its row's first segment is read; for
@@ -257,7 +264,7 @@ reg [23:0] nx_bg, cur_bg;
 
 always @(posedge clk) begin
 	bg_q1   <= bg;
-	by      <= (y[7:1] < 7'(BG_H)) ? y[7:1] : 7'(BG_H - 1);
+	by      <= wy[8] ? 7'd0 : (wy[7:1] < 7'(BG_H)) ? wy[7:1] : 7'(BG_H - 1);
 	bx      <= (nx_dx[8:1] < 8'(BG_W)) ? nx_dx[8:1] : 8'(BG_W - 1);
 	by_base <= {2'b0, by, 7'd0} + {3'b0, by, 6'd0} + {6'd0, by, 3'd0} +    // y / 2 x 200
 	           (bg_q1 ? 16'(BG_W * BG_H) : 16'd0);
