@@ -9,6 +9,15 @@
 | Players | 2 |
 | Sound | CVSD board |
 
+## Extra content
+
+Smash T.V. has no game-specific OSD items.
+
+- **Fire from buttons or the right stick**: B1-B4 fire up, down, left and right (two together fire diagonally), or the right analog stick fires in the direction it points.
+- **Coin 3** on the third controller's Coin button.
+
+The [core-wide extras](ExtraContent.md#core-wide-features) (CRT Adjust, CRT V-Size, Video Timing, DIP Switches, Service Mode and the rest) apply to every game.
+
 ## Controls
 
 Smash T.V. is a twin-stick game: one stick moves, the other fires.

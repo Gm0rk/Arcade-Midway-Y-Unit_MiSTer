@@ -9,6 +9,16 @@
 | Players | 2 |
 | Sound | CVSD board |
 
+## Extra content
+
+Strike Force has no game-specific OSD items.
+
+- **Short DIP labels**: Coin A's two-step settings are written short ("1C/1C - 2C/3C") and "Points for Extra Ship" is "Extra Ship Points", so the value fits on the DIP menu line.
+- **Coins 3 and 4** on the third and fourth controllers' Coin buttons.
+- **Saurian Front** (the prototype v5.0) has its own MRA among the alternatives.
+
+The [core-wide extras](ExtraContent.md#core-wide-features) (CRT Adjust, CRT V-Size, Video Timing, DIP Switches, Service Mode and the rest) apply to every game.
+
 ## Controls
 
 | Input | Use |

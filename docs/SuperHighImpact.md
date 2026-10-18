@@ -9,6 +9,14 @@
 | Players | 4 (or 2 with the Players DIP switch) |
 | Sound | CVSD board |
 
+## Extra content
+
+- **[Octopus Bookkeeping shortcut](#hidden-developer-menu-octopus-bookkeeping)** (Hidden Items, revisions LA2 and LA1): the core plays the 27-press code for you, in about 3 seconds. The game accepts it only while attract mode shows HIGHEST PAID SUPERSTARS, so the core says "Not now" at any other time instead of spoiling the code. The prototypes have no menu and the message says so.
+- **Readable Coinage menu**: the USA settings, so all six can be reached from the OSD, written short.
+- **Coins 3 and 4** on the third and fourth controllers' Coin buttons.
+
+The [core-wide extras](ExtraContent.md#core-wide-features) (CRT Adjust, CRT V-Size, Video Timing, DIP Switches, Service Mode and the rest) apply to every game.
+
 ## Controls
 
 | Input | Use |

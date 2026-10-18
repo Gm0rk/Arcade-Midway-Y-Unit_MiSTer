@@ -9,6 +9,14 @@
 | Players | 4 (or 2 with the Players DIP switch) |
 | Sound | CVSD board |
 
+## Extra content
+
+- **[Octopus Bookkeeping shortcut](#hidden-developer-menu-octopus-bookkeeping)** (Hidden Items, revisions LA1-LA5): the core plays the two switch combinations for you, in about 4 seconds, any time in attract mode. A message reports "code entered", "Not now: the code works in the attract mode", "Code not taken: try again" or "Not in this revision of the game" (the prototype has no menu). It follows the Players DIP switch (4 or 2 players).
+- **Readable Coinage menu**: Coinage lists the USA settings so every one can be reached from the OSD, written short, for example "2C/1C - 4C/3C".
+- **Coins 3 and 4** on the third and fourth controllers' Coin buttons.
+
+The [core-wide extras](ExtraContent.md#core-wide-features) (CRT Adjust, CRT V-Size, Video Timing, DIP Switches, Service Mode and the rest) apply to every game.
+
 ## Controls
 
 | Input | Use |

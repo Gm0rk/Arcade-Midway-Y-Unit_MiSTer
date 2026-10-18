@@ -9,6 +9,16 @@
 | Players | 4 |
 | Sound | CVSD board |
 
+## Extra content
+
+Trog has no game-specific OSD items.
+
+- **4-way stick filter**: on a diagonal the direction pressed last wins, like the cabinet's 4-way joysticks.
+- **Prototype rev 4.00** (trogpa4) has its own MRA, with an 8-way stick and a Bone button in place of Punch.
+- **Four players**, with coin 3 on the third controller's Coin button.
+
+The [core-wide extras](ExtraContent.md#core-wide-features) (CRT Adjust, CRT V-Size, Video Timing, DIP Switches, Service Mode and the rest) apply to every game.
+
 ## Controls
 
 | Input | Use |

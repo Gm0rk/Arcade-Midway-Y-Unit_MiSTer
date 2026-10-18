@@ -9,6 +9,17 @@
 | Players | 2 |
 | Sound | ADPCM board |
 
+## Extra content
+
+Terminator 2 gets its gun controls as [OSD entries](#osd) in the DIP Switches menu.
+
+- **Gun Control**: Joystick or Mouse for player 1.
+- **Crosshair**: Off or On.
+- **Aiming**: each player's gun is aimed with the left analog stick (it points directly) or the d-pad (it moves the sight); player 1 can also use the mouse.
+- **Coins 3 and 4** on the third and fourth controllers' Coin buttons.
+
+The [core-wide extras](ExtraContent.md#core-wide-features) (CRT Adjust, CRT V-Size, Video Timing, DIP Switches, Service Mode and the rest) apply to every game.
+
 ## Controls
 
 Terminator 2 is a gun game; each player's gun is aimed with the left analog

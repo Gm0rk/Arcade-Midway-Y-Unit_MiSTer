@@ -9,6 +9,15 @@
 | Players | 2 |
 | Sound | ADPCM board |
 
+## Extra content
+
+- **[Passwords](#passwords)** (main page, Off or On): a window over the game, on Total Carnage's own title screen, with how to enter a warp code at the PASSWORD REQUIRED disc, the 16 codes by mission with where each warps to, and the Weasel and Orcus warp bonuses. The game waits while it shows.
+- **Twin-stick fire** from B1-B4 (two together fire diagonally) or the right analog stick.
+- **Start/Bomb**: Start also throws a bomb in a game.
+- **Coin 3** on the third controller's Coin button.
+
+The [core-wide extras](ExtraContent.md#core-wide-features) (CRT Adjust, CRT V-Size, Video Timing, DIP Switches, Service Mode and the rest) apply to every game.
+
 ## Controls
 
 Total Carnage is a twin-stick game: one stick moves, the other fires.

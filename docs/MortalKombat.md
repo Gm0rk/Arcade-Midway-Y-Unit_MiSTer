@@ -9,6 +9,19 @@
 | Players | 2 |
 | Sound | ADPCM board |
 
+## Extra content
+
+Mortal Kombat has the most extras: four OSD features and its own button layout.
+
+- **[Finishing Moves](#finishing-moves)** (main page): pick a fighter's fatality or The Pit, and the core enters it on the round winner's controls at the next FINISH HIM, for either player. The distance is measured the way the game does it, from the fighters' centres. Messages say when the fighter is too far or too close, the move waits for another fighter's FINISH HIM, FINISH HIM is over, the move was not taken, or it was cleared. **Clear the set move** drops it.
+- **[Move List](#move-list)** (Off, Page 1, Page 2): a reference window over the dimmed title screen with each fighter's special moves, fatality and the distance it needs, and The Pit in the footer. The game waits while a page shows.
+- **[EJB Menu shortcut](#hidden-developer-menu-ejb-menu)** (Hidden Items, every revision except prototype 4.0): plays the 27-press code on the two Block buttons in about 3 seconds, for diagnostics, audits, enter initials and character endings. Start 1 and 2 are held released while it plays so a Start press cannot spoil it. Messages report the result.
+- **[Reptile on demand](#reptile)** (Hidden Items, rev 3.0, rev 4.0 and the Turbo hacks): Reptile Fight Next, Moon Silhouettes Always and Reptile Hints Always. The core changes a few of the game's instructions as the CPU fetches them; nothing is written to the ROM or the CMOS.
+- **Button layout**: High Punch, Low Punch, High Kick, Low Kick, Block, then Start, Coin, Test, Pause. The board's second Block input stays unused, as the cabinet has one block button per player.
+- **Coin 3** on the third controller's Coin button.
+
+The [core-wide extras](ExtraContent.md#core-wide-features) (CRT Adjust, CRT V-Size, Video Timing, DIP Switches, Service Mode and the rest) apply to every game.
+
 ## Controls
 
 | Input | Use |
