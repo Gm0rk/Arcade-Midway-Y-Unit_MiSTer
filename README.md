@@ -21,6 +21,7 @@ Mortal Kombat and Terminator 2.
 - [ROMs](#roms)
 - [Credits and references](#credits-and-references)
 - [License](#license)
+- [Extra content](docs/ExtraContent.md)
 - [Test plan](docs/TestPlan.md)
 
 ## Hardware
@@ -38,7 +39,8 @@ Mortal Kombat and Terminator 2.
 ## Games
 
 Each game has its own page in [`docs`](docs) with its revisions, controls and
-game-specific features.
+game-specific features. Everything the core adds, core-wide and per game, is
+listed in [Extra content](docs/ExtraContent.md).
 
 | Game | Main set | Players | Sound | Status |
 |---|---|---|---|---|
