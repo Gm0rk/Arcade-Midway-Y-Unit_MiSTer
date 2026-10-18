@@ -77,7 +77,8 @@ hacks are in the `_alternatives` folder of the MRAs.
 
   The middle of the picture moves as it resizes; recentre it with V-Shift.
   Changes are applied a line per frame. With the 57 Hz / 60 Hz Video Timing
-  there is little room around the picture, so a taller one is cut. On HDMI,
+  there is little room around the picture, so "+" goes only as far as the
+  whole picture still fits (at 60 Hz hardly at all). On HDMI,
   PVM leaves the picture untouched and Cabinet shows the resized picture
 - Video Timing: the board's own 54.7 Hz, or 57 Hz / 60 Hz frames for TVs
   that do not hold 54.7 Hz. Only blank lines are dropped, so the whole
