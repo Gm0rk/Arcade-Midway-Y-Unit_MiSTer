@@ -334,7 +334,18 @@ pia6821 pia
 	.irqb    (pia_irqb)
 );
 
+// YM2151 writes. jt51 stores a write on any clock but raises its busy flag
+// only on a clock with its own clock enable (fm_cen_p1, one in about 54
+// clk), so a one-clk strobe almost never set busy. The sound programs poll
+// busy before every write; with it never set, a fast loop (the all-channels
+// key-off at sound stop / music change: one write per 9 us) wrote faster than
+// jt51 applies key-on changes (each waits for its channel's slot, 17.9 us a
+// round) and about half the operators stayed keyed on. The write is now
+// held, with its address bit and data, until a fm_cen_p1 clock takes it, and
+// the status read shows busy from the write on, as the real chip does.
 reg        ym_wr;
+reg        ym_a0;
+reg  [7:0] ym_din;
 wire [7:0] ym_dout;
 wire signed [15:0] ym_l, ym_r;
 
@@ -351,8 +362,8 @@ jt51 ym
 	.cen_p1  (fm_cen_p1),
 	.cs_n    (~ym_wr),
 	.wr_n    (~ym_wr),
-	.a0      (cpu_addr[0]),
-	.din     (cpu_dout),
+	.a0      (ym_a0),
+	.din     (ym_din),
 	.dout    (ym_dout),
 	.ct1     (),
 	.ct2     (),
@@ -423,7 +434,8 @@ wire       din_take = !din_ok && mem_ready && (ecnt > A_SETTLE) &&
 always @(posedge clk) begin
 	pia_rd     <= 1'b0;
 	pia_wr     <= 1'b0;
-	ym_wr      <= 1'b0;
+	if (fm_cen_p1)
+		ym_wr  <= 1'b0;                  // jt51 has taken the write on this clock
 	ram_we     <= 1'b0;
 	pram_we    <= 1'b0;
 	oki_wr     <= 1'b0;
@@ -432,6 +444,7 @@ always @(posedge clk) begin
 	cmd_read   <= 1'b0;
 
 	if (reset) begin
+		ym_wr       <= 1'b0;
 		rom_pending <= 1'b0;
 		mem_ready   <= 1'b1;
 		din_ok      <= 1'b0;
@@ -482,7 +495,11 @@ always @(posedge clk) begin
 				end
 				else if (a_ram)
 					ram_we <= 1'b1;
-				if (a_ym)    ym_wr  <= 1'b1;
+				if (a_ym) begin
+					ym_wr  <= 1'b1;
+					ym_a0  <= cpu_addr[0];
+					ym_din <= cpu_dout;
+				end
 				if (a_pia)   pia_wr <= 1'b1;
 				if (a_oki)   oki_wr <= 1'b1;
 				if (a_dac)   dac    <= cpu_dout;
@@ -517,7 +534,7 @@ always @(*) begin
 	else if (a_ram)
 		cpu_din = ram_q;
 	else if (a_ym)
-		cpu_din = ym_dout;
+		cpu_din = {ym_dout[7] | (ym_wr & ym_a0), ym_dout[6:0]};   // busy from a data write on
 	else if (a_pia)
 		cpu_din = pia_dout;
 	else if (a_oki)
