@@ -584,6 +584,8 @@ always @(*) begin
 	if (sec_active) begin
 		in0 = sec_in0;
 		if (cfg_layout == L_MK) begin
+			in1[2]    = 1'b0;                 // start 1
+			in1[5]    = 1'b0;                 // start 2
 			in1[13:9] = 5'd0;
 			in1[15]   = 1'b0;
 		end
