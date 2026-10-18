@@ -71,7 +71,7 @@ module tms34010
 	output            vblank,
 	output      [9:0] hcount,       // in VCLK units
 	output      [9:0] vcount,
-	output      [9:0] heblnk,       // active window, VCLK units
+	output      [9:0] heblnk,       // screen window (hblank), VCLK units
 	output      [9:0] hsblnk,
 	output      [9:0] vsblnk,       // first line after the picture
 	output            disp_en,      // DPYCTL.ENV
@@ -79,6 +79,8 @@ module tms34010
 	output reg        line_vis,     // that line is inside VEBLNK..VSBLNK
 	output reg [11:0] line_row,     // display row address for this line
 	output reg [13:0] line_col,     // display column address for this line
+	output reg  [9:0] line_heblnk,  // HEBLNK/HSBLNK when this line started
+	output reg  [9:0] line_hsblnk,
 
 	// debug / verification
 	output     [31:0] dbg_pc,
@@ -616,19 +618,28 @@ tms34010_gfx gfx
 // Until the game programs sane timing (at power-up and in reset all registers
 // are zero) the generator runs the Y Unit's usual 506x289 raster so the
 // display stays locked; it keeps counting while the CPU is held in reset.
+//
+// Games write HEBLNK/HSBLNK during the picture for effects: Total Carnage's
+// high score wave sets HEBLNK on every line, from HSBLNK-1 or HSBLNK (nothing
+// shown) back down to the normal value. As MAME does, the screen window
+// (hblank) stays put and only takes new HEBLNK/HSBLNK values that are valid
+// and have been left alone for a few frames (any timing change other than
+// HEBLNK/HSBLNK takes them at once). Each line is drawn from the
+// HEBLNK/HSBLNK in effect when it starts (line_heblnk/line_hsblnk), so a write
+// after VCOUNT reads n changes line n+1, as in MAME.
 //----------------------------------------------------------------------------
 
 reg   [9:0] hcnt, vcnt;
 
 // The timing values are registered (two stages): they only change through
 // I/O writes, and the beam logic that compares against them stays shallow.
-reg         tim_ok;
+reg         tim_ok, t_hok;
 reg   [9:0] t_htotal, t_hesync, t_heblnk, t_hsblnk;
 reg   [9:0] t_vtotal, t_vesync, t_veblnk, t_vsblnk;
 always @(posedge clk) if (ce) begin
 	tim_ok   <= (ioreg[R_HTOTAL] > 16'd100) && (ioreg[R_HTOTAL] < 16'd1000) &&
 	            (ioreg[R_VTOTAL] > 16'd100) && (ioreg[R_VTOTAL] < 16'd1000) &&
-	            (ioreg[R_VSBLNK] > ioreg[R_VEBLNK]) && (ioreg[R_HSBLNK] > ioreg[R_HEBLNK]);
+	            (ioreg[R_VSBLNK] > ioreg[R_VEBLNK]);
 	t_htotal <= tim_ok ? ioreg[R_HTOTAL][9:0] : 10'd252;
 	t_hesync <= tim_ok ? ioreg[R_HESYNC][9:0] : 10'd18;
 	t_heblnk <= tim_ok ? ioreg[R_HEBLNK][9:0] : 10'd45;
@@ -637,16 +648,24 @@ always @(posedge clk) if (ce) begin
 	t_vesync <= tim_ok ? ioreg[R_VESYNC][9:0] : 10'd3;
 	t_veblnk <= tim_ok ? ioreg[R_VEBLNK][9:0] : 10'd20;
 	t_vsblnk <= tim_ok ? ioreg[R_VSBLNK][9:0] : 10'd276;
+	// a usable window: it starts before it ends and ends inside the line
+	t_hok    <= (ioreg[R_HSBLNK] > ioreg[R_HEBLNK]) && (ioreg[R_HSBLNK] <= ioreg[R_HTOTAL] + 16'd1);
 end
+
+// Screen window (see above): taken with a new raster, else after 3 steady frames
+reg   [9:0] w_heblnk, w_hsblnk;      // hblank window
+reg   [1:0] w_stable;                // frames HEBLNK/HSBLNK have held (saturates at 3)
+reg  [39:0] w_vkey;                  // the rest of the timing the window was taken with
+wire [39:0] t_vkey = {t_htotal, t_vtotal, t_veblnk, t_vsblnk};
 
 assign hcount  = hcnt;
 assign vcount  = vcnt;
-assign heblnk  = t_heblnk;
-assign hsblnk  = t_hsblnk;
+assign heblnk  = w_heblnk;
+assign hsblnk  = w_hsblnk;
 assign vsblnk  = t_vsblnk;
 assign hsync   = (hcnt < t_hesync);
 assign vsync   = (vcnt < t_vesync);
-assign hblank  = (hcnt < t_heblnk) | (hcnt >= t_hsblnk);
+assign hblank  = (hcnt < w_heblnk) | (hcnt >= w_hsblnk);
 assign vblank  = (vcnt < t_veblnk) | (vcnt >= t_vsblnk);
 assign disp_en = r_dpyctl[15];
 
@@ -755,6 +774,12 @@ always @(posedge clk) if (ce) begin
 		drop_left  <= 10'd0;
 		refcnt     <= 20'd0;
 		line_vis   <= 1'b0;
+		w_heblnk   <= 10'd45;
+		w_hsblnk   <= 10'd250;
+		w_stable   <= 2'd0;
+		w_vkey     <= 40'd0;
+		line_heblnk <= 10'd45;
+		line_hsblnk <= 10'd250;
 	end
 	else begin
 		if (ce_cyc)
@@ -776,6 +801,25 @@ always @(posedge clk) if (ce) begin
 
 			line_start <= 1'b1;
 			line_vis   <= ({6'd0, vcnt_new} >= ioreg[R_VEBLNK]) && ({6'd0, vcnt_new} < ioreg[R_VSBLNK]);
+			line_heblnk <= t_heblnk;
+			line_hsblnk <= t_hsblnk;
+
+			// the screen window: with a new raster at once (the next line),
+			// otherwise at the start of a frame once HEBLNK/HSBLNK have held
+			if (!tim_ok) begin
+				w_heblnk <= 10'd45;
+				w_hsblnk <= 10'd250;
+				w_vkey   <= 40'd0;
+			end
+			else if (t_hok) begin
+				if ((w_vkey != t_vkey) || ((vcnt_new == 10'd0) && (w_stable == 2'd3))) begin
+					w_heblnk <= t_heblnk;
+					w_hsblnk <= t_hsblnk;
+					w_vkey   <= t_vkey;
+				end
+				if ((vcnt_new == 10'd0) && (w_stable != 2'd3))
+					w_stable <= w_stable + 2'd1;
+			end
 
 			if ({6'd0, vcnt_new} == ioreg[R_VSBLNK]) begin
 				ioreg[R_DPYADR] <= ioreg[R_DPYSTRT];
@@ -783,7 +827,8 @@ always @(posedge clk) if (ce) begin
 			end
 			else begin
 				line_row <= dpyadr_vis[15:4];
-				line_col <= {dpyadr_vis[6:2], 4'd0, 5'd0} | ioreg[R_DPYTAP][13:0];
+				// MAME: ((dpyadr & 0x7c) << 4) | DPYTAP (DPYADR bits 6:2 at column bits 10:6)
+				line_col <= {3'd0, dpyadr_vis[6:2], 6'd0} | ioreg[R_DPYTAP][13:0];
 				if (({6'd0, vcnt_new} >= ioreg[R_VEBLNK]) && ({6'd0, vcnt_new} < ioreg[R_VSBLNK])) begin
 					// step to the next display line by DUDATE
 					if (dpyadr_cur[1:0] == 2'b00)
@@ -795,8 +840,11 @@ always @(posedge clk) if (ce) begin
 		end
 
 		// ---- sequencer side effects ----
+		// bit by bit, so a display interrupt raised at this clock's line
+		// start (above) is not overwritten by the old INTPEND value
 		if (seq_set_intpend)
-			ioreg[R_INTPEND] <= ioreg[R_INTPEND] | seq_intpend_or;
+			for (k = 0; k < 16; k = k + 1)
+				if (seq_intpend_or[k]) ioreg[R_INTPEND][k] <= 1'b1;
 		if (seq_nmi_ack)
 			ioreg[R_HSTCTLH][8] <= 1'b0;
 
@@ -828,6 +876,9 @@ always @(posedge clk) if (ce) begin
 				default:
 					ioreg[io_wr_idx] <= io_wr_data;
 			endcase
+			// a new HEBLNK/HSBLNK value restarts the window's wait
+			if (((io_wr_idx == R_HEBLNK) || (io_wr_idx == R_HSBLNK)) && (io_wr_data != ioreg[io_wr_idx]))
+				w_stable <= 2'd0;
 		end
 	end
 end
