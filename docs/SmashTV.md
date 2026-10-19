@@ -2,6 +2,8 @@
 
 [Back to the main README](../README.md)
 
+<img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Smash_TV.png" width="400" alt="Smash T.V. title screen"> <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Smash_TV_2.png" width="400" alt="Smash T.V. gameplay">
+
 | | |
 |---|---|
 | Sets | smashtv (rev 8.00, main MRA); rev 6.00, 5.00, 4.00, 3.01 |
