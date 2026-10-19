@@ -43,7 +43,7 @@ game-specific features. Everything the core adds, core-wide and per game, is
 listed in [Extra content](docs/ExtraContent.md).
 
 | Game | Main set | Players | Sound | Status |
-|---|---|---|---|---|
+|---|---|---|---|---|---|---|
 | [High Impact Football](docs/HighImpactFootball.md) | hiimpact (rev LA5) | 4 | CVSD | Awaiting hardware test | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/High_Impact_Football.png" width="100"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/High_Impact_Football2.png" width="100">|
 | [Mortal Kombat](docs/MortalKombat.md) | mkla4 (rev 4.0) | 2 | ADPCM | Awaiting hardware test | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Mortal_Kombat.png" width="100">|<img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Mortal_Kombat_2.png" width="100"> |
 | [Smash T.V.](docs/SmashTV.md) | smashtv (rev 8.00) | 2 | CVSD | Awaiting hardware test | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Smash_TV.png" width="100"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Smash_TV_2.png" width="100"> |
