@@ -26,7 +26,7 @@ Core tested (rbf date): ____________
 | [High Impact Football](#high-impact-football) | 13 | 2 / 13 passed |
 | [Super High Impact](#super-high-impact) | 13 | 2 / 13 passed |
 | [Strike Force](#strike-force) | 11 | 1 / 11 passed |
-| [Mortal Kombat](#mortal-kombat) | 29 | 2 / 29 passed |
+| [Mortal Kombat](#mortal-kombat) | 29 | 10 / 29 passed |
 | [Terminator 2 - Judgment Day](#terminator-2---judgment-day) | 13 | 1 / 13 passed |
 | [Total Carnage](#total-carnage) | 13 | 2 / 13 passed |
 | [Y-Unit Test ROM](#y-unit-test-rom) | 3 | 1 / 3 passed |
@@ -171,14 +171,14 @@ Main MRA: Mortal Kombat (rev 4.0). [Controls, move list, finishing moves, hidden
 | # | Test | Expected | Result | Notes |
 |---|---|---|---|---|
 | MK-01 | Boot | Attract mode: title, bios, demo fight | Pass | |
-| MK-02 | Coin and Start for players 1-2; coin 3 | Credits added, each player joins | | |
-| MK-03 | Controls of each player | 8-way stick; High Punch, Low Punch, High Kick, Low Kick, Block | | |
-| MK-04 | Play a match, 1 player vs the CPU and 2 players | Picture correct: fighters, backgrounds, blood | | |
-| MK-05 | Sound | Music, effects, voices ("Finish him", announcer) | | |
+| MK-02 | Coin and Start for players 1-2; coin 3 | Credits added, each player joins | Pass | |
+| MK-03 | Controls of each player | 8-way stick; High Punch, Low Punch, High Kick, Low Kick, Block | Pass | |
+| MK-04 | Play a match, 1 player vs the CPU and 2 players | Picture correct: fighters, backgrounds, blood | Pass | |
+| MK-05 | Sound | Music, effects, voices ("Finish him", announcer) | Pass | |
 | MK-06 | Set a high score / winning streak, open the OSD, reload | Kept, no CMOS error on boot | | |
 | MK-07 | Test menu: switch test, sound test | Every switch shows; sounds play | | |
 | MK-08 | Finishing Moves: Johnny Cage, Decapitation | Played at FINISH HIM; the fatality runs | | |
-| MK-09 | Kano, Heart Rip | As MK-08 | | |
+| MK-09 | Kano, Heart Rip | As MK-08 | Pass | |
 | MK-10 | Sub-Zero, Spine Rip | As MK-08 | | |
 | MK-11 | Sonya, Kiss of Death | As MK-08 | | |
 | MK-12 | Raiden, Electrocution | As MK-08 | | |
@@ -193,9 +193,9 @@ Main MRA: Mortal Kombat (rev 4.0). [Controls, move list, finishing moves, hidden
 | MK-21 | Hidden Items → EJB Menu in the attract mode | EJB Menu opens; message "EJB Menu: code entered" | | |
 | MK-22 | The same during a fight | Nothing is pressed; message "Not now: the code works in the attract mode" | | |
 | MK-23 | Each MRA in `_alternatives/_Mortal Kombat` | Boots to attract and plays; prototype 4.0's EJB Menu says "Not in this revision of the game" | Pass | |
-| MK-24 | Set Move List to a page during a fight, close the OSD, then set it Off | The fight waits behind the page and goes on where it was once Off | | |
-| MK-25 | Hidden Items → Reptile Fight Next, then win a match in a 1-player game | Message "Reptile fight set: win a match in a 1-player game"; after the win "YOU HAVE FOUND ME", then the fight with Reptile below The Pit | | |
-| MK-26 | Reptile Fight Next twice | Message "Reptile fight cleared"; the next win goes on as usual | | |
+| MK-24 | Set Move List to a page during a fight, close the OSD, then set it Off | The fight waits behind the page and goes on where it was once Off | Pass | |
+| MK-25 | Hidden Items → Reptile Fight Next, then win a match in a 1-player game | Message "Reptile fight set: win a match in a 1-player game"; after the win "YOU HAVE FOUND ME", then the fight with Reptile below The Pit | Pass | |
+| MK-26 | Reptile Fight Next twice | Message "Reptile fight cleared"; the next win goes on as usual | Pass | |
 | MK-27 | Moon Silhouettes Always On, play to The Pit | Silhouettes cross the moon in every round there | | |
 | MK-28 | Reptile Hints Always On, start a match | Reptile drops in with a hint before each round's "FIGHT!"; the EJB Menu's game audits are not cleared | | |
 | MK-29 | Hidden Items on rev 2.0 or a prototype | Only EJB Menu (no Reptile lines); on rev 3.0 and the Turbo hacks the Reptile lines show | | |
