@@ -2,6 +2,8 @@
 
 [Back to the main README](../README.md)
 
+<img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Mortal_Kombat.png" width="300" alt="Mortal Kombat title screen"> <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Mortal_Kombat_2.png" width="300" alt="Mortal Kombat gameplay">
+
 | | |
 |---|---|
 | Sets | mkla4 (rev 4.0, main MRA); rev 3.0, 2.0, 1.0; prototypes 9.0, 8.0, 4.0; Turbo 3.0 / 3.1 and Nifty Kombo / Nifty Kombo 666 hacks |
