@@ -45,7 +45,7 @@ listed in [Extra content](docs/ExtraContent.md).
 | Game | Main set | Status | Title Screen | Gameplay |
 |---|---|---|---|---|
 | [High Impact Football](docs/HighImpactFootball.md) | hiimpact (rev LA5) | Awaiting hardware test | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/High_Impact_Football.png" width="300" alt="High Impact Football title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/High_Impact_Football2.png" width="300" alt="High Impact Football gameplay"> |
-| [Mortal Kombat](docs/MortalKombat.md) | mkla4 (rev 4.0) | Awaiting hardware test | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Mortal_Kombat.png" width="300" alt="Mortal Kombat title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Mortal_Kombat_2.png" width="300" alt="Mortal Kombat gameplay"> |
+| [Mortal Kombat](docs/MortalKombat.md) | mkla4 (rev 4.0) | Verified | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Mortal_Kombat.png" width="300" alt="Mortal Kombat title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Mortal_Kombat_2.png" width="300" alt="Mortal Kombat gameplay"> |
 | [Smash T.V.](docs/SmashTV.md) | smashtv (rev 8.00) | Awaiting hardware test | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Smash_TV.png" width="300" alt="Smash T.V. title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Smash_TV_2.png" width="300" alt="Smash T.V. gameplay"> |
 | [Strike Force](docs/StrikeForce.md) | strkforc (rev 1) | Awaiting hardware test | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Strikeforce.png" width="300" alt="Strike Force title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Strikeforce_2.png" width="300" alt="Strike Force gameplay"> |
 | [Super High Impact](docs/SuperHighImpact.md) | shimpact (rev LA2) | Awaiting hardware test | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Super_High_Impact_Football.png" width="300" alt="Super High Impact title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Super_High_Impact_Football_2.png" width="300" alt="Super High Impact gameplay"> |
@@ -53,7 +53,7 @@ listed in [Extra content](docs/ExtraContent.md).
 | [Total Carnage](docs/TotalCarnage.md) | totcarn (rev LA1) | Awaiting hardware test | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Total_Carnage.png" width="300" alt="Total Carnage title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Total_Carnage_2.png" width="300" alt="Total Carnage gameplay"> |
 | [Trog](docs/Trog.md) | trog (rev LA5), prototype rev 4.00 | Verified | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Trog.png" width="300" alt="Trog title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Trog_2.png" width="300" alt="Trog gameplay"> |
 
-Verified on hardware: `[██░░░░░░░░░░░░░░░░░░]` 1 / 8
+Verified on hardware: `[█████░░░░░░░░░░░░░░░]` 2 / 8
 
 A game is verified when it passes every test of the
 [test plan](docs/TestPlan.md), which tracks the progress.
