@@ -4,6 +4,16 @@ What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's 
 
 Build numbers count the core's development builds in order. Released RBF files are named by date. Builds 1 to 12 were named Arcade-MidwayY.
 
+## Build 44 (2026-10-19)
+
+**Docs & tools**
+- TestPlan: hardware results for 30 more tests (78 of 135 passed, none failed). Mortal Kombat passes all 29 tests and is **Verified** (README status and progress bar: 2 / 8). Terminator 2 is at 12 of 13; only the mouse aiming test (T2-05) is still open.
+
+## Build 43 (2026-10-19)
+
+**Fixed**
+- Strike Force and Total Carnage: the power-up RAM test ran about 4 % slower than the real board (it lost cycles in a loop that reads video memory, for about 200 frames in Strike Force and 300 or more in Total Carnage), so the boot screens finished a little late. The CPU's read of video memory now fetches the next 64-bit beat as well and keeps it, so the second read of the pair no longer waits for DDR3. Nothing is lost any more (0 cycles over 300 frames in both games). The other six games were already keeping up; their frames and audio are unchanged.
+
 ## Build 42 (2026-10-19)
 
 **Docs & tools**
