@@ -27,7 +27,7 @@ Core tested (rbf date): ____________
 | [Super High Impact](#super-high-impact) | 13 | 2 / 13 passed |
 | [Strike Force](#strike-force) | 11 | 1 / 11 passed |
 | [Mortal Kombat](#mortal-kombat) | 29 | Pass |
-| [Terminator 2 - Judgment Day](#terminator-2---judgment-day) | 13 | 12 / 13 passed |
+| [Terminator 2 - Judgment Day](#terminator-2---judgment-day) | 13 | Pass |
 | [Total Carnage](#total-carnage) | 13 | 2 / 13 passed |
 | [Y-Unit Test ROM](#y-unit-test-rom) | 3 | Pass |
 
@@ -210,7 +210,7 @@ Main MRA: Terminator 2 - Judgment Day (rev LA4). [Controls and gun options](Term
 | T2-02 | Coin and Start for players 1-2; coins 3 and 4 | Credits added, each player joins | Pass | |
 | T2-03 | Aim with the left analog stick and shoot | The sight follows the stick across the whole screen; shots land where it points | Pass | |
 | T2-04 | Aim with the d-pad | The sight moves steadily | Pass | |
-| T2-05 | Gun Control "Mouse" (DIP Switches), aim player 1 with the mouse | The sight follows the mouse; left button fires, right throws a bomb | | |
+| T2-05 | Gun Control "Mouse" (DIP Switches), aim player 1 with the mouse | The sight follows the mouse; left button fires, right throws a bomb | Pass | |
 | T2-06 | Crosshair Off | The sight is hidden | Pass | |
 | T2-07 | Trigger and Bomb, both players | Fire and bomb work | Pass | |
 | T2-08 | Play the first level with 2 players | Picture correct; the game does not freeze | Pass | |
