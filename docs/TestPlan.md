@@ -26,8 +26,8 @@ Core tested (rbf date): ____________
 | [High Impact Football](#high-impact-football) | 13 | 2 / 13 passed |
 | [Super High Impact](#super-high-impact) | 13 | 2 / 13 passed |
 | [Strike Force](#strike-force) | 11 | 1 / 11 passed |
-| [Mortal Kombat](#mortal-kombat) | 29 | 10 / 29 passed |
-| [Terminator 2 - Judgment Day](#terminator-2---judgment-day) | 13 | 1 / 13 passed |
+| [Mortal Kombat](#mortal-kombat) | 29 | Pass |
+| [Terminator 2 - Judgment Day](#terminator-2---judgment-day) | 13 | 12 / 13 passed |
 | [Total Carnage](#total-carnage) | 13 | 2 / 13 passed |
 | [Y-Unit Test ROM](#y-unit-test-rom) | 3 | Pass |
 
@@ -175,30 +175,30 @@ Main MRA: Mortal Kombat (rev 4.0). [Controls, move list, finishing moves, hidden
 | MK-03 | Controls of each player | 8-way stick; High Punch, Low Punch, High Kick, Low Kick, Block | Pass | |
 | MK-04 | Play a match, 1 player vs the CPU and 2 players | Picture correct: fighters, backgrounds, blood | Pass | |
 | MK-05 | Sound | Music, effects, voices ("Finish him", announcer) | Pass | |
-| MK-06 | Set a high score / winning streak, open the OSD, reload | Kept, no CMOS error on boot | | |
-| MK-07 | Test menu: switch test, sound test | Every switch shows; sounds play | | |
-| MK-08 | Finishing Moves: Johnny Cage, Decapitation | Played at FINISH HIM; the fatality runs | | |
+| MK-06 | Set a high score / winning streak, open the OSD, reload | Kept, no CMOS error on boot | Pass | |
+| MK-07 | Test menu: switch test, sound test | Every switch shows; sounds play | Pass | |
+| MK-08 | Finishing Moves: Johnny Cage, Decapitation | Played at FINISH HIM; the fatality runs | Pass | |
 | MK-09 | Kano, Heart Rip | As MK-08 | Pass | |
-| MK-10 | Sub-Zero, Spine Rip | As MK-08 | | |
-| MK-11 | Sonya, Kiss of Death | As MK-08 | | |
-| MK-12 | Raiden, Electrocution | As MK-08 | | |
-| MK-13 | Liu Kang, Cartwheel | As MK-08 | | |
-| MK-14 | Scorpion, Fire Breath | As MK-08 | | |
-| MK-15 | The Pit, on The Pit stage | The loser falls into the pit | | |
-| MK-16 | A fatality with player 2 the winner | Played on player 2's controls | | |
-| MK-17 | Set a move before the match | Message "Finishing move set: it plays at the next FINISH HIM"; it plays at FINISH HIM | | |
-| MK-18 | Stand too far for Johnny Cage, then walk in | Message "Too far: step closer"; the move plays once close | | |
-| MK-19 | Clear the set move | Message "Finishing move cleared"; nothing plays | | |
-| MK-20 | Move List: Page 1, then Page 2 | Over the dimmed title screen, MOVE LIST 1/2 (Johnny Cage to Sonya) and 2/2 (Raiden to Scorpion): special moves, fatality with its distance, The Pit at the bottom; the text reads clearly | | |
-| MK-21 | Hidden Items → EJB Menu in the attract mode | EJB Menu opens; message "EJB Menu: code entered" | | |
-| MK-22 | The same during a fight | Nothing is pressed; message "Not now: the code works in the attract mode" | | |
+| MK-10 | Sub-Zero, Spine Rip | As MK-08 | Pass | |
+| MK-11 | Sonya, Kiss of Death | As MK-08 | Pass | |
+| MK-12 | Raiden, Electrocution | As MK-08 | Pass | |
+| MK-13 | Liu Kang, Cartwheel | As MK-08 | Pass | |
+| MK-14 | Scorpion, Fire Breath | As MK-08 | Pass | |
+| MK-15 | The Pit, on The Pit stage | The loser falls into the pit | Pass | |
+| MK-16 | A fatality with player 2 the winner | Played on player 2's controls | Pass | |
+| MK-17 | Set a move before the match | Message "Finishing move set: it plays at the next FINISH HIM"; it plays at FINISH HIM | Pass | |
+| MK-18 | Stand too far for Johnny Cage, then walk in | Message "Too far: step closer"; the move plays once close | Pass | |
+| MK-19 | Clear the set move | Message "Finishing move cleared"; nothing plays | Pass | |
+| MK-20 | Move List: Page 1, then Page 2 | Over the dimmed title screen, MOVE LIST 1/2 (Johnny Cage to Sonya) and 2/2 (Raiden to Scorpion): special moves, fatality with its distance, The Pit at the bottom; the text reads clearly | Pass | |
+| MK-21 | Hidden Items → EJB Menu in the attract mode | EJB Menu opens; message "EJB Menu: code entered" | Pass | |
+| MK-22 | The same during a fight | Nothing is pressed; message "Not now: the code works in the attract mode" | Pass | |
 | MK-23 | Each MRA in `_alternatives/_Mortal Kombat` | Boots to attract and plays; prototype 4.0's EJB Menu says "Not in this revision of the game" | Pass | |
 | MK-24 | Set Move List to a page during a fight, close the OSD, then set it Off | The fight waits behind the page and goes on where it was once Off | Pass | |
 | MK-25 | Hidden Items → Reptile Fight Next, then win a match in a 1-player game | Message "Reptile fight set: win a match in a 1-player game"; after the win "YOU HAVE FOUND ME", then the fight with Reptile below The Pit | Pass | |
 | MK-26 | Reptile Fight Next twice | Message "Reptile fight cleared"; the next win goes on as usual | Pass | |
-| MK-27 | Moon Silhouettes Always On, play to The Pit | Silhouettes cross the moon in every round there | | |
-| MK-28 | Reptile Hints Always On, start a match | Reptile drops in with a hint before each round's "FIGHT!"; the EJB Menu's game audits are not cleared | | |
-| MK-29 | Hidden Items on rev 2.0 or a prototype | Only EJB Menu (no Reptile lines); on rev 3.0 and the Turbo hacks the Reptile lines show | | |
+| MK-27 | Moon Silhouettes Always On, play to The Pit | Silhouettes cross the moon in every round there | Pass | |
+| MK-28 | Reptile Hints Always On, start a match | Reptile drops in with a hint before each round's "FIGHT!"; the EJB Menu's game audits are not cleared | Pass | |
+| MK-29 | Hidden Items on rev 2.0 or a prototype | Only EJB Menu (no Reptile lines); on rev 3.0 and the Turbo hacks the Reptile lines show | Pass | |
 
 ## Terminator 2 - Judgment Day
 
@@ -206,18 +206,18 @@ Main MRA: Terminator 2 - Judgment Day (rev LA4). [Controls and gun options](Term
 
 | # | Test | Expected | Result | Notes |
 |---|---|---|---|---|
-| T2-01 | Boot | Attract mode: title, demo, high scores | | |
-| T2-02 | Coin and Start for players 1-2; coins 3 and 4 | Credits added, each player joins | | |
-| T2-03 | Aim with the left analog stick and shoot | The sight follows the stick across the whole screen; shots land where it points | | |
-| T2-04 | Aim with the d-pad | The sight moves steadily | | |
+| T2-01 | Boot | Attract mode: title, demo, high scores | Pass | |
+| T2-02 | Coin and Start for players 1-2; coins 3 and 4 | Credits added, each player joins | Pass | |
+| T2-03 | Aim with the left analog stick and shoot | The sight follows the stick across the whole screen; shots land where it points | Pass | |
+| T2-04 | Aim with the d-pad | The sight moves steadily | Pass | |
 | T2-05 | Gun Control "Mouse" (DIP Switches), aim player 1 with the mouse | The sight follows the mouse; left button fires, right throws a bomb | | |
-| T2-06 | Crosshair Off | The sight is hidden | | |
-| T2-07 | Trigger and Bomb, both players | Fire and bomb work | | |
-| T2-08 | Play the first level with 2 players | Picture correct; the game does not freeze | | |
-| T2-09 | Sound | Music, effects, voices | | |
-| T2-10 | Set a high score, open the OSD, reload | Score kept, no CMOS error on boot | | |
-| T2-11 | Test menu: switch test, sound test | Every switch shows; sounds play | | |
-| T2-12 | Play to game over | Continue screen, initials entry | | |
+| T2-06 | Crosshair Off | The sight is hidden | Pass | |
+| T2-07 | Trigger and Bomb, both players | Fire and bomb work | Pass | |
+| T2-08 | Play the first level with 2 players | Picture correct; the game does not freeze | Pass | |
+| T2-09 | Sound | Music, effects, voices | Pass | |
+| T2-10 | Set a high score, open the OSD, reload | Score kept, no CMOS error on boot | Pass | |
+| T2-11 | Test menu: switch test, sound test | Every switch shows; sounds play | Pass | |
+| T2-12 | Play to game over | Continue screen, initials entry | Pass | |
 | T2-13 | Each MRA in `_alternatives/_Terminator 2 - Judgment Day` | Boots to attract and plays | Pass | |
 
 ## Total Carnage
