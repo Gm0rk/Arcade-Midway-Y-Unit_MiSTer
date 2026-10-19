@@ -4,6 +4,11 @@ What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's 
 
 Build numbers count the core's development builds in order. Released RBF files are named by date. Builds 1 to 12 were named Arcade-MidwayY.
 
+## Build 38 (2026-10-19)
+
+**Docs & tools**
+- Game pages: a title-screen and a gameplay picture at the top of each page (Y-Unit Test ROM excepted).
+
 ## Build 37 (2026-10-19)
 
 **Changed**
