@@ -20,9 +20,9 @@ Core tested (rbf date): ____________
 
 | Game | Tests | Result |
 |---|---|---|
-| [Core-wide](#core-wide) | 19 | |
-| [Trog](#trog) | 11 | 2 / 11 passed |
-| [Smash T.V.](#smash-tv) | 10 | 2 / 10 passed |
+| [Core-wide](#core-wide) | 19 | 8 / 19 passed |
+| [Trog](#trog) | 11 | Pass |
+| [Smash T.V.](#smash-tv) | 10 | 8 / 10 passed |
 | [High Impact Football](#high-impact-football) | 13 | 2 / 13 passed |
 | [Super High Impact](#super-high-impact) | 13 | 2 / 13 passed |
 | [Strike Force](#strike-force) | 11 | 1 / 11 passed |
@@ -51,19 +51,19 @@ Run with any game (Mortal Kombat or Smash T.V. covers them all).
 
 | # | Test | Expected | Result | Notes |
 |---|---|---|---|---|
-| C-01 | Open the OSD | Main page: Video Settings, Move List and Finishing Moves (Mortal Kombat only), Passwords (Total Carnage only), DIP Switches, Hidden Items (games with a hidden menu only), Service Mode, Pause when OSD is open, Reset, Reset and close OSD | | |
-| C-02 | Video Settings: Aspect Ratio, Scandoubler Fx, Scale | Each option changes the HDMI picture as named | | |
+| C-01 | Open the OSD | Main page: Video Settings, Move List and Finishing Moves (Mortal Kombat only), Passwords (Total Carnage only), DIP Switches, Hidden Items (games with a hidden menu only), Service Mode, Pause when OSD is open, Reset, Reset and close OSD | Pass | |
+| C-02 | Video Settings: Aspect Ratio, Scandoubler Fx, Scale | Each option changes the HDMI picture as named | Pass | |
 | C-03 | Video Timing 54.7 Hz / 57 Hz / 60 Hz | Picture stable on HDMI and analog at each; at 57 / 60 Hz the game runs a little faster, music keeps its pitch | | |
 | C-04 | CRT Adjust: H-Size, H-Position, V-Shift, Auto-Width (analog) | The picture resizes and moves; Auto-Width fits it to the screen | | |
 | C-05 | CRT V-Size, PVM and Cabinet modes (analog) | "+" taller, "-" shorter in both modes; the screen keeps sync, also while V-Size is turned on, changed or set back to 0 (PVM: no roll or tear) | | |
-| C-06 | Pause when OSD is open: On, then Off | On: the game stops while the OSD is open. Off: it keeps running | | |
-| C-07 | Pause button on the controller | Pauses and resumes the game | | |
-| C-08 | Reset, then Reset and close OSD | Both restart the game; the first leaves the OSD open, the second closes it | | |
-| C-09 | Change a DIP switch (e.g. Coinage or Free Play), close the OSD, then Reset | Nothing changes until the reset; after it the new setting applies | | |
-| C-10 | DIP Switches → Service Credit "Press", close the OSD | One credit is added | | |
+| C-06 | Pause when OSD is open: On, then Off | On: the game stops while the OSD is open. Off: it keeps running | Pass | |
+| C-07 | Pause button on the controller | Pauses and resumes the game | Pass | |
+| C-08 | Reset, then Reset and close OSD | Both restart the game; the first leaves the OSD open, the second closes it | Pass | |
+| C-09 | Change a DIP switch (e.g. Coinage or Free Play), close the OSD, then Reset | Nothing changes until the reset; after it the new setting applies | Pass | |
+| C-10 | DIP Switches → Service Credit "Press", close the OSD | One credit is added | Pass | |
 | C-11 | DIP Switches → Tilt "Press", close the OSD | The game shows its tilt message | | |
 | C-12 | Service Mode On, then Off; then the Test button | The game's test menu opens and closes; the Test button opens it too | | |
-| C-13 | Change a setting in the game's test menu (or set a high score), open the OSD, reload the MRA | The setting / score is still there | | |
+| C-13 | Change a setting in the game's test menu (or set a high score), open the OSD, reload the MRA | The setting / score is still there | Pass | |
 | C-14 | Trigger a Hidden Items item at the wrong time (e.g. EJB Menu during a fight) and close the OSD | A message shows for about 2 seconds after the OSD closes | | |
 | C-15 | Define joystick buttons for a game | The button names match the game's controls page | | |
 | C-16 | Play a game, then load another game from the menu | The screen stays black behind the loading box | | |
@@ -78,15 +78,15 @@ Main MRA: Trog (rev LA5). [Controls](Trog.md).
 | # | Test | Expected | Result | Notes |
 |---|---|---|---|---|
 | TR-01 | Boot | Attract mode: title, demo, high scores | Pass | |
-| TR-02 | Coin and Start for players 1-4; coin 3 from the third controller | Credits added, each player joins | | |
-| TR-03 | Controls of each player (test menu switch test or in game) | 4-way stick (on a diagonal the last direction pressed wins), Punch | | |
-| TR-04 | Play a level with 2+ players | Picture correct: sprites, backgrounds, colours, no garbage | | |
-| TR-05 | Sound in attract and game | Music, effects and speech, no crackle or missing voices | | |
-| TR-06 | Play to game over | Continue screen, initials entry | | |
-| TR-07 | Set a high score, open the OSD, reload | Score kept, no CMOS error on boot | | |
-| TR-08 | Test menu: switch test, sound test | Every switch shows; sounds play | | |
-| TR-09 | Change a DIP switch, reset | Applied | | |
-| TR-10 | Trog (prototype, rev 4.00) MRA | Boots; 8-way stick, Bone button | | |
+| TR-02 | Coin and Start for players 1-4; coin 3 from the third controller | Credits added, each player joins | Pass | |
+| TR-03 | Controls of each player (test menu switch test or in game) | 4-way stick (on a diagonal the last direction pressed wins), Punch | Pass | |
+| TR-04 | Play a level with 2+ players | Picture correct: sprites, backgrounds, colours, no garbage | Pass | |
+| TR-05 | Sound in attract and game | Music, effects and speech, no crackle or missing voices | Pass | |
+| TR-06 | Play to game over | Continue screen, initials entry | Pass | |
+| TR-07 | Set a high score, open the OSD, reload | Score kept, no CMOS error on boot | Pass | |
+| TR-08 | Test menu: switch test, sound test | Every switch shows; sounds play | Pass | |
+| TR-09 | Change a DIP switch, reset | Applied | Pass | |
+| TR-10 | Trog (prototype, rev 4.00) MRA | Boots; 8-way stick, Bone button | Pass | |
 | TR-11 | Each MRA in `_alternatives/_Trog` | Boots to attract and plays | Pass | |
 
 ## Smash T.V.
@@ -97,13 +97,13 @@ Main MRA: Smash T.V. (rev 8.00). [Controls](SmashTV.md).
 |---|---|---|---|---|
 | ST-01 | Boot | Attract mode: title, demo, high scores | Pass | |
 | ST-02 | Coin and Start for players 1-2; coin 3 | Credits added, each player joins | | |
-| ST-03 | Move with the d-pad / left stick; fire with B1-B4, two at once | Moves in 8 directions; fires up, down, left, right and diagonals | | |
-| ST-04 | Fire with the right analog stick | Fires the way it points | | |
-| ST-05 | Play the first arena with 2 players | Picture correct, no slowdown or garbage | | |
-| ST-06 | Sound in attract and game | Music, effects, host's speech | | |
+| ST-03 | Move with the d-pad / left stick; fire with B1-B4, two at once | Moves in 8 directions; fires up, down, left, right and diagonals | Pass | |
+| ST-04 | Fire with the right analog stick | Fires the way it points | Pass | |
+| ST-05 | Play the first arena with 2 players | Picture correct, no slowdown or garbage | Pass | |
+| ST-06 | Sound in attract and game | Music, effects, host's speech | Pass | |
 | ST-07 | Set a high score, open the OSD, reload | Score kept, no CMOS error on boot | | |
-| ST-08 | Test menu: switch test, sound test | Every switch shows; sounds play | | |
-| ST-09 | Play to game over | Continue screen, initials entry | | |
+| ST-08 | Test menu: switch test, sound test | Every switch shows; sounds play | Pass | |
+| ST-09 | Play to game over | Continue screen, initials entry | Pass | |
 | ST-10 | Each MRA in `_alternatives/_Smash T.V_` | Boots to attract and plays | Pass | |
 
 ## High Impact Football
