@@ -4,6 +4,11 @@ What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's 
 
 Build numbers count the core's development builds in order. Released RBF files are named by date. Builds 1 to 12 were named Arcade-MidwayY.
 
+## Build 40 (2026-10-19)
+
+**Docs & tools**
+- TestPlan: Mortal Kombat hardware results for 8 more tests (10 of 29 passed): controls, coins, picture, sound, Kano's Heart Rip, the Move List waiting behind its page, and Reptile Fight Next set and cleared. 46 of 135 tests pass overall, none failed.
+
 ## Build 39 (2026-10-19)
 
 **Docs & tools**
