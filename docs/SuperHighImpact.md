@@ -2,6 +2,8 @@
 
 [Back to the main README](../README.md)
 
+<img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Super_High_Impact_Football.png" width="400" alt="Super High Impact title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Super_High_Impact_Football_2.png" width="400" alt="Super High Impact gameplay"> 
+
 | | |
 |---|---|
 | Sets | shimpact (rev LA2, main MRA); LA1, prototypes 6.0, 5.0, 4.0 |
