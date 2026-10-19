@@ -42,7 +42,7 @@ Each game has its own page in [`docs`](docs) with its revisions, controls and
 game-specific features. Everything the core adds, core-wide and per game, is
 listed in [Extra content](docs/ExtraContent.md).
 
-| Game | Main set | Players | Sound | Status | Title Screen | Gameplay |
+| <div style="width: 400px;">Game</div> | Main set | Players | Sound | Status | Title Screen | Gameplay |
 |---|---|---|---|---|---|---|
 | [High Impact Football](docs/HighImpactFootball.md) | hiimpact (rev LA5) | 4 | CVSD | Awaiting hardware test | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/High_Impact_Football.png" width="400"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/High_Impact_Football2.png" width="400">|
 | [Mortal Kombat](docs/MortalKombat.md) | mkla4 (rev 4.0) | 2 | ADPCM | Awaiting hardware test | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Mortal_Kombat.png" width="400">|<img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Mortal_Kombat_2.png" width="400"> |
