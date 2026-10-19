@@ -2,6 +2,8 @@
 
 [Back to the main README](../README.md)
 
+<img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Strikeforce.png" width="400" alt="Strike Force title screen"> <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Strikeforce_2.png" width="400" alt="Strike Force gameplay">
+
 | | |
 |---|---|
 | Sets | strkforc (rev 1, main MRA); Saurian Front (proto v5.0) |
