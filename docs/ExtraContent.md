@@ -2,7 +2,7 @@
 
 [Back to the main README](../README.md)
 
-Extra content is everything the core offers that the original boards did not: OSD options, shortcuts, helper pages and output features, as opposed to the games and hardware reproduced from MAME. The first section lists what every game gets; the sections after it list what is specific to one game, in the order of the README. Each game's own page repeats its section.
+Extra content is everything the core offers that the original boards did not: OSD options, shortcuts, helper pages and output features, as opposed to the games and hardware reproduced from MAME. The first section lists what every game gets; the sections after it list what is specific to one game. Each game's own page repeats its section.
 
 ## Core-wide features
 
