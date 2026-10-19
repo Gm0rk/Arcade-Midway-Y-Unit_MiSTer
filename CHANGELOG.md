@@ -4,6 +4,11 @@ What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's 
 
 Build numbers count the core's development builds in order. Released RBF files are named by date. Builds 1 to 12 were named Arcade-MidwayY.
 
+## Build 39 (2026-10-19)
+
+**Docs & tools**
+- TestPlan: hardware results for 23 more tests (38 of 135 passed, none failed). Trog passes all 11 tests and is **Verified** (README status and progress bar: 1 / 8). Core-wide 8 / 19; Smash T.V. 8 / 10.
+
 ## Build 38 (2026-10-19)
 
 **Docs & tools**
