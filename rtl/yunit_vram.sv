@@ -14,6 +14,11 @@
 //    4. blitter  - write back one finished blitter row as a single burst
 //    5. cpu      - 32-bit read or byte-masked write (two entries)
 //
+//  A CPU read fetches two beats and keeps the second: the boot RAM tests of
+//  Strike Force and Total Carnage walk video memory beat by beat, and one DDR3
+//  round trip per read made them run behind the chip. The kept beat is
+//  dropped whenever anything writes video memory.
+//
 //  Write bursts take their data straight from the output register of the
 //  source block RAM. Its address runs one beat ahead whenever the bridge
 //  accepts a beat, so the next beat's data is on DDRAM_DIN the following cycle
@@ -140,6 +145,12 @@ reg         second;              // second half of a two-burst operation
 reg  [28:0] next_addr;
 reg   [6:0] blt_rd;
 
+// one-beat read-ahead for the CPU
+reg  [63:0] pf_data;
+reg  [15:0] pf_addr;             // beat address of pf_data
+reg         pf_valid;
+reg  [15:0] rq_addr;             // beat address of the CPU read being fetched
+
 assign blt_raddr = blt_rd;
 
 wire        wr_accept = ddr_we & ~ddr_busy;
@@ -173,6 +184,7 @@ always @(posedge clk) begin
 		srt_ack   <= srt_req;
 		blt_ack   <= blt_req;
 		cpu_ack   <= cpu_req;
+		pf_valid  <= 1'b0;
 	end
 	else begin
 		case (vstate)
@@ -190,6 +202,7 @@ always @(posedge clk) begin
 				end
 				else if (erase_req != erase_ack) begin
 					// read the erase row first, then write it out
+					pf_valid     <= 1'b0;
 					op           <= D_ERASE;
 					dst          <= D_ERASE;
 					ddr_addr     <= BASE | {13'd0, erase_src, 7'd0};
@@ -199,6 +212,7 @@ always @(posedge clk) begin
 					vstate       <= V_RD;
 				end
 				else if (srt_req != srt_ack) begin
+					pf_valid     <= 1'b0;
 					op           <= D_SRT;
 					dst          <= D_SRT;
 					ddr_addr     <= BASE | {13'd0, srt_entry[17:2]};
@@ -208,6 +222,7 @@ always @(posedge clk) begin
 					vstate       <= srt_wr ? V_WRPRE : V_RD;
 				end
 				else if (blt_req != blt_ack) begin
+					pf_valid     <= 1'b0;
 					op           <= D_BLT;
 					dst          <= D_BLT;
 					ddr_addr     <= BASE | {13'd0, blt_row, blt_lo};
@@ -216,19 +231,32 @@ always @(posedge clk) begin
 					vstate       <= V_WRPRE;
 				end
 				else if (cpu_req != cpu_ack) begin
-					op           <= D_CPU;
-					dst          <= D_CPU;
-					ddr_addr     <= BASE | {13'd0, cpu_qaddr};
-					ddr_burstcnt <= 8'd1;
-					beats        <= 8'd1;
-					if (cpu_wr) begin
-						ddr_we     <= 1'b1;
-						cpu_din    <= {cpu_wdata, cpu_wdata};
-						cpu_bemask <= cpu_half ? {cpu_be, 4'b0000} : {4'b0000, cpu_be};
-						vstate     <= V_WR;
+					if (!cpu_wr && pf_valid && pf_addr == cpu_qaddr) begin
+						// the beat read ahead by the previous read
+						cpu_rdata <= cpu_half ? pf_data[63:32] : pf_data[31:0];
+						cpu_ack   <= cpu_req;
 					end
-					else
-						vstate <= V_RD;
+					else begin
+						op           <= D_CPU;
+						dst          <= D_CPU;
+						rq_addr      <= cpu_qaddr;
+						ddr_addr     <= BASE | {13'd0, cpu_qaddr};
+						if (cpu_wr) begin
+							pf_valid     <= 1'b0;
+							ddr_burstcnt <= 8'd1;
+							beats        <= 8'd1;
+							ddr_we       <= 1'b1;
+							cpu_din      <= {cpu_wdata, cpu_wdata};
+							cpu_bemask   <= cpu_half ? {cpu_be, 4'b0000} : {4'b0000, cpu_be};
+							vstate       <= V_WR;
+						end
+						else begin
+							// this beat and the next (not past the last beat)
+							ddr_burstcnt <= (cpu_qaddr == 16'hFFFF) ? 8'd1 : 8'd2;
+							beats        <= (cpu_qaddr == 16'hFFFF) ? 8'd1 : 8'd2;
+							vstate       <= V_RD;
+						end
+					end
 				end
 			end
 
@@ -258,7 +286,15 @@ always @(posedge clk) begin
 						sb_wdata <= ddr_dout;
 						if (!second && bi == 8'd0) sr0 <= ddr_dout[15:0];
 					end
-					default: cpu_rdata <= cpu_half ? ddr_dout[63:32] : ddr_dout[31:0];
+					default: begin
+						if (bi == 8'd0)
+							cpu_rdata <= cpu_half ? ddr_dout[63:32] : ddr_dout[31:0];
+						else begin
+							pf_data  <= ddr_dout;
+							pf_addr  <= rq_addr + 16'd1;
+							pf_valid <= 1'b1;
+						end
+					end
 				endcase
 				bi <= bi + 8'd1;
 				if (bi + 8'd1 == beats) begin
