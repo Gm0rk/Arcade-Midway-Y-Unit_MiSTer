@@ -2,6 +2,8 @@
 
 [Back to the main README](../README.md)
 
+<img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Trog.png" width="400" alt="Trog title screen"> <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Trog_2.png" width="400" alt="Trog gameplay"> 
+
 | | |
 |---|---|
 | Sets | trog (rev LA5, main MRA); LA4, LA3 (2-14-91), LA3 (2-10-91), prototypes PA6-PAC and PA5-PAC; prototype rev 4.00 (trogpa4, its own MRA) |
