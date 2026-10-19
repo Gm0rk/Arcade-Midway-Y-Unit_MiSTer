@@ -4,6 +4,11 @@ What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's 
 
 Build numbers count the core's development builds in order. Released RBF files are named by date. Builds 1 to 12 were named Arcade-MidwayY.
 
+## Build 41 (2026-10-19)
+
+**Docs & tools**
+- TestPlan: the Y-Unit Test ROM passes all 3 tests (picking tests with the DIP switches, and the Octopus Bookkeeping message). 48 of 135 tests pass overall, none failed.
+
 ## Build 40 (2026-10-19)
 
 **Docs & tools**
