@@ -2,6 +2,8 @@
 
 [Back to the main README](../README.md)
 
+<img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Total_Carnage.png" width="400" alt="Total Carnage title screen"> <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Total_Carnage_2.png" width="400" alt="Total Carnage gameplay"> 
+
 | | |
 |---|---|
 | Sets | totcarn (rev LA1, main MRA); prototypes v2.0 and v1.0 |
