@@ -29,7 +29,7 @@ Core tested (rbf date): ____________
 | [Mortal Kombat](#mortal-kombat) | 29 | 10 / 29 passed |
 | [Terminator 2 - Judgment Day](#terminator-2---judgment-day) | 13 | 1 / 13 passed |
 | [Total Carnage](#total-carnage) | 13 | 2 / 13 passed |
-| [Y-Unit Test ROM](#y-unit-test-rom) | 3 | 1 / 3 passed |
+| [Y-Unit Test ROM](#y-unit-test-rom) | 3 | Pass |
 
 ## What you need
 
@@ -248,5 +248,5 @@ graphics ROMs, so their tests are not expected to show anything.
 | # | Test | Expected | Result | Notes |
 |---|---|---|---|---|
 | YT-01 | Boot | The diagnostic starts and shows its screens | Pass | |
-| YT-02 | Pick tests with the DIP switches, reset | The chosen test runs | | |
-| YT-03 | Hidden Items → Octopus Bookkeeping | Message "Not in this revision of the game" | | |
+| YT-02 | Pick tests with the DIP switches, reset | The chosen test runs | Pass | |
+| YT-03 | Hidden Items → Octopus Bookkeeping | Message "Not in this revision of the game" | Pass | |
