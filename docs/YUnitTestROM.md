@@ -2,6 +2,8 @@
 
 [Back to the main README](../README.md)
 
+<img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Y-Unit_Test_ROM.png" width="400" alt="Trog title screen">
+
 | | |
 |---|---|
 | Set | yunittst (v1.40) |
