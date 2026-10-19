@@ -2,6 +2,8 @@
 
 [Back to the main README](../README.md)
 
+<img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Terminator_2_Judgement_Day.png" width="400" alt="Terminator 2 - Judgment Day title screen"> <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Terminator_2_Judgement_Day_2.png" width="400" alt="Terminator 2 - Judgment Day gameplay">
+
 | | |
 |---|---|
 | Sets | term2 (rev LA4, main MRA); LA3, LA2, LA1, prototype PA2, German LG1 |
