@@ -25,3 +25,12 @@ set_multicycle_path -hold  -end 7 -from [get_registers {*|williams_sound:*|din_r
 # detune/modulation adder chain in front of it has more than one clock.
 set_multicycle_path -setup -end 2 -to [get_registers {*|jt51_pg:u_pg|keycode_II[*]}]
 set_multicycle_path -hold  -end 1 -to [get_registers {*|jt51_pg:u_pg|keycode_II[*]}]
+
+# HQ2x scandoubler filter (sys/hq2x.sv, used when Scandoubler Fx is HQ2x):
+# every register of its Blend stage changes only while the scandoubler's
+# ce_x4i is high. ce_x4i comes at a quarter of the pixel length (12 clocks at
+# 96 MHz / 8 MHz, so every 3 clocks) and once more at each HSync edge, which
+# is in the blanking. Paths from one Blend register to another therefore have
+# more than one clock.
+set_multicycle_path -setup -end 2 -from [get_registers {*|Hq2x:Hq2x|Blend:blender|*}] -to [get_registers {*|Hq2x:Hq2x|Blend:blender|*}]
+set_multicycle_path -hold  -end 1 -from [get_registers {*|Hq2x:Hq2x|Blend:blender|*}] -to [get_registers {*|Hq2x:Hq2x|Blend:blender|*}]
