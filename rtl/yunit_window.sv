@@ -2,8 +2,8 @@
 //  yunit_window - the information window: Mortal Kombat's Move List,
 //  Total Carnage's Passwords
 //
-//  With the OSD's "Move List" set to Page 1 or Page 2 (Mortal Kombat) or
-//  "Passwords" on (Total Carnage), this draws that page over the picture:
+//  With the OSD's "Move List" On (Mortal Kombat) or "Passwords" On (Total
+//  Carnage), this draws that page over the picture:
 //  the game's title screen, dimmed, and on it a grid of 56 x 30 characters
 //  (7 x 8 dots each, the MiSTer OSD's font), centred in the 400 x 254
 //  picture (Mortal Kombat; on Total Carnage's 256 lines the window starts a
