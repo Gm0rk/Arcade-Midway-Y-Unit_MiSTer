@@ -4,6 +4,27 @@ What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's 
 
 Build numbers count the core's development builds in order. Released RBF files are named by date. Builds 1 to 12 were named Arcade-MidwayY.
 
+## Build 49 (2026-10-19)
+
+**Docs & tools**
+- TestPlan: the Smash T.V. high score test (ST-07) passes with a score in the ALL TIME table; Smash T.V. passes all 10 tests and is **Verified** (README status and progress bar: 6 / 8). 103 of 135 tests pass overall, none failed.
+
+## Build 48 (2026-10-19)
+
+**Docs & tools**
+- TestPlan: hardware results for 23 more tests (102 of 135 passed, 1 failed). High Impact Football and Super High Impact pass all 13 tests each and are **Verified** (README status and progress bar: 5 / 8). Smash T.V. is at 9 of 10; its high score test (ST-07) is marked failed and is being re-run (see below).
+- Trog and Smash T.V. high scores: not a bug. Each game has two tables, and the second (Trog's DAILY DINOS, Smash T.V.'s TODAY) is reset by the game itself every time it starts, as on the board; only TOP TROGS / ALL TIME is kept. A score that makes only the second table is gone after a reload. Checked against MAME, which does the same, and against a saved Smash T.V. NVRAM file (the ALL TIME and TODAY tables hold the defaults; the audit counters were saved). TR-07 and ST-07 now say which table to make. Trog writes the table about 8 seconds after the initials, so wait for it to show before opening the OSD (Trog and Smash T.V. pages).
+
+## Build 47 (2026-10-19)
+
+**Docs & tools**
+- Mortal Kombat page: the Move List text no longer refers to the Midway T-Unit core.
+
+## Build 46 (2026-10-19)
+
+**Docs & tools**
+- README credits: the line crediting the Midway T-Unit core for the finishing-move player and the information window is removed; ppriest's MiSTer-CoreSkill is credited.
+
 ## Build 45 (2026-10-19)
 
 **Docs & tools**
