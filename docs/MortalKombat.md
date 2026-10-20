@@ -15,8 +15,8 @@
 
 Mortal Kombat has the most extras: four OSD features and its own button layout.
 
-- **[Finishing Moves](#finishing-moves)** (main page): pick a fighter's fatality or The Pit, and the core enters it on the round winner's controls at the next FINISH HIM, for either player. The distance is measured the way the game does it, from the fighters' centres. Messages say when the fighter is too far or too close, the move waits for another fighter's FINISH HIM, FINISH HIM is over, the move was not taken, or it was cleared. **Clear the set move** drops it.
-- **[Move List](#move-list)** (Off, Page 1, Page 2): a reference window over the dimmed title screen with each fighter's special moves, fatality and the distance it needs, and The Pit in the footer. The game waits while a page shows.
+- **[Finishing Moves](#finishing-moves)** (main page): pick a fighter's fatality, and the core enters it on the round winner's controls at the next FINISH HIM, for either player. The distance is measured the way the game does it, from the fighters' centres. Messages say when the fighter is too far or too close, the move waits for another fighter's FINISH HIM, FINISH HIM is over, the move was not taken, or it was cleared. **Clear the set move** drops it.
+- **[Move List](#move-list)** (Off, On): a reference window over the dimmed title screen with each fighter's special moves, fatality and the distance it needs, and The Pit's uppercut in the footer. With the OSD closed, Left or Right turns to the other page. The game waits while it shows.
 - **[EJB Menu shortcut](#hidden-developer-menu-ejb-menu)** (Hidden Items, every revision except prototype 4.0): plays the 27-press code on the two Block buttons in about 3 seconds, for diagnostics, audits, enter initials and character endings. Start 1 and 2 are held released while it plays so a Start press cannot spoil it. Messages report the result.
 - **[Reptile on demand](#reptile)** (Hidden Items, rev 3.0, rev 4.0 and the Turbo hacks): Reptile Fight Next, Moon Silhouettes Always and Reptile Hints Always. The core changes a few of the game's instructions as the CPU fetches them; nothing is written to the ROM or the CMOS.
 - **Button layout**: High Punch, Low Punch, High Kick, Low Kick, Block, then Start, Coin, Test, Pause. The board's second Block input stays unused, as the cabinet has one block button per player.
@@ -42,7 +42,7 @@ The cabinet has one block button per player; the board's second block input
 
 ## Finishing Moves
 
-**OSD → Finishing Moves** lists each fighter's fatality and The Pit. Pick the
+**OSD → Finishing Moves** lists each fighter's fatality. Pick the
 fighter in **Fighter**, then the move: the core enters it for you at the next
 FINISH HIM that fighter wins (either player), on the winner's controls. Stand
 at the right distance; the core says when you are too far or too close and
@@ -61,7 +61,7 @@ set move** drops it.
 | Liu Kang | Cartwheel | D B U F D | any |
 | Scorpion | Fire Breath | (BL) U U | 119-158 |
 
-Every fighter also has The Pit (on that stage): D+HP, close (up to 80).
+The Pit is not entered for you: on that stage an uppercut (D+HP) up close does it (the Move List's footer says so).
 
 Commands are for a fighter facing right: F and B are toward and away from the
 opponent, (BL) means Block held over the directions. Distances are between
@@ -76,21 +76,23 @@ Messages (shown after the OSD closes):
 | Finishing move set: it plays at the next FINISH HIM | Set outside FINISH HIM |
 | Not this fighter's FINISH HIM: the move waits for a later one | Set while another fighter is finishing |
 | Too far: step closer / Too close: step back | The distance is outside the move's window |
-| Stage move: The Pit only | The Pit set, another stage |
 | FINISH HIM is over: the move waits for the next one | FINISH HIM ended before the move could start |
 | Move not taken | The game did not take it (the opponent was hit, the distance changed) |
 | Finishing move cleared | After Clear the set move |
 
 ## Move List
 
-**OSD → Move List** (Off, Page 1, Page 2) shows that page of the move list
-over the game, on the title screen dimmed: Page 1 has Johnny Cage to Sonya,
-Page 2 Raiden to Scorpion (the select screen's order), as in the Midway
-T-Unit core. Each fighter has the special moves and the fatality with the
-distance it needs; The Pit, the same for all, is at the bottom. The game
-waits while a page is on (the OSD can stay open over it); set Move List to
-**Off** to play on. It is for reference: the core does not enter these moves
-(Finishing Moves does that for the fatality and The Pit).
+**OSD → Move List** (Off, On) shows the move list over the game, on the
+title screen dimmed: page 1 has Johnny Cage to Sonya, page 2 Raiden to
+Scorpion (the select screen's order). Each fighter has the special moves and
+the fatality with the distance it needs; The Pit's uppercut, the same for
+all, is at the bottom. **Close the OSD** to see the page in full screen, and
+press **Left or Right** on either controller to turn to the other page (the
+d-pad steers the OSD while it is open, so the pages turn only with it
+closed). The list starts on page 1 each time it is switched On. The game
+waits while it is on; open the OSD and set Move List to **Off** to play on.
+It is for reference: the core does not enter these moves (Finishing Moves
+does that for the fatalities).
 
 Commands as the game reads them: F toward the opponent, B away; (BL B F)
 means Block held while you enter B F; X+Y pressed together. Distances in
@@ -126,7 +128,7 @@ one of rev 4.0; the prototypes may differ.
 |  | Teleport | D B HP |  |
 |  | Fatality: Fire Breath | (BL) U U | Sweep to jump |
 
-Every fighter: The Pit, D+HP, Close, on The Pit stage only.
+Every fighter, on The Pit stage only: an uppercut (D+HP), close. The core does not enter it.
 
 ## Hidden developer menu: EJB Menu
 
