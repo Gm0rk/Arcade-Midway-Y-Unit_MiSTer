@@ -2,7 +2,9 @@
 #
 # timing_paths.tcl - list the worst setup paths of the last compilation
 #
-# Run from the project folder after a compilation, without recompiling:
+# Run automatically after every compilation by post_flow.tcl (the project's
+# post-flow script, set in Arcade-Midway-Y-Unit.qsf). By hand, from the project
+# folder and without recompiling:
 #   quartus_sta -t tools/timing_paths.tcl
 # (quartus_sta is in the Quartus bin64 folder, e.g.
 #  C:\intelFPGA_lite\17.0\quartus\bin64\quartus_sta.exe)
