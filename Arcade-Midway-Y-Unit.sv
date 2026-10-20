@@ -1161,8 +1161,16 @@ function automatic xhair(input [9:0] x, input [9:0] y, input [9:0] cx, input [9:
 	        ((y == cy) && (x + 10'd4 >= cx) && (x <= cx + 10'd4));
 endfunction
 
-wire ch_on0 = is_t2 && !xhair_off && xhair(out_x, out_y, ch_x0[17:8], ch_y0[17:8]);
-wire ch_on1 = is_t2 && !xhair_off && xhair(out_x, out_y, ch_x1[17:8], ch_y1[17:8]);
+// The flags are registered: the multiplier output, the compare and the colour
+// mux below feed the CRT V-Size line RAM, which was too much for one 96 MHz
+// clock. out_x / out_y change only on ce_pix and yunit_crt samples the colour
+// only on ce_pix (12 clocks apart), so the flags a clock late are stable well
+// before they are used and the crosshair stays on the same pixel.
+reg ch_on0, ch_on1;
+always @(posedge clk_sys) begin
+	ch_on0 <= is_t2 && !xhair_off && xhair(out_x, out_y, ch_x0[17:8], ch_y0[17:8]);
+	ch_on1 <= is_t2 && !xhair_off && xhair(out_x, out_y, ch_x1[17:8], ch_y1[17:8]);
+end
 
 // ---- Information window (rtl/yunit_window.sv) ----
 //
