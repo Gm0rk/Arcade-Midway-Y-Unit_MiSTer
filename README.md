@@ -16,6 +16,7 @@ Mortal Kombat and Terminator 2.
 - [Hardware](#hardware)
 - [Games](#games)
 - [Testing setup](#testing-setup)
+- [Timing and resources](#timing-and-resources)
 - [Features](#features)
 - [OSD](#osd)
 - [Controls](#controls)
@@ -46,7 +47,7 @@ listed in [Extra content](docs/ExtraContent.md).
 | Game | Main set | Status | Title Screen | Gameplay |
 |---|---|---|---|---|
 | [High Impact Football](docs/HighImpactFootball.md) | hiimpact (rev LA5) | Verified | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/High_Impact_Football.png" width="300" alt="High Impact Football title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/High_Impact_Football2.png" width="300" alt="High Impact Football gameplay"> |
-| [Mortal Kombat](docs/MortalKombat.md) | mkla4 (rev 4.0) | Awaiting hardware test | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Mortal_Kombat.png" width="300" alt="Mortal Kombat title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Mortal_Kombat_2.png" width="300" alt="Mortal Kombat gameplay"> |
+| [Mortal Kombat](docs/MortalKombat.md) | mkla4 (rev 4.0) | Verified | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Mortal_Kombat.png" width="300" alt="Mortal Kombat title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Mortal_Kombat_2.png" width="300" alt="Mortal Kombat gameplay"> |
 | [Smash T.V.](docs/SmashTV.md) | smashtv (rev 8.00) | Verified | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Smash_TV.png" width="300" alt="Smash T.V. title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Smash_TV_2.png" width="300" alt="Smash T.V. gameplay"> |
 | [Strike Force](docs/StrikeForce.md) | strkforc (rev 1) | Verified | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Strikeforce.png" width="300" alt="Strike Force title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Strikeforce_2.png" width="300" alt="Strike Force gameplay"> |
 | [Super High Impact](docs/SuperHighImpact.md) | shimpact (rev LA2) | Verified | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Super_High_Impact_Football.png" width="300" alt="Super High Impact title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Super_High_Impact_Football_2.png" width="300" alt="Super High Impact gameplay"> |
@@ -54,7 +55,7 @@ listed in [Extra content](docs/ExtraContent.md).
 | [Total Carnage](docs/TotalCarnage.md) | totcarn (rev LA1) | Verified | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Total_Carnage.png" width="300" alt="Total Carnage title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Total_Carnage_2.png" width="300" alt="Total Carnage gameplay"> |
 | [Trog](docs/Trog.md) | trog (rev LA5), prototype rev 4.00 | Verified | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Trog.png" width="300" alt="Trog title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Trog_2.png" width="300" alt="Trog gameplay"> |
 
-Verified on hardware: `[█████████████████░░░]` 7 / 8
+Verified on hardware: `[████████████████████]` 8 / 8
 
 A game is verified when it passes every test of the
 [test plan](docs/TestPlan.md), which tracks the progress.
@@ -78,6 +79,42 @@ The hardware tests behind the status above are run on:
 
 > **Not tested:** consumer PAL TVs, and analog connections other than
 > component (YPbPr).
+
+## Timing and resources
+
+From the Quartus Prime 17.0.2 Lite compilation of Build 61's RTL
+(2026-10-20), for the DE10-Nano's Cyclone V 5CSEBA6U23I7. The project runs
+one timing model, Slow 1100 mV 100 C. All 135 hardware tests pass (see the
+[test plan](docs/TestPlan.md)).
+
+**Timing is not met on one clock:** setup on the 96 MHz system clock fails by
+0.538 ns (total negative slack 10.583 ns; the clock's Fmax is 91.29 MHz). The
+worst path, the one the report lists, is inside the MiSTer framework's HQ2x
+scandoubler filter (`sys/hq2x.sv`, used only when Scandoubler Fx is HQ2x), not
+in the core's own logic. Every other clock, and every hold, recovery, removal
+and minimum pulse width check, is met.
+
+| Clock | Frequency | Setup slack | Hold slack |
+|---|---|---|---|
+| System (core PLL) | 96 MHz | -0.538 ns (fails) | 0.242 ns |
+| HDMI PLL | 148.54 MHz | 0.785 ns | 0.195 ns |
+| HPS user clock | 100 MHz | 4.647 ns | 0.308 ns |
+| SPI | 100 MHz | 6.179 ns | 0.313 ns |
+| FPGA_CLK1_50 | 50 MHz | 8.761 ns | 0.339 ns |
+| FPGA_CLK2_50 | 50 MHz | 12.770 ns | 0.386 ns |
+| Audio PLL | 24.58 MHz | 14.901 ns | 0.392 ns |
+
+Worst recovery slack 2.802 ns, removal 0.699 ns, minimum pulse width 1.041 ns.
+
+| Resource | Used |
+|---|---|
+| Logic (ALMs) | 28,508 / 41,910 (68 %) |
+| Registers | 29,528 |
+| Block RAM (M10K blocks) | 403 / 553 (73 %) |
+| Block memory bits | 3,075,111 / 5,662,720 (54 %) |
+| DSP blocks | 68 / 112 (61 %) |
+| PLLs | 3 / 6 (50 %) |
+| Pins | 145 / 314 (46 %) |
 
 ## Features
 
