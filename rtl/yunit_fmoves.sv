@@ -1,19 +1,19 @@
 //============================================================================
 //  Finishing moves (Mortal Kombat), from the OSD
 //
-//  The OSD's "Finishing Moves" page lists each fighter's fatality and The
-//  Pit. A pick sets the move; this module enters it on the winner's controls
-//  at the next FINISH HIM where the winner is that fighter, and says in an
-//  OSD message when it cannot (another fighter, The Pit on another stage,
-//  too far or too close, FINISH HIM over, not taken). It is the T-Unit
-//  core's player (rtl/tunit_fmoves.sv there) measuring the distance the way
-//  the game does.
+//  The OSD's "Finishing Moves" page lists each fighter's fatality. A pick
+//  sets the move; this module enters it on the winner's controls at the next
+//  FINISH HIM where the winner is that fighter, and says in an OSD message
+//  when it cannot (another fighter, too far or too close, FINISH HIM over,
+//  not taken). The Pit is not entered for you: it is the uppercut, D+HP. It
+//  is the T-Unit core's player (rtl/tunit_fmoves.sv there) measuring the
+//  distance the way the game does.
 //
 //  Following the fight. The module keeps copies of the game's fight
 //  variables by watching the CPU's writes (the board's dbg_wr): the round
 //  state (3 = FINISH HIM), both fighters' character, energy, object and
-//  process pointers, the stage and the finish flag the game sets when a
-//  fatality starts. Their addresses differ between revisions; the MRA sends
+//  process pointers and the finish flag the game sets when a fatality
+//  starts. Their addresses differ between revisions; the MRA sends
 //  them (ROM index 1, words 0x10-0x2F; tools/yunit_fmoves.py). Through the
 //  pointers it follows where each fighter's process resumes (process words
 //  14-15): the finisher's stance loop and the loser's dizzy loop tell when a
@@ -29,10 +29,10 @@
 //  game makes several times a frame.
 //
 //  The winner is the fighter whose energy is not 0 at FINISH HIM. A move
-//  starts when its fighter is the winner, the stage fits (The Pit), the
-//  distance is in the move's window and both fighters are ready; the module
-//  then takes that player's controls (the player's own are ignored) for a
-//  few frames so the finisher comes to rest, and plays the move's program.
+//  starts when its fighter is the winner, the distance is in the move's
+//  window and both fighters are ready; the module then takes that player's
+//  controls (the player's own are ignored) for a few frames so the finisher
+//  comes to rest, and plays the move's program.
 //  Out of the window it says so once and waits, leaving the controls to the
 //  player, who can step in or out: the move starts when the distance fits.
 //
@@ -48,8 +48,7 @@
 //  Keys {BL, LK, HK, LP, HP, B, F, D, U}; F and B are toward and away from
 //  the loser, turned into Right / Left each frame from the two centers.
 //
-//  After the program the finish flag says whether the game took the move
-//  (The Pit: the round state leaving FINISH HIM soon after the uppercut).
+//  After the program the finish flag says whether the game took the move.
 //  Taken, the move is done; not taken, a message says so. Either way the
 //  set move is cleared. A move set outside FINISH HIM (or for another
 //  fighter) waits for the right one; a FINISH HIM that ends first leaves it
@@ -96,12 +95,10 @@ module yunit_fmoves
 
 `include "yunit_fmoves_tab.svh"
 
-localparam K_FATAL = 1'b0, K_MKPIT = 1'b1;
 localparam OP_END = 3'd0, OP_TAP = 3'd1, OP_PRESS = 3'd2, OP_RELEASE = 3'd3, OP_WAIT = 3'd4,
            OP_READY = 3'd5;
 localparam [12:0] GAP = 13'd3;            // frames up after a tap or a release
 localparam [7:0] CHECK_FRAMES = 8'd192;
-localparam [7:0] PIT_FRAMES = 8'd40;      // The Pit: the round must end this soon after the program
 localparam [2:0] SETTLE = 3'd4;
 
 // object and image word offsets (the game's center routine, every revision)
@@ -113,7 +110,8 @@ localparam [27:0] P_RESUME = 28'd14;      // process: where it resumes (32-bit)
 //----------------------------------------------------------------------------
 
 // word addresses: 0 round state, 1-2 P1 / P2 character, 3-4 energy,
-// 5-6 object pointer, 7-8 process pointer, 9 stage, 10 finish flag
+// 5-6 object pointer, 7-8 process pointer, 9 stage (the MRAs still send it;
+// not used), 10 finish flag
 reg  [27:0] c_a  [0:10];
 reg  [27:0] c_a1 [0:10];         // each + 1 (high word of a pointer)
 reg  [31:0] c_diz, c_stance;
@@ -153,7 +151,7 @@ always @(posedge clk) begin
 	r_d <= cpu_rdata;
 end
 
-reg  [15:0] v_state, v_c1, v_c2, v_e1, v_e2, v_stage, v_flag;
+reg  [15:0] v_state, v_c1, v_c2, v_e1, v_e2, v_flag;
 reg  [31:0] v_o [1:2];            // object pointers (bit addresses)
 reg  [31:0] v_p [1:2];            // process pointers
 reg  [15:0] v_x [1:2], v_fl [1:2], v_w [1:2], v_ax [1:2];
@@ -194,7 +192,6 @@ always @(posedge clk) begin
 			if (w_a == c_a[2])  v_c2    <= w_d;
 			if (w_a == c_a[3])  v_e1    <= w_d;
 			if (w_a == c_a[4])  v_e2    <= w_d;
-			if (w_a == c_a[9])  v_stage <= w_d;
 			if (w_a == c_a[10]) v_flag  <= w_d;
 			for (p = 1; p <= 2; p = p + 1) begin
 				// a new object: nothing of it known yet
@@ -274,14 +271,12 @@ end
 reg         sel_d;
 reg   [5:0] sel_id;
 reg         sel_clr;
-wire [30:0] rec = fm_rec(sel_id);
+wire [29:0] rec = fm_rec(sel_id);
 
-reg         m_kind;
 reg   [2:0] m_char;
 reg   [8:0] m_dmin, m_dmax;
 reg   [7:0] m_start;
 
-wire        stage_ok  = (m_kind == K_MKPIT) ? (v_stage == 16'd3) : 1'b1;
 wire        too_close = sep < {7'd0, m_dmin};
 wire        too_far   = sep > {7'd0, m_dmax};
 wire        in_window = sep_ok & ~too_close & ~too_far;
@@ -294,7 +289,6 @@ wire        mine      = fin && fin_char == {13'd0, m_char};
 localparam S_IDLE = 2'd0, S_ARMED = 2'd1, S_RUN = 2'd2, S_CHECK = 2'd3;
 
 reg   [1:0] st;
-reg         skip;                // this FINISH HIM does not fit the move
 reg   [1:0] warned;              // distance messages given this FINISH HIM: [0] too far, [1] too close
 reg         own;                 // the controls are the move's
 reg   [2:0] settle;
@@ -306,10 +300,8 @@ reg   [7:0] chk_n;
 reg   [8:0] held, tap;           // relative keys {BL, LK, HK, LP, HP, B, F, D, U}
 reg         pwho;                // whose controls
 reg         begun;               // past the ready point: the move is being entered
-reg         ended_in_fin;        // the program ended with FINISH HIM still on
 
-wire        taken = (v_flag != 16'd0) ||
-                    (m_kind == K_MKPIT && v_state != 16'd3 && (!ended_in_fin || chk_n > CHECK_FRAMES - PIT_FRAMES));
+wire        taken = (v_flag != 16'd0);                // the game began a fatality
 
 assign drive = own ? (pwho ? 2'b10 : 2'b01) : 2'b00;
 
@@ -347,13 +339,12 @@ always @(posedge clk) begin
 		own  <= 1'b0;
 		held <= 9'd0;
 		tap  <= 9'd0;
-		skip <= 1'b0;
 		if (sel_clr) begin
 			if (st != S_IDLE) begin msg_req <= 1'b1; msg <= MSG_CLEARED; end
 			st <= S_IDLE;
 		end
-		else if (rec[30]) begin
-			{m_kind, m_char, m_dmin, m_dmax, m_start} <= rec[29:0];
+		else if (rec[29]) begin
+			{m_char, m_dmin, m_dmax, m_start} <= rec[28:0];
 			st <= S_ARMED;
 			if (!fin) begin
 				msg_req <= 1'b1;
@@ -366,29 +357,20 @@ always @(posedge clk) begin
 		end
 	end
 	else if (frame) begin
-		if (!fin) skip <= 1'b0;
-
 		case (st)
 			S_ARMED: begin
-				// the move's fighter wins: go when the stage fits
-				if (mine && !skip) begin
-					if (!stage_ok) begin
-						msg_req <= 1'b1;
-						msg     <= MSG_MKPIT;
-						skip    <= 1'b1;
-					end
-					else begin
-						st     <= S_RUN;
-						ptr    <= m_start;
-						pwho   <= who;
-						wait_n <= 13'd0;
-						tap_n  <= 4'd0;
-						held   <= 9'd0;
-						tap    <= 9'd0;
-						settle <= 3'd0;
-						warned <= 2'd0;
-						begun  <= 1'b0;
-					end
+				// the move's fighter wins: go
+				if (mine) begin
+					st     <= S_RUN;
+					ptr    <= m_start;
+					pwho   <= who;
+					wait_n <= 13'd0;
+					tap_n  <= 4'd0;
+					held   <= 9'd0;
+					tap    <= 9'd0;
+					settle <= 3'd0;
+					warned <= 2'd0;
+					begun  <= 1'b0;
 				end
 			end
 
@@ -403,10 +385,9 @@ always @(posedge clk) begin
 					tap     <= 9'd0;
 				end
 				else if (!fin) begin
-					// over while it played (The Pit's uppercut, a hit): see what came of it
+					// over while it played (the game took the move): see what came of it
 					st           <= S_CHECK;
 					chk_n        <= CHECK_FRAMES;
-					ended_in_fin <= 1'b0;
 					own          <= 1'b0;
 					held         <= 9'd0;
 					tap          <= 9'd0;
@@ -473,7 +454,6 @@ always @(posedge clk) begin
 						default: begin                     // END
 							st           <= S_CHECK;
 							chk_n        <= CHECK_FRAMES;
-							ended_in_fin <= 1'b1;
 							own          <= 1'b0;
 							held         <= 9'd0;
 							tap          <= 9'd0;
