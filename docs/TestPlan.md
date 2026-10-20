@@ -18,13 +18,13 @@ when every game and the core-wide tests pass.
 
 | Game | Tests | Result |
 |---|---|---|
-| [Core-wide](#core-wide) | 19 | Pass |
+| [Core-wide](#core-wide) | 20 | 19 / 20 |
 | [Trog](#trog) | 11 | Pass |
 | [Smash T.V.](#smash-tv) | 10 | Pass |
 | [High Impact Football](#high-impact-football) | 13 | Pass |
 | [Super High Impact](#super-high-impact) | 13 | Pass |
 | [Strike Force](#strike-force) | 11 | Pass |
-| [Mortal Kombat](#mortal-kombat) | 29 | Pass |
+| [Mortal Kombat](#mortal-kombat) | 28 | 26 / 28 |
 | [Terminator 2 - Judgment Day](#terminator-2---judgment-day) | 13 | Pass |
 | [Total Carnage](#total-carnage) | 13 | Pass |
 | [Y-Unit Test ROM](#y-unit-test-rom) | 3 | Pass |
@@ -68,6 +68,7 @@ Run with any game (Mortal Kombat or Smash T.V. covers them all).
 | C-17 | Open DIP Switches in each game | The switches in alphabetical order (Service Credit and Tilt among them), and each switch's settings too; every value shows on its line | Pass | |
 | C-18 | Video Timing 57 Hz, then 60 Hz, with CRT Adjust on: CRT V-Size "+7" in PVM and in Cabinet mode | The whole picture stays on screen (the bottom rows too); "+" makes it only as tall as the frame allows | Pass | |
 | C-19 | Mortal Kombat: let the attract mode run into a demo fight and on; Smash T.V.: lose a game to GAME OVER | Each tune stops cleanly when the music changes or stops; no FM notes keep droning | Pass | |
+| C-20 | Video Timing 57 Hz or 60 Hz (analog, a TV that needs it): load a game from its MRA, and again after Reset | The ROM loading screen holds as steady as the game does (no bouncing or rolling) | | |
 
 ## Trog
 
@@ -182,21 +183,20 @@ Main MRA: Mortal Kombat (rev 4.0). [Controls, move list, finishing moves, hidden
 | MK-12 | Raiden, Electrocution | As MK-08 | Pass | |
 | MK-13 | Liu Kang, Cartwheel | As MK-08 | Pass | |
 | MK-14 | Scorpion, Fire Breath | As MK-08 | Pass | |
-| MK-15 | The Pit, on The Pit stage | The loser falls into the pit | Pass | |
-| MK-16 | A fatality with player 2 the winner | Played on player 2's controls | Pass | |
-| MK-17 | Set a move before the match | Message "Finishing move set: it plays at the next FINISH HIM"; it plays at FINISH HIM | Pass | |
-| MK-18 | Stand too far for Johnny Cage, then walk in | Message "Too far: step closer"; the move plays once close | Pass | |
-| MK-19 | Clear the set move | Message "Finishing move cleared"; nothing plays | Pass | |
-| MK-20 | Move List: Page 1, then Page 2 | Over the dimmed title screen, MOVE LIST 1/2 (Johnny Cage to Sonya) and 2/2 (Raiden to Scorpion): special moves, fatality with its distance, The Pit at the bottom; the text reads clearly | Pass | |
-| MK-21 | Hidden Items → EJB Menu in the attract mode | EJB Menu opens; message "EJB Menu: code entered" | Pass | |
-| MK-22 | The same during a fight | Nothing is pressed; message "Not now: the code works in the attract mode" | Pass | |
-| MK-23 | Each MRA in `_alternatives/_Mortal Kombat` | Boots to attract and plays; prototype 4.0's EJB Menu says "Not in this revision of the game" | Pass | |
-| MK-24 | Set Move List to a page during a fight, close the OSD, then set it Off | The fight waits behind the page and goes on where it was once Off | Pass | |
-| MK-25 | Hidden Items → Reptile Fight Next, then win a match in a 1-player game | Message "Reptile fight set: win a match in a 1-player game"; after the win "YOU HAVE FOUND ME", then the fight with Reptile below The Pit | Pass | |
-| MK-26 | Reptile Fight Next twice | Message "Reptile fight cleared"; the next win goes on as usual | Pass | |
-| MK-27 | Moon Silhouettes Always On, play to The Pit | Silhouettes cross the moon in every round there | Pass | |
-| MK-28 | Reptile Hints Always On, start a match | Reptile drops in with a hint before each round's "FIGHT!"; the EJB Menu's game audits are not cleared | Pass | |
-| MK-29 | Hidden Items on rev 2.0 or a prototype | Only EJB Menu (no Reptile lines); on rev 3.0 and the Turbo hacks the Reptile lines show | Pass | |
+| MK-15 | A fatality with player 2 the winner | Played on player 2's controls | Pass | |
+| MK-16 | Set a move before the match | Message "Finishing move set: it plays at the next FINISH HIM"; it plays at FINISH HIM | Pass | |
+| MK-17 | Stand too far for Johnny Cage, then walk in | Message "Too far: step closer"; the move plays once close | Pass | |
+| MK-18 | Clear the set move | Message "Finishing move cleared"; nothing plays | Pass | |
+| MK-19 | Move List: On, close the OSD, then press Left or Right on either controller | Over the dimmed title screen, MOVE LIST 1/2 (Johnny Cage to Sonya), full screen with the OSD closed; each press of Left or Right turns to the other page (2/2: Raiden to Scorpion); special moves, fatality with its distance, the Pit's D+HP uppercut at the bottom; the text reads clearly; with the OSD open the d-pad steers the OSD and the page stays; Off and On again starts at 1/2 | | |
+| MK-20 | Hidden Items → EJB Menu in the attract mode | EJB Menu opens; message "EJB Menu: code entered" | Pass | |
+| MK-21 | The same during a fight | Nothing is pressed; message "Not now: the code works in the attract mode" | Pass | |
+| MK-22 | Each MRA in `_alternatives/_Mortal Kombat` | Boots to attract and plays; prototype 4.0's EJB Menu says "Not in this revision of the game" | Pass | |
+| MK-23 | Set Move List On during a fight, close the OSD, then open it and set Move List Off | The fight waits behind the page and goes on where it was once Off | | |
+| MK-24 | Hidden Items → Reptile Fight Next, then win a match in a 1-player game | Message "Reptile fight set: win a match in a 1-player game"; after the win "YOU HAVE FOUND ME", then the fight with Reptile below The Pit | Pass | |
+| MK-25 | Reptile Fight Next twice | Message "Reptile fight cleared"; the next win goes on as usual | Pass | |
+| MK-26 | Moon Silhouettes Always On, play to The Pit | Silhouettes cross the moon in every round there | Pass | |
+| MK-27 | Reptile Hints Always On, start a match | Reptile drops in with a hint before each round's "FIGHT!"; the EJB Menu's game audits are not cleared | Pass | |
+| MK-28 | Hidden Items on rev 2.0 or a prototype | Only EJB Menu (no Reptile lines); on rev 3.0 and the Turbo hacks the Reptile lines show | Pass | |
 
 ## Terminator 2 - Judgment Day
 
