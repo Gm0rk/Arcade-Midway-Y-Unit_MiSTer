@@ -14,8 +14,6 @@ the summary, set its Status in the [README's game table](../README.md#games) to
 "Verified" and move the README's progress bar on by one. The core is done
 when every game and the core-wide tests pass.
 
-Core tested (rbf date): ____________
-
 ## Summary
 
 | Game | Tests | Result |
