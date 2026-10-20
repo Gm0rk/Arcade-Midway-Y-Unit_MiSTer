@@ -4,6 +4,11 @@ What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's 
 
 Build numbers count the core's development builds in order. Released RBF files are named by date. Builds 1 to 12 were named Arcade-MidwayY.
 
+## Build 50 (2026-10-19)
+
+**Docs & tools**
+- TestPlan: typo in the Super High Impact notes (SH-08, SH-10) fixed.
+
 ## Build 49 (2026-10-19)
 
 **Docs & tools**
