@@ -4,6 +4,26 @@ What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's 
 
 Build numbers count the core's development builds in order. Released RBF files are named by date. Builds 1 to 12 were named Arcade-MidwayY.
 
+## Build 66 (2026-10-20)
+
+**Docs & tools**
+- README: Timing and resources from the Build 65 compilation (the RTL of Build 64): **timing is met on every clock**. Setup on the 96 MHz system clock has 0.067 ns to spare (total negative slack 0, Fmax 96.63 MHz; Build 63: -0.763 ns); the next clock, the HDMI PLL, 0.680 ns; hold, recovery, removal and minimum pulse width are met. The closest paths are now in `crt_vsize` (the line memory and the line-count arithmetic of CRT V-Size), no longer in the crosshair or the HQ2x filter. The paths file `output_files/Arcade-Midway-Y-Unit.paths.txt` was written by the build itself (Build 65), the first time.
+
+## Build 65 (2026-10-20)
+
+**Docs & tools**
+- Every compilation now lists its worst timing paths by itself: after the build, `output_files/Arcade-Midway-Y-Unit.paths.txt` is written (the 100 worst setup paths of every clock, then the 10 worst in full), the file that used to need `quartus_sta -t tools/timing_paths.tcl` by hand. Quartus runs one post-flow script per project, so the project's now runs the new `post_flow.tcl`, which runs `release.tcl` (files the core in `releases/`, as before) and then `tools/timing_paths.tcl`. It takes a minute or two after the build and runs whether timing is met or not; a build that failed before the timing analysis leaves the last paths file alone. A problem is a warning in the Messages window, never a failed build. The script was tested with a stand-in for quartus_sta, not with Quartus itself.
+
+## Build 64 (2026-10-20)
+
+**Changed**
+- Terminator 2 crosshair: the two "sight is here" flags are now registered (one 96 MHz clock late) before they are mixed into the picture. The Build 63 compilation met timing on every clock except the 96 MHz system clock, which failed by 0.763 ns (total negative slack 92.591 ns) on one path: the crosshair's position multiplier, the compare with the beam position and the colour mix, all in one clock, into the CRT V-Size line memory. Split in two, each half has about 4 ns to spare. The beam position changes only on the 8 MHz dot enable and the picture is read only on it, so the sight is drawn on exactly the same pixels as before (checked in simulation: no difference over 400 frames of random sight positions). The README's timing report is still that of Build 61 until the next compilation.
+
+## Build 63 (2026-10-20)
+
+**Changed**
+- Timing constraints (Arcade-Midway-Y-Unit.sdc): a two-cycle exception (setup 2, hold 1) for paths between the registers of the HQ2x scandoubler filter's Blend stage (sys/hq2x.sv). They change only on the scandoubler's clock enable, which comes at least every 3 clocks while pixels flow (once more at each HSync edge, in the blanking), so they have more than one 96 MHz clock. This is the path that failed setup on the 96 MHz system clock by 0.538 ns in the Build 61 compilation. No RTL change; the next compilation's reports show whether setup now closes and what the next worst path is. The README's timing report is still that of Build 61.
+
 ## Build 62 (2026-10-20)
 
 **Docs & tools**
