@@ -4,6 +4,11 @@ What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's 
 
 Build numbers count the core's development builds in order. Released RBF files are named by date. Builds 1 to 12 were named Arcade-MidwayY.
 
+## Build 53 (2026-10-20)
+
+**Docs & tools**
+- TestPlan: the "Core tested (rbf date)" line is removed (the tester's edited file). No test result changes.
+
 ## Build 52 (2026-10-20)
 
 **Docs & tools**
