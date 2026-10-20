@@ -20,6 +20,10 @@ Smash T.V. has no game-specific OSD items.
 
 The [core-wide extras](ExtraContent.md#core-wide-features) (CRT Adjust, CRT V-Size, Video Timing, DIP Switches, Service Mode and the rest) apply to every game.
 
+## High scores
+
+Smash T.V. keeps two tables, ALL TIME and TODAY. As on the board, TODAY starts afresh every time the game starts: loading the MRA, a Reset or a power-up. Only the ALL TIME table is kept, so a score has to make that table to be there next time. The NVRAM is saved when the OSD opens, so open the OSD after the table has shown your initials.
+
 ## Controls
 
 Smash T.V. is a twin-stick game: one stick moves, the other fires.
