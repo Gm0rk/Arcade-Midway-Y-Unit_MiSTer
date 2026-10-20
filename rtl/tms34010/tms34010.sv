@@ -766,12 +766,15 @@ always @(posedge clk) if (ce) begin
 		convdp_sh  <= 5'd0;
 		// the CRT timing keeps running (the default raster, the registers
 		// being zero) so the display stays locked while the board is held
-		// in reset, e.g. during a ROM download
+		// in reset, e.g. during a ROM download; blank lines are dropped as
+		// when the board runs (Video Timing), so a TV that needs 57 or
+		// 60 Hz also holds the loading screen
 		if (ce_vclk)
 			hcnt <= line_wrap ? 10'd0 : hcnt + 10'd1;
-		if (line_wrap)
-			vcnt <= (vcnt >= t_vtotal) ? 10'd0 : vcnt + 10'd1;
-		drop_left  <= 10'd0;
+		if (line_wrap) begin
+			vcnt      <= vcnt_new;
+			drop_left <= (vcnt_new == t_vsblnk) ? t_drop : drop_left - sk_k;
+		end
 		refcnt     <= 20'd0;
 		line_vis   <= 1'b0;
 		w_heblnk   <= 10'd45;
