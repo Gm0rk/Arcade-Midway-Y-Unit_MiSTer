@@ -3,15 +3,19 @@
 yunit_window.py - the pages of the information window: Mortal Kombat's
 Move List and Total Carnage's Passwords
 
-With the OSD's "Move List" set to Page 1 or Page 2 (Mortal Kombat) or
-"Passwords" on (Total Carnage), rtl/yunit_window.sv draws the page over the
-picture, on the game's title screen dimmed so the text reads.
+With the OSD's "Move List" On (Mortal Kombat) or "Passwords" on (Total
+Carnage), rtl/yunit_window.sv draws the page over the picture, on the game's
+title screen dimmed so the text reads. The Move List's two pages are flipped
+with a controller's Left or Right while the OSD is closed (rtl/
+yunit_listpage.sv), so the pages say so.
 
 Move List (pages 0 and 1): the T-Unit core's pages for MK (Arcade-Midway-
 T-Unit tools/tunit_window.py): each fighter's special moves and fatality
 with the distance it needs, in words (Close, Sweep, Jump; tools/
 yunit_fmoves.py has the moves and the distances), as many fighters to a
-page as fit (four, then three), The Pit in the footer.
+page as fit (four, then three), The Pit (the uppercut, which the core does
+not enter for you) in the footer, and under the title how to flip the pages
+and to leave.
 
 Passwords (page 2): Total Carnage's warp codes. The game checks the code
 entered at the warp disc at the start against a list in its program ROM
@@ -173,7 +177,7 @@ NOTATION = [
 
 def pit_footer():
     """The Pit, the same for every fighter: in the footer."""
-    mname, kind, cmd, prog, dmin, dmax = fm.PIT
+    mname, cmd, dmin, dmax = fm.PIT
     return [(mname, YELLOW), (' (all): %s, %s, %s' % (cmd, fm.dist_words(dmin, dmax).lower(),
                                                        fm.FINISH_NOTES[(None, mname)]), GRAY)]
 
@@ -200,24 +204,24 @@ def pages():
     and the fatality; The Pit, the same for all, in the footer. The OSD's
     Move List option names the pages (yunit_fmoves.LIST_PAGES)."""
     foot = [row(*f) for f in NOTATION] + [row(*pit_footer())]
-    fighters = [(n, [m for m in moves if m[1] != fm.K_MKPIT]) for n, _, moves in fm.fighters()]
+    fighters = [(n, moves) for n, _, moves in fm.fighters()]
     c_name = LEFT + 2
     w_name = max(len(m) for sp in fm.SPECIALS for m, _ in sp)
     w_name = max([w_name] + [len('Fatality: ' + m[0]) for _, fat in fighters for m in fat])
     c_cmd = c_name + w_name + 2
-    dists = [fm.dist_words(m[4], m[5]) for _, fat in fighters for m in fat]
+    dists = [fm.dist_words(m[3], m[4]) for _, fat in fighters for m in fat]
     c_dist = RIGHT + 1 - max(max(len(d) for d in dists), len('DISTANCE'))
     blocks = []
     for (name, fat), sp in zip(fighters, fm.SPECIALS):
         b = [row((name.upper(), CYAN))] + special_rows(name, sp, c_name, c_cmd)
-        for mname, kind, cmd, prog, dmin, dmax in fat:
+        for mname, cmd, prog, dmin, dmax in fat:
             b.append(at((c_name, 'Fatality: ' + mname, WHITE), (c_cmd, cmd, YELLOW),
                         (c_dist, fm.dist_words(dmin, dmax), GRAY)))
             note = fm.FINISH_NOTES.get((name, mname))
             if note:
                 b.append(at((c_cmd, note, GRAY)))
         blocks.append((name, b))
-    room = ROWS - 3 - 1 - len(foot)          # title, blank, header ... blank, footer
+    room = ROWS - 3 - 1 - len(foot)          # title, hint, header ... blank, footer
     groups, cur = [], []
     for name, b in blocks:
         rows_ = sum(len(x) + 1 for _, x in cur) + len(b)
@@ -234,7 +238,9 @@ def pages():
         for name, b in g:
             body += ([None] if body else []) + b
         head = [at((LEFT, 'MOVE LIST' + ('  %d/%d' % (k + 1, len(groups)) if len(groups) > 1 else ''), CYAN),
-                   (RIGHT + 1 - len(TITLE), TITLE, GRAY)), None,
+                   (RIGHT + 1 - len(TITLE), TITLE, GRAY)),
+                at((LEFT, 'LEFT/RIGHT', YELLOW), (LEFT + 10, ': other page   ', GRAY),
+                   (LEFT + 25, 'OSD > Move List > Off', YELLOW), (LEFT + 46, ': play', GRAY)),
                 at((c_name, 'MOVE', GRAY), (c_cmd, 'COMMAND', GRAY), (c_dist, 'DISTANCE', GRAY))]
         out.append(compose(', '.join(n for n, _ in g), head, body, foot))
     return out
