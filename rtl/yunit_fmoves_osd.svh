@@ -5,7 +5,7 @@
 // Copyright (C) 2026 Gm0rk - GPL-3.0-or-later
 
 `define FMOVES_MENU \
-	"H5O[42:41],Move List,Off,Page 1,Page 2;", \
+	"H5O[41],Move List,Off,On;", \
 	"H5P3,Finishing Moves;"
 
 `define FMOVES_PAGES \
@@ -13,41 +13,33 @@
 	"P3O[30:28],Fighter,Johnny Cage,Kano,Sub-Zero,Sonya,Raiden,Liu Kang,Scorpion;", \
 	"P3-;", \
 	"H8H9HAP3R[32],Decapitation F F F HP;", \
-	"H8H9HAP3R[33],The Pit      D+HP;", \
 	"h8H9HAP3R[32],Heart Rip    B D F LP;", \
-	"h8H9HAP3R[33],The Pit      D+HP;", \
 	"H8h9HAP3R[32],Spine Rip    F D F HP;", \
-	"H8h9HAP3R[33],The Pit      D+HP;", \
 	"h8h9HAP3R[32],Kiss of Death F F B B BL;", \
-	"h8h9HAP3R[33],The Pit      D+HP;", \
 	"H8H9hAP3R[32],Electrocution F B B B HP;", \
-	"H8H9hAP3R[33],The Pit      D+HP;", \
 	"h8H9hAP3R[32],Cartwheel    D B U F D;", \
-	"h8H9hAP3R[33],The Pit      D+HP;", \
 	"H8h9hAP3R[32],Fire Breath  (BL) U U;", \
-	"H8h9hAP3R[33],The Pit      D+HP;", \
 	"P3-;", \
 	"P3R[40],Clear the set move;", \
 	"P3-;", \
 	"P3-,The move plays at the;", \
 	"P3-,winner's FINISH HIM;"
 
-`define CORE_INFO "I,Finishing move set: it plays\nat the next FINISH HIM,Not this fighter's FINISH HIM:\nthe move waits for a later one,Too far: step closer,Too close: step back,Stage move: The Pit only,FINISH HIM is over: the move\nwaits for the next one,Move not taken,Finishing move cleared,EJB Menu: code entered,Octopus Bookkeeping:\ncode entered,Code not taken: try again,Not now: the code works in\nthe attract mode,Not now: the code works while\nthe attract mode shows\nHIGHEST PAID SUPERSTARS,Not in this revision\nof the game,Reptile fight set: win a match\nin a 1-player game,Reptile fight cleared;"
+`define CORE_INFO "I,Finishing move set: it plays\nat the next FINISH HIM,Not this fighter's FINISH HIM:\nthe move waits for a later one,Too far: step closer,Too close: step back,FINISH HIM is over: the move\nwaits for the next one,Move not taken,Finishing move cleared,EJB Menu: code entered,Octopus Bookkeeping:\ncode entered,Code not taken: try again,Not now: the code works in\nthe attract mode,Not now: the code works while\nthe attract mode shows\nHIGHEST PAID SUPERSTARS,Not in this revision\nof the game,Reptile fight set: win a match\nin a 1-player game,Reptile fight cleared;"
 
 // message numbers (the I line's fields)
 localparam [4:0] MSG_SET = 5'd1;
 localparam [4:0] MSG_NOT_THIS = 5'd2;
 localparam [4:0] MSG_FAR = 5'd3;
 localparam [4:0] MSG_CLOSE = 5'd4;
-localparam [4:0] MSG_MKPIT = 5'd5;
-localparam [4:0] MSG_OVER = 5'd6;
-localparam [4:0] MSG_NOT_TAKEN = 5'd7;
-localparam [4:0] MSG_CLEARED = 5'd8;
-localparam [4:0] MSG_EJB_OK = 5'd9;
-localparam [4:0] MSG_OCTO_OK = 5'd10;
-localparam [4:0] MSG_CODE_FAIL = 5'd11;
-localparam [4:0] MSG_WHEN_ATTRACT = 5'd12;
-localparam [4:0] MSG_WHEN_SHI = 5'd13;
-localparam [4:0] MSG_NOT_HERE = 5'd14;
-localparam [4:0] MSG_REPT_SET = 5'd15;
-localparam [4:0] MSG_REPT_CLEARED = 5'd16;
+localparam [4:0] MSG_OVER = 5'd5;
+localparam [4:0] MSG_NOT_TAKEN = 5'd6;
+localparam [4:0] MSG_CLEARED = 5'd7;
+localparam [4:0] MSG_EJB_OK = 5'd8;
+localparam [4:0] MSG_OCTO_OK = 5'd9;
+localparam [4:0] MSG_CODE_FAIL = 5'd10;
+localparam [4:0] MSG_WHEN_ATTRACT = 5'd11;
+localparam [4:0] MSG_WHEN_SHI = 5'd12;
+localparam [4:0] MSG_NOT_HERE = 5'd13;
+localparam [4:0] MSG_REPT_SET = 5'd14;
+localparam [4:0] MSG_REPT_CLEARED = 5'd15;
