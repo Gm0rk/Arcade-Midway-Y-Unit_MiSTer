@@ -7,13 +7,15 @@ data the core needs for them and for the Hidden Items page's messages
     python3 tools/yunit_fmoves.py --scan <prog.bin>...  addresses found in program ROMs
     python3 tools/yunit_fmoves.py --docs                docs/MortalKombat.md tables
 
-The OSD's "Finishing Moves" page picks a fighter and one of the fighter's
-moves; rtl/yunit_fmoves.sv enters it on the winner's controls at the next
-FINISH HIM it fits. The main page's "Move List" option (Off, Page 1, Page 2)
-shows a page of the fighters' special moves and fatalities, with the
-distance each needs, in a window over the picture (tools/yunit_window.py
-makes the two pages from the lists here, rtl/yunit_window.sv draws them). This script
-holds the lists and makes from them:
+The OSD's "Finishing Moves" page picks a fighter; rtl/yunit_fmoves.sv enters
+the fighter's fatality on the winner's controls at the next FINISH HIM it
+fits. (The Pit is not entered for you: it is the uppercut, D+HP; the Move
+List says so.) The main page's "Move List" option (Off, On) shows the
+fighters' special moves and fatalities, with the distance each needs, in a
+window over the picture, two pages that the controllers' Left and Right flip
+(tools/yunit_window.py makes the pages from the lists here,
+rtl/yunit_window.sv draws them, rtl/yunit_listpage.sv flips them). This
+script holds the lists and makes from them:
 
   - rtl/yunit_fmoves_tab.svh: the move records and their programs (the
     controls they press), included by rtl/yunit_fmoves.sv
@@ -57,8 +59,9 @@ the same code, the protos and Nifty Kombat their own addresses):
 
   Limits (center distance), all revisions: Johnny Cage <= 0x48, Kano
   <= 0x68, Sub-Zero <= 0x65, Raiden 0x48-0x88, Scorpion 0x75-0xA0 (proto
-  4.0 0x70-0xA0), Sonya and Liu Kang anywhere. The Pit: the uppercut has to
-  connect (up to 88). The windows below keep 2 pixels from each limit.
+  4.0 0x70-0xA0), Sonya and Liu Kang anywhere. (The Pit, not entered by the
+  core: the uppercut has to connect, up to 88.) The windows below keep 2
+  pixels from each limit.
 
 Each move was played in MAME 0.289 on every Y Unit set at center distances
 from the closest the fighters get (about 62) to 300, P1 and P2 the winner:
@@ -84,22 +87,23 @@ ROOT = os.path.dirname(HERE)
 # Moves
 # --------------------------------------------------------------------------
 
-# kinds (rtl/yunit_fmoves.sv): what "taken" is and what the stage must be
-K_FATAL, K_MKPIT = 0, 1
 FAR = 511                        # no upper distance limit
 
-# select screen order: (name, character id, [(osd name, kind, OSD command,
-# program, min distance, max distance)])
+# select screen order: (name, character id, [(osd name, OSD command, program,
+# min distance, max distance)])
 FIGHTERS = [
-    ("Johnny Cage", 0, [("Decapitation", K_FATAL, "F F F HP", "[BL F F F ]BL HP", 0, 70)]),
-    ("Kano", 1, [("Heart Rip", K_FATAL, "B D F LP", "[BL B D F ]BL LP", 0, 102)]),
-    ("Sub-Zero", 5, [("Spine Rip", K_FATAL, "F D F HP", "[BL F D F ]BL HP", 0, 99)]),
-    ("Sonya", 6, [("Kiss of Death", K_FATAL, "F F B B BL", "[BL F F B B ]BL BL", 0, FAR)]),
-    ("Raiden", 2, [("Electrocution", K_FATAL, "F B B B HP", "[BL F B B B ]BL HP", 74, 134)]),
-    ("Liu Kang", 3, [("Cartwheel", K_FATAL, "D B U F D", "[BL D B U F ]BL D", 0, FAR)]),
-    ("Scorpion", 4, [("Fire Breath", K_FATAL, "(BL) U U", "[BL U U ]BL", 119, 158)]),
+    ("Johnny Cage", 0, [("Decapitation", "F F F HP", "[BL F F F ]BL HP", 0, 70)]),
+    ("Kano", 1, [("Heart Rip", "B D F LP", "[BL B D F ]BL LP", 0, 102)]),
+    ("Sub-Zero", 5, [("Spine Rip", "F D F HP", "[BL F D F ]BL HP", 0, 99)]),
+    ("Sonya", 6, [("Kiss of Death", "F F B B BL", "[BL F F B B ]BL BL", 0, FAR)]),
+    ("Raiden", 2, [("Electrocution", "F B B B HP", "[BL F B B B ]BL HP", 74, 134)]),
+    ("Liu Kang", 3, [("Cartwheel", "D B U F D", "[BL D B U F ]BL D", 0, FAR)]),
+    ("Scorpion", 4, [("Fire Breath", "(BL) U U", "[BL U U ]BL", 119, 158)]),
 ]
-PIT = ("The Pit", K_MKPIT, "D+HP", "[D w8 HP w8 ]D", 0, 80)
+# The Pit is not a Finishing Moves entry (it is the uppercut, D+HP, which the
+# player does); it is only named in the Move List's footer: (name, command,
+# min distance, max distance)
+PIT = ("The Pit", "D+HP uppercut", 0, 80)
 
 # Move List window: each fighter's special moves, shown only. Same order as the
 # fighters. Found in the move handlers (rev 4.0: per button and direction at
@@ -120,7 +124,7 @@ SPECIAL_NOTES = {
 # Move List window: a line under a finishing move (by fighter and move name)
 FINISH_NOTES = {
     ('Raiden', 'Electrocution'): 'not when touching',
-    (None, 'The Pit'): 'on The Pit stage only',
+    (None, 'The Pit'): 'on its stage',
 }
 
 # Distances in words (Move List window). The windows are center distances
@@ -152,8 +156,8 @@ def dist_words(dmin, dmax):
 
 
 def fighters():
-    """(name, id, moves) per OSD line, with The Pit every fighter has."""
-    return [(n, c, m + [PIT]) for n, c, m in FIGHTERS]
+    """(name, id, moves) per OSD line: one fatality each."""
+    return [(n, c, list(m)) for n, c, m in FIGHTERS]
 
 
 # --------------------------------------------------------------------------
@@ -535,7 +539,6 @@ MESSAGES = [
     ('NOT_THIS', "Not this fighter's FINISH HIM:\nthe move waits for a later one"),
     ('FAR', "Too far: step closer"),
     ('CLOSE', "Too close: step back"),
-    ('MKPIT', "Stage move: The Pit only"),
     ('OVER', "FINISH HIM is over: the move\nwaits for the next one"),
     ('NOT_TAKEN', "Move not taken"),
     ('CLEARED', "Finishing move cleared"),
@@ -549,13 +552,13 @@ MESSAGES = [
     ('REPT_CLEARED', "Reptile fight cleared"),
 ]
 
-N_FM_MESSAGES = 8                # the move player's (rtl/yunit_fmoves.sv)
+N_FM_MESSAGES = 7                # the move player's (rtl/yunit_fmoves.sv)
 
 # OSD status bits (top level)
 SEL_BITS = (30, 28)              # O[30:28] fighter
 SLOT_BIT = 32                    # R[32] + slot: the fighter's moves
 CLEAR_BIT = 40                   # R[40]: clear the set move
-LIST_BITS = (42, 41)             # O[42:41] Move List: Off, Page 1, Page 2
+LIST_BIT = 41                    # O[41] Move List: Off, On
 LIST_PAGES = 2                   # tools/yunit_window.py's pages (it checks)
 MASK_SEL = 8                     # status_menumask bits 8-10: the page's fighter
 PAGE_FM = 'P3'
@@ -587,15 +590,14 @@ def osd_lines():
     names = ','.join(n for n, _, _ in FIGHTERS)
     fopt = 'O[%d:%d],Fighter,%s;' % (SEL_BITS[0], SEL_BITS[1], names)
     out = []
-    out.append('H5O[%d:%d],Move List,Off,%s;' % (LIST_BITS[0], LIST_BITS[1],
-                                                ','.join('Page %d' % (k + 1) for k in range(LIST_PAGES))))
+    out.append('H5O[%d],Move List,Off,On;' % LIST_BIT)
     out.append('H5%s,Finishing Moves;' % PAGE_FM)
     out.append('%s-;' % PAGE_FM)
     out.append(PAGE_FM + fopt)
     out.append('%s-;' % PAGE_FM)
     for li, (name, cid, moves) in enumerate(fighters()):
         pre = sel_prefix(li)
-        for slot, (mname, kind, cmd, prog, dmin, dmax) in enumerate(moves):
+        for slot, (mname, cmd, prog, dmin, dmax) in enumerate(moves):
             out.append('%s%sR[%d],%s;' % (pre, PAGE_FM, SLOT_BIT + slot, label(mname, cmd)))
     out.append('%s-;' % PAGE_FM)
     out.append('%sR[%d],Clear the set move;' % (PAGE_FM, CLEAR_BIT))
@@ -614,8 +616,8 @@ def tables():
     """Move records and steps: records[(line, slot)] and the step list."""
     steps, recs = [], {}
     for li, (name, cid, moves) in enumerate(fighters()):
-        for slot, (mname, kind, cmd, prog, dmin, dmax) in enumerate(moves):
-            recs[(li, slot)] = dict(char=cid, kind=kind, dmin=dmin, dmax=dmax, start=len(steps),
+        for slot, (mname, cmd, prog, dmin, dmax) in enumerate(moves):
+            recs[(li, slot)] = dict(char=cid, dmin=dmin, dmax=dmax, start=len(steps),
                                     name='%s: %s' % (name, mname))
             steps += compile_prog(prog)
     return recs, steps
@@ -630,19 +632,19 @@ def gen_tab():
     o.append('// yunit_fmoves_tab.svh - finishing moves: records and programs')
     o.append('// Generated by tools/yunit_fmoves.py --gen; do not edit.')
     o.append('//')
-    o.append('// fm_rec({line, slot}): {valid, kind, character[2:0], min distance[8:0],')
-    o.append('//   max distance[8:0], first step[7:0]}; kind 0 fatality, 1 The Pit')
+    o.append('// fm_rec({line, slot}): {valid, character[2:0], min distance[8:0],')
+    o.append('//   max distance[8:0], first step[7:0]}')
     o.append('// fm_step(n): {op[2:0], arg[12:0]} (rtl/yunit_fmoves.sv)')
     o.append('//')
     o.append(HEADER)
     o.append('')
-    o.append('function automatic [30:0] fm_rec(input [5:0] id);')
+    o.append('function automatic [29:0] fm_rec(input [5:0] id);')
     o.append('\tcase (id)')
     for (li, slot), r in sorted(recs.items()):
         idv = li << 3 | slot
-        o.append("\t\t6'h%02X: fm_rec = {1'b1, 1'b%d, 3'd%d, 9'd%d, 9'd%d, 8'd%d};   // %s"
-                 % (idv, r['kind'], r['char'], r['dmin'], r['dmax'], r['start'], r['name']))
-    o.append("\t\tdefault: fm_rec = 31'd0;")
+        o.append("\t\t6'h%02X: fm_rec = {1'b1, 3'd%d, 9'd%d, 9'd%d, 8'd%d};   // %s"
+                 % (idv, r['char'], r['dmin'], r['dmax'], r['start'], r['name']))
+    o.append("\t\tdefault: fm_rec = 30'd0;")
     o.append('\tendcase')
     o.append('endfunction')
     o.append('')
@@ -698,11 +700,8 @@ def docs():
         return '%d-%d' % (dmin, dmax)
     o = ['| Fighter | Move | Command | Distance |', '|---|---|---|---|']
     for name, cid, moves in FIGHTERS:
-        for n, (mname, kind, cmd, prog, dmin, dmax) in enumerate(moves):
+        for n, (mname, cmd, prog, dmin, dmax) in enumerate(moves):
             o.append('| %s | %s | %s | %s |' % (name if n == 0 else '', mname, cmd, dist(dmin, dmax)))
-    o.append('')
-    mname, kind, cmd, prog, dmin, dmax = PIT
-    o.append('Every fighter also has The Pit (on that stage): %s, %s.' % (cmd, dist(dmin, dmax)))
     o.append('')
     # the Move List window's pages (tools/yunit_window.py) as a table
     o.append('| Fighter | Move | Command | Distance |')
@@ -712,14 +711,15 @@ def docs():
         for mname, cmd in moves:
             note = SPECIAL_NOTES.get((name, mname))
             rows.append((mname, cmd + (', ' + note if note else ''), ''))
-        for mname, kind, cmd, prog, dmin, dmax in fat:
+        for mname, cmd, prog, dmin, dmax in fat:
             note = FINISH_NOTES.get((name, mname))
             rows.append(('Fatality: ' + mname, cmd, dist_words(dmin, dmax) + (', ' + note if note else '')))
         for n, r in enumerate(rows):
             o.append('| %s | %s | %s | %s |' % ((name if n == 0 else '',) + r))
     o.append('')
-    mname, kind, cmd, prog, dmin, dmax = PIT
-    o.append('Every fighter: %s, %s, %s, %s.' % (mname, cmd, dist_words(dmin, dmax), FINISH_NOTES[(None, mname)]))
+    mname, cmd, dmin, dmax = PIT
+    o.append('Every fighter, on %s stage only: an uppercut (D+HP), %s. The core does not enter it.' % (
+        mname, dist_words(dmin, dmax).lower()))
     return '\n'.join(o)
 
 
