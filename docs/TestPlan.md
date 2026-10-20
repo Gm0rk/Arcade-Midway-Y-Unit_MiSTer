@@ -22,9 +22,9 @@ Core tested (rbf date): ____________
 |---|---|---|
 | [Core-wide](#core-wide) | 19 | 8 / 19 passed |
 | [Trog](#trog) | 11 | Pass |
-| [Smash T.V.](#smash-tv) | 10 | 8 / 10 passed |
-| [High Impact Football](#high-impact-football) | 13 | 2 / 13 passed |
-| [Super High Impact](#super-high-impact) | 13 | 2 / 13 passed |
+| [Smash T.V.](#smash-tv) | 10 | Pass |
+| [High Impact Football](#high-impact-football) | 13 | Pass |
+| [Super High Impact](#super-high-impact) | 13 | Pass |
 | [Strike Force](#strike-force) | 11 | 1 / 11 passed |
 | [Mortal Kombat](#mortal-kombat) | 29 | Pass |
 | [Terminator 2 - Judgment Day](#terminator-2---judgment-day) | 13 | Pass |
@@ -83,7 +83,7 @@ Main MRA: Trog (rev LA5). [Controls](Trog.md).
 | TR-04 | Play a level with 2+ players | Picture correct: sprites, backgrounds, colours, no garbage | Pass | |
 | TR-05 | Sound in attract and game | Music, effects and speech, no crackle or missing voices | Pass | |
 | TR-06 | Play to game over | Continue screen, initials entry | Pass | |
-| TR-07 | Set a high score, open the OSD, reload | Score kept, no CMOS error on boot | Pass | |
+| TR-07 | Set a high score in the Top Trogs table, open the OSD, reload | Score kept, no CMOS error on boot. The Daily Dinos table starts afresh at every power-up, as on the board | Pass | |
 | TR-08 | Test menu: switch test, sound test | Every switch shows; sounds play | Pass | |
 | TR-09 | Change a DIP switch, reset | Applied | Pass | |
 | TR-10 | Trog (prototype, rev 4.00) MRA | Boots; 8-way stick, Bone button | Pass | |
@@ -96,12 +96,12 @@ Main MRA: Smash T.V. (rev 8.00). [Controls](SmashTV.md).
 | # | Test | Expected | Result | Notes |
 |---|---|---|---|---|
 | ST-01 | Boot | Attract mode: title, demo, high scores | Pass | |
-| ST-02 | Coin and Start for players 1-2; coin 3 | Credits added, each player joins | | |
+| ST-02 | Coin and Start for players 1-2; coin 3 | Credits added, each player joins | Pass | |
 | ST-03 | Move with the d-pad / left stick; fire with B1-B4, two at once | Moves in 8 directions; fires up, down, left, right and diagonals | Pass | |
 | ST-04 | Fire with the right analog stick | Fires the way it points | Pass | |
 | ST-05 | Play the first arena with 2 players | Picture correct, no slowdown or garbage | Pass | |
 | ST-06 | Sound in attract and game | Music, effects, host's speech | Pass | |
-| ST-07 | Set a high score, open the OSD, reload | Score kept, no CMOS error on boot | | |
+| ST-07 | Set a high score in the All Time table, open the OSD, reload | Score kept, no CMOS error on boot. The Today table starts afresh at every power-up, as on the board | Pass | |
 | ST-08 | Test menu: switch test, sound test | Every switch shows; sounds play | Pass | |
 | ST-09 | Play to game over | Continue screen, initials entry | Pass | |
 | ST-10 | Each MRA in `_alternatives/_Smash T.V_` | Boots to attract and plays | Pass | |
@@ -113,18 +113,18 @@ Main MRA: High Impact Football (rev LA5). [Controls and hidden menu](HighImpactF
 | # | Test | Expected | Result | Notes |
 |---|---|---|---|---|
 | HI-01 | Boot | Attract mode: title, demo plays, standings | Pass | |
-| HI-02 | Coin and Start for players 1-4; coins 3 and 4 | Credits added, each player joins | | |
-| HI-03 | Controls of each player | 8-way stick, Action | | |
-| HI-04 | Play a quarter | Picture correct: field scrolls, players, scoreboard | | |
-| HI-05 | Sound | Music, effects, announcer | | |
-| HI-06 | Change a setting, open the OSD, reload | Kept, no CMOS error on boot | | |
-| HI-07 | Players DIP switch at 2, reset | 2-player cabinet: only players 1-2 | | |
-| HI-08 | Hidden Items → Octopus Bookkeeping in the attract mode | Octopus Bookkeeping pages open; message "Octopus Bookkeeping: code entered" | | |
-| HI-09 | The same during a game | Nothing is pressed; message "Not now: the code works in the attract mode" | | |
-| HI-10 | HI-08 with the Players DIP switch at 2 | Pages open | | |
-| HI-11 | Prototype 8.6 MRA: Octopus Bookkeeping | Message "Not in this revision of the game" | | |
+| HI-02 | Coin and Start for players 1-4; coins 3 and 4 | Credits added, each player joins | Pass | |
+| HI-03 | Controls of each player | 8-way stick, Action | Pass | |
+| HI-04 | Play a quarter | Picture correct: field scrolls, players, scoreboard | Pass | |
+| HI-05 | Sound | Music, effects, announcer | Pass | |
+| HI-06 | Change a setting, open the OSD, reload | Kept, no CMOS error on boot | Pass | |
+| HI-07 | Players DIP switch at 2, reset | 2-player cabinet: only players 1-2 | Pass | |
+| HI-08 | Hidden Items → Octopus Bookkeeping in the attract mode | Octopus Bookkeeping pages open; message "Octopus Bookkeeping: code entered" | Pass | |
+| HI-09 | The same during a game | Nothing is pressed; message "Not now: the code works in the attract mode" | Pass | |
+| HI-10 | HI-08 with the Players DIP switch at 2 | Pages open | Pass | |
+| HI-11 | Prototype 8.6 MRA: Octopus Bookkeeping | Message "Not in this revision of the game" | Pass | |
 | HI-12 | Each MRA in `_alternatives/_High Impact Football` | Boots to attract and plays | Pass | |
-| HI-13 | DIP Switches → Coinage: select it repeatedly, then Free Play and reset | Six settings in turn (1 Coin/1 Credit, 2 Coins/1 Credit, 2C/1C - 4C/3C, 2C/1C - 4C/4C, ECA, Free Play); after the reset the game is on free play | | |
+| HI-13 | DIP Switches → Coinage: select it repeatedly, then Free Play and reset | Six settings in turn (1 Coin/1 Credit, 2 Coins/1 Credit, 2C/1C - 4C/3C, 2C/1C - 4C/4C, ECA, Free Play); after the reset the game is on free play | Pass | |
 
 ## Super High Impact
 
@@ -133,18 +133,18 @@ Main MRA: Super High Impact (rev LA2). [Controls and hidden menu](SuperHighImpac
 | # | Test | Expected | Result | Notes |
 |---|---|---|---|---|
 | SH-01 | Boot | Attract mode: title, demo plays, HIGHEST PAID SUPERSTARS | Pass | |
-| SH-02 | Coin and Start for players 1-4; coins 3 and 4 | Credits added, each player joins | | |
-| SH-03 | Controls of each player | 8-way stick, Action | | |
-| SH-04 | Play a quarter | Picture correct: field scrolls, players, scoreboard | | |
-| SH-05 | Sound | Music, effects, announcer | | |
-| SH-06 | Change a setting, open the OSD, reload | Kept, no CMOS error on boot | | |
-| SH-07 | Players DIP switch at 2, reset | 2-player cabinet: only players 1-2 | | |
-| SH-08 | Hidden Items → Octopus Bookkeeping while HIGHEST PAID SUPERSTARS shows | Octopus Bookkeeping opens; message "Octopus Bookkeeping: code entered" | | |
-| SH-09 | The same on another attract screen | Nothing is pressed; message "Not now: the code works while the attract mode shows HIGHEST PAID SUPERSTARS" | | |
-| SH-10 | SH-08 with the Players DIP switch at 2 | Opens | | |
-| SH-11 | A prototype MRA: Octopus Bookkeeping | Message "Not in this revision of the game" | | |
+| SH-02 | Coin and Start for players 1-4; coins 3 and 4 | Credits added, each player joins | Pass | |
+| SH-03 | Controls of each player | 8-way stick, Action | Pass | |
+| SH-04 | Play a quarter | Picture correct: field scrolls, players, scoreboard | Pass | |
+| SH-05 | Sound | Music, effects, announcer | Pass | |
+| SH-06 | Change a setting, open the OSD, reload | Kept, no CMOS error on boot | Pass | |
+| SH-07 | Players DIP switch at 2, reset | 2-player cabinet: only players 1-2 | Pass | |
+| SH-08 | Hidden Items → Octopus Bookkeeping while HIGHEST PAID SUPERSTARS shows | Octopus Bookkeeping opens; message "Octopus Bookkeeping: code entered" | Pass | Lost sound when exiting the octopus menu – Rest game fixes it |
+| SH-09 | The same on another attract screen | Nothing is pressed; message "Not now: the code works while the attract mode shows HIGHEST PAID SUPERSTARS" | Pass | |
+| SH-10 | SH-08 with the Players DIP switch at 2 | Opens | Pass | Lost sound when exiting the octopus menu – Rest game fixes it |
+| SH-11 | A prototype MRA: Octopus Bookkeeping | Message "Not in this revision of the game" | Pass | |
 | SH-12 | Each MRA in `_alternatives/_Super High Impact` | Boots to attract and plays | Pass | |
-| SH-13 | DIP Switches → Coinage: select it repeatedly, then Free Play and reset | Six settings in turn (as HI-13); after the reset the game is on free play | | |
+| SH-13 | DIP Switches → Coinage: select it repeatedly, then Free Play and reset | Six settings in turn (as HI-13); after the reset the game is on free play | Pass | |
 
 ## Strike Force
 
