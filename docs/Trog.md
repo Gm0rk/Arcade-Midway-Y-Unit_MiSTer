@@ -21,6 +21,10 @@ Trog has no game-specific OSD items.
 
 The [core-wide extras](ExtraContent.md#core-wide-features) (CRT Adjust, CRT V-Size, Video Timing, DIP Switches, Service Mode and the rest) apply to every game.
 
+## High scores
+
+Trog keeps two tables, TOP TROGS and DAILY DINOS. As on the board, DAILY DINOS starts afresh every time the game starts: loading the MRA, a Reset or a power-up. Only TOP TROGS is kept, so a score has to make that table to be there next time. Trog writes the new table to its NVRAM about 8 seconds after the initials (after the continue countdown, as the game goes back to the attract mode). The NVRAM is saved when the OSD opens, so wait until the table shows your initials before opening the OSD.
+
 ## Controls
 
 | Input | Use |
