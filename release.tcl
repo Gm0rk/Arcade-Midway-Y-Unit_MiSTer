@@ -6,9 +6,11 @@
 # to Arcade-Midway-Y-Unit_YYYYMMDD.rbf (the local date) and moves it to
 # releases/. A second build on the same day replaces that day's file.
 #
-# Hooked up in Arcade-Midway-Y-Unit.qsf:
-#   set_global_assignment -name POST_FLOW_SCRIPT_FILE "quartus_sh:release.tcl"
-# Quartus runs it from the project folder with
+# Run by post_flow.tcl, which Arcade-Midway-Y-Unit.qsf hooks up as the
+# project's one post-flow script:
+#   set_global_assignment -name POST_FLOW_SCRIPT_FILE "quartus_sh:post_flow.tcl"
+# (it can still be hooked up on its own as "quartus_sh:release.tcl"). Quartus
+# runs the script from the project folder with
 #   $quartus(args) = {flow project revision}.
 #
 # A compilation that failed leaves no new core: the script only takes an .rbf
