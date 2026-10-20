@@ -480,8 +480,8 @@ wire [3:0] fire1 = fire_dir(joy0, joy0_ra);
 wire [3:0] fire2 = fire_dir(joy1, joy1_ra);
 
 wire       test_sw = status[9] | joy0[12] | joy1[12];
-reg  [3:0] svc_cnt  = 4'd0;                 // service credit held while non-zero
-reg  [3:0] tilt_cnt = 4'd0;                 // slam tilt held while non-zero
+reg  [5:0] svc_cnt  = 6'd0;                 // service credit held while non-zero
+reg  [5:0] tilt_cnt = 6'd0;                 // slam tilt held while non-zero
 wire       svc_sw  = |svc_cnt;
 wire       tilt_sw = |tilt_cnt;
 wire       adpcm_irq;
@@ -703,11 +703,16 @@ wire        core_hs, core_vs, core_hb, core_vb;
 // OSD service credit and tilt
 //
 // Both are "Press" entries in the OSD DIP Switches menu (see dip_btn_hit
-// above). A press holds the matching cabinet switch closed for 8 frames
-// (about 150 ms), long enough for the game's switch scan to accept it, like
-// a real coin or slam switch. Frames are counted only while the game runs,
-// so with "Pause when OSD is open" the switch closes when the OSD is shut.
+// above). A press holds the matching cabinet switch closed for 30 frames
+// (about half a second): long enough for the game's switch scan to accept
+// it, and for its lamp in the game's switch test to be seen (8 frames, 150
+// ms, was a blink that was easy to miss). The games take one press per
+// closing, so the longer hold still gives one credit / one slam. Frames are
+// counted only while the game runs, so with "Pause when OSD is open" the
+// switch closes when the OSD is shut.
 //////////////////////////////////////////////////////////////////
+
+localparam [5:0] SW_FRAMES = 6'd30;                    // frames a press holds the switch
 
 reg        osd_vb_d;
 wire       osd_frame = core_vb & ~osd_vb_d & ~pause;   // start of a running frame
@@ -716,15 +721,15 @@ always @(posedge clk_sys) begin
 	osd_vb_d <= core_vb;
 
 	if (reset) begin
-		svc_cnt  <= 4'd0;
-		tilt_cnt <= 4'd0;
+		svc_cnt  <= 6'd0;
+		tilt_cnt <= 6'd0;
 	end
 	else begin
-		if (dip_btn_hit[0])              svc_cnt  <= 4'd8;
-		else if (osd_frame && svc_sw)    svc_cnt  <= svc_cnt - 4'd1;
+		if (dip_btn_hit[0])              svc_cnt  <= SW_FRAMES;
+		else if (osd_frame && svc_sw)    svc_cnt  <= svc_cnt - 6'd1;
 
-		if (dip_btn_hit[1])              tilt_cnt <= 4'd8;
-		else if (osd_frame && tilt_sw)   tilt_cnt <= tilt_cnt - 4'd1;
+		if (dip_btn_hit[1])              tilt_cnt <= SW_FRAMES;
+		else if (osd_frame && tilt_sw)   tilt_cnt <= tilt_cnt - 6'd1;
 	end
 end
 
