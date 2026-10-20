@@ -4,6 +4,31 @@ What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's 
 
 Build numbers count the core's development builds in order. Released RBF files are named by date. Builds 1 to 12 were named Arcade-MidwayY.
 
+## Build 57 (2026-10-20)
+
+**Docs & tools**
+- TestPlan: hardware results for the 11 remaining core-wide tests (C-03, C-04, C-05, C-11, C-12 and C-14 to C-19): all pass. Every section of the test plan now passes: 135 of 135 tests, none failed (core-wide 19 / 19).
+
+## Build 56 (2026-10-20)
+
+**Removed**
+- Video Timing **480i** (added in Build 55). The list is Native 54.7 Hz, 57 Hz, 60 Hz again, and the analog output is as it was in Build 54. A TV that expects NTSC lines (15.7 kHz) did not lock to the 480i signal, whose lines are about 14.36 kHz; the 480i work is kept in a separate fork and is on hold. A Video Timing saved by Build 55 comes back one step along the list (480i as 57 Hz, 57 Hz as 60 Hz, 60 Hz as Native 54.7 Hz): select it again.
+
+**Docs & tools**
+- README, Extra content and TestPlan: the 480i text and test C-20 are taken out; core-wide is 19 tests (8 / 19 passed), 135 tests overall (124 passed), as before Build 55.
+
+## Build 55 (2026-10-20)
+
+**Added**
+- Video Timing: new choice **480i** for the analog output: a 525-line interlaced signal with the board's 54.70684 Hz as the field rate (two fields are one 27.35 Hz frame) on lines of about 14.36 kHz (557 or 558 dots of 8 MHz). Each board frame is shown as one field: the picture lines go through a 32-line buffer onto the new line grid, so every picture line and dot is kept (254 lines, Smash T.V. 256) and the game, its speed and its sound are untouched (only the analog output changes). The fields are 263 and 262 lines, and VSync comes half a line later in the first one, which makes them interlace. The picture starts as many dots after HSync as before, so CRT Auto-Width, H-Size and H-Position act as at 54.7 Hz, with more room on the right (the line is 51 dots longer). It works with CRT Adjust on or off (off: no adjustments); CRT V-Size is not used. It needs the 15 kHz analog output (Scandoubler Fx None). About 6 to 8 of a field's 262.5 lines are left for VSync and blanking, so V-Shift has little room, as at 60 Hz. HDMI shows the same picture. While the raster is not measured (a game reprogramming it) the board's own timing is sent, and 480i starts again when it is.
+
+**Changed**
+- Video Timing list: Native 54.7 Hz, 480i, 57 Hz, 60 Hz. A 57 Hz or 60 Hz saved by an earlier build comes back as 480i or 57 Hz: select it again.
+
+**Docs & tools**
+- README and Extra content: Video Timing and the 480i option.
+- TestPlan: new core-wide test C-20 (480i); core-wide now has 20 tests (8 / 20 passed), 136 tests overall (124 passed). The CSV has the same row.
+
 ## Build 53 (2026-10-20)
 
 **Docs & tools**
