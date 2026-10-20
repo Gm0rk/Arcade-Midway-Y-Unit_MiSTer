@@ -677,8 +677,7 @@ end
 
 // Mortal Kombat's Move List window and Total Carnage's Passwords (see
 // Video) hold the game too
-wire [1:0] movelist_sel = status[42:41];         // Off, Page 1, Page 2
-wire       movelist_on  = is_mk && (movelist_sel == 2'd1 || movelist_sel == 2'd2);
+wire       movelist_on  = is_mk && status[41];   // Off, On
 wire       passwords_on = is_tc && status[44];   // Off, On
 wire pause = pause_toggle | (OSD_STATUS & ~status[8]) | movelist_on | passwords_on;
 
@@ -850,8 +849,8 @@ wire [2:0] rep_patch_en = {3{rep_items}} & {status[19], status[18], rep_arm};
 //
 // The Finishing Moves page picks a fighter (O[30:28]; the menu mask's bits
 // 8-10 show that fighter's lines) and one of its moves (R[32] the fatality,
-// R[33] The Pit; R[40] clears the set move). (The main page's Move List,
-// O[42:41], is a window over the picture: see Video.) rtl/yunit_fmoves.sv
+// R[40] clears the set move). (The main page's Move List, O[41], is a
+// window over the picture: see Video.) rtl/yunit_fmoves.sv
 // plays the set move at the winner's next FINISH HIM, following the fight
 // through the CPU's accesses to the variables the MRA gives (ROM index 1
 // words 0x10-0x2F).
@@ -1167,18 +1166,31 @@ wire ch_on1 = is_t2 && !xhair_off && xhair(out_x, out_y, ch_x1[17:8], ch_y1[17:8
 
 // ---- Information window (rtl/yunit_window.sv) ----
 //
-// Mortal Kombat's Move List (O[42:41]: Off, Page 1, Page 2) and Total
-// Carnage's Passwords (O[44]: Off, On) draw their page over the game's
-// dimmed title screen in place of the picture: the Move List's four
-// fighters, then three, as in the T-Unit core (pages 0, 1); the warp codes
-// (page 2). The game waits behind it (pause above).
+// Mortal Kombat's Move List (O[41]: Off, On) and Total Carnage's Passwords
+// (O[44]: Off, On) draw their page over the game's dimmed title screen in
+// place of the picture: the Move List's four fighters, then three, as in
+// the T-Unit core (pages 0, 1; with the OSD closed Left or Right flips
+// between them: yunit_listpage); the warp codes (page 2). The game waits
+// behind it (pause above).
+
+wire ml_page;
+
+yunit_listpage yunit_listpage
+(
+	.clk   (clk_sys),
+	.on    (movelist_on),
+	.osd   (OSD_STATUS),
+	.left  (joy0[1] | joy1[1]),
+	.right (joy0[0] | joy1[0]),
+	.page  (ml_page)
+);
 
 yunit_window yunit_window
 (
 	.clk     (clk_sys),
 	.ce_pix  (ce_pix),
 	.enable  (movelist_on | passwords_on),
-	.page    (is_tc ? 3'd2 : {2'd0, movelist_sel[1]}),
+	.page    (is_tc ? 3'd2 : {2'd0, ml_page}),
 	.bg      (is_tc),
 
 	.r_in    (brd_r),
