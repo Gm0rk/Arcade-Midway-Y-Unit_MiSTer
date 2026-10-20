@@ -33,6 +33,18 @@ Total Carnage is a twin-stick game: one stick moves, the other fires.
 | Coin | Players 1-2; the third controller's Coin is coin 3 |
 | Test, Pause | Service mode switch, pause |
 
+## Test menu
+
+Open the game's test menu with **OSD → Service Mode** (On; Off leaves it) or the Test button. **Diagnostic Tests → Switch Test** shows a lamp for each switch while it is closed. The ones that are not on a controller:
+
+| Lamp | How to close it |
+|---|---|
+| SERVICE CREDIT | OSD → DIP Switches → Service Credit → Press. The lamp lights for about half a second once the game runs again (after the OSD is shut, unless Pause when OSD is open is Off) |
+| SLAM - TILT | OSD → DIP Switches → Tilt → Press, the same |
+| TEST | Service Mode On, or the Test button held |
+
+The **Test Switch** DIP (DS2:8) is another switch: it opens the test menu too, but it never lights the TEST lamp, as in MAME. 4 COIN (the bill input) and VIDEO FREEZE have no control.
+
 ## Passwords
 
 The game hides warp codes: at the start of a game a red and white disc
