@@ -23,10 +23,10 @@ when every game and the core-wide tests pass.
 | [Smash T.V.](#smash-tv) | 10 | Pass |
 | [High Impact Football](#high-impact-football) | 13 | Pass |
 | [Super High Impact](#super-high-impact) | 13 | Pass |
-| [Strike Force](#strike-force) | 11 | 1 / 11 passed |
+| [Strike Force](#strike-force) | 11 | Pass |
 | [Mortal Kombat](#mortal-kombat) | 29 | Pass |
 | [Terminator 2 - Judgment Day](#terminator-2---judgment-day) | 13 | Pass |
-| [Total Carnage](#total-carnage) | 13 | 2 / 13 passed |
+| [Total Carnage](#total-carnage) | 13 | Pass |
 | [Y-Unit Test ROM](#y-unit-test-rom) | 3 | Pass |
 
 ## What you need
@@ -151,16 +151,16 @@ Main MRA: Strike Force (rev 1). [Controls](StrikeForce.md).
 | # | Test | Expected | Result | Notes |
 |---|---|---|---|---|
 | SF-01 | Boot | Attract mode: title, demo, high scores | Pass | |
-| SF-02 | Coin and Start for players 1-2; coins 3 and 4 | Credits added, each player joins | | |
-| SF-03 | Controls | 8-way stick; Fire, Weapon, Weapon Select; Start transforms in a game | | |
-| SF-04 | Play the first stage with 2 players | Picture correct: scrolling, sprites, colours | | |
-| SF-05 | Sound | Music, effects, speech | | |
-| SF-06 | Set a high score, open the OSD, reload | Score kept, no CMOS error on boot | | |
-| SF-07 | Test menu: switch test, sound test | Every switch shows; sounds play | | |
-| SF-08 | Play to game over | Continue screen, initials entry | | |
-| SF-09 | Change a DIP switch, reset | Applied | | |
-| SF-10 | Saurian Front MRA (`_alternatives/_Strike Force`) | Boots to attract and plays | | |
-| SF-11 | DIP Switches → Coin A, then Extra Ship Points: select each repeatedly | All 16 Coin A settings and the 4 Extra Ship Points values show on their line (1C/1C - 2C/3C style for the two-step ones) | | |
+| SF-02 | Coin and Start for players 1-2; coins 3 and 4 | Credits added, each player joins | Pass | |
+| SF-03 | Controls | 8-way stick; Fire, Weapon, Weapon Select; Start transforms in a game | Pass | |
+| SF-04 | Play the first stage with 2 players | Picture correct: scrolling, sprites, colours | Pass | |
+| SF-05 | Sound | Music, effects, speech | Pass | |
+| SF-06 | Set a high score, open the OSD, reload | Score kept, no CMOS error on boot | Pass | Just like Smash TV “Today’s” scores do not save after reset |
+| SF-07 | Test menu: switch test, sound test | Every switch shows; sounds play | Pass | |
+| SF-08 | Play to game over | Continue screen, initials entry | Pass | |
+| SF-09 | Change a DIP switch, reset | Applied | Pass | |
+| SF-10 | Saurian Front MRA (`_alternatives/_Strike Force`) | Boots to attract and plays | Pass | |
+| SF-11 | DIP Switches → Coin A, then Extra Ship Points: select each repeatedly | All 16 Coin A settings and the 4 Extra Ship Points values show on their line (1C/1C - 2C/3C style for the two-step ones) | Pass | |
 
 ## Mortal Kombat
 
@@ -213,7 +213,7 @@ Main MRA: Terminator 2 - Judgment Day (rev LA4). [Controls and gun options](Term
 | T2-07 | Trigger and Bomb, both players | Fire and bomb work | Pass | |
 | T2-08 | Play the first level with 2 players | Picture correct; the game does not freeze | Pass | |
 | T2-09 | Sound | Music, effects, voices | Pass | |
-| T2-10 | Set a high score, open the OSD, reload | Score kept, no CMOS error on boot | Pass | |
+| T2-10 | Set a high score, open the OSD, reload | Score kept, no CMOS error on boot | Pass | Just like Smash TV “Today’s” scores do not save after reset |
 | T2-11 | Test menu: switch test, sound test | Every switch shows; sounds play | Pass | |
 | T2-12 | Play to game over | Continue screen, initials entry | Pass | |
 | T2-13 | Each MRA in `_alternatives/_Terminator 2 - Judgment Day` | Boots to attract and plays | Pass | |
@@ -225,18 +225,18 @@ Main MRA: Total Carnage (rev LA1). [Controls](TotalCarnage.md).
 | # | Test | Expected | Result | Notes |
 |---|---|---|---|---|
 | TC-01 | Boot | Attract mode: title, demo, high scores | Pass | |
-| TC-02 | Coin and Start for players 1-2; coin 3 | Credits added, each player joins | | |
-| TC-03 | Move with the d-pad / left stick; fire with B1-B4, two at once | Moves in 8 directions; fires in 8 directions | | |
-| TC-04 | Fire with the right analog stick; Start in a game | Fires the way it points; Start throws a bomb | | |
-| TC-05 | Play the first level with 2 players | Picture correct, no garbage | | |
-| TC-06 | Sound | Music, effects, voices | | |
-| TC-07 | Set a high score, open the OSD, reload | Score kept, no CMOS error on boot | | |
-| TC-08 | Test menu: switch test, sound test | Every switch shows; sounds play | | |
-| TC-09 | Play to game over | Continue screen, initials entry | | |
+| TC-02 | Coin and Start for players 1-2; coin 3 | Credits added, each player joins | Pass | |
+| TC-03 | Move with the d-pad / left stick; fire with B1-B4, two at once | Moves in 8 directions; fires in 8 directions | Pass | |
+| TC-04 | Fire with the right analog stick; Start in a game | Fires the way it points; Start throws a bomb | Pass | |
+| TC-05 | Play the first level with 2 players | Picture correct, no garbage | Pass | |
+| TC-06 | Sound | Music, effects, voices | Pass | |
+| TC-07 | Set a high score, open the OSD, reload | Score kept, no CMOS error on boot | Pass | |
+| TC-08 | Test menu (Service Mode On): switch test, sound test | Every switch shows; Tilt and Service Credit (OSD DIP Switches, Press) light their lamp for about half a second once the OSD is shut; sounds play. The Test Switch DIP opens the menu but leaves the TEST lamp dark, as in MAME | Pass | |
+| TC-09 | Play to game over | Continue screen, initials entry | Pass | |
 | TC-10 | Each MRA in `_alternatives/_Total Carnage` | Boots to attract and plays | Pass | |
-| TC-11 | Passwords On during a game, close the OSD, then set it Off | Over the dimmed title screen: how to enter a code, the 16 codes by mission and the two warp bonuses, all readable; the game waits behind it and goes on once Off | | |
-| TC-12 | Start a game, walk onto the warp disc, YES, enter ZULU, END | Weasel Warp Bonus (40,000 points, 50 hostages, flags and gems, 10 keys) in the bunker | | |
-| TC-13 | Leave the attract mode running until the high score table (about 1 minute 40 seconds after a reset) | The table waves in line by line from the right and later waves out, as in MAME; the picture stays steady, no streaks or torn lines | | |
+| TC-11 | Passwords On during a game, close the OSD, then set it Off | Over the dimmed title screen: how to enter a code, the 16 codes by mission and the two warp bonuses, all readable; the game waits behind it and goes on once Off | Pass | |
+| TC-12 | Start a game, walk onto the warp disc, YES, enter ZULU, END | Weasel Warp Bonus (40,000 points, 50 hostages, flags and gems, 10 keys) in the bunker | Pass | |
+| TC-13 | Leave the attract mode running until the high score table (about 1 minute 40 seconds after a reset) | The table waves in line by line from the right and later waves out, as in MAME; the picture stays steady, no streaks or torn lines | Pass | |
 
 ## Y-Unit Test ROM
 
