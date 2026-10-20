@@ -4,6 +4,21 @@ What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's 
 
 Build numbers count the core's development builds in order. Released RBF files are named by date. Builds 1 to 12 were named Arcade-MidwayY.
 
+## Build 52 (2026-10-20)
+
+**Docs & tools**
+- TestPlan: hardware results for 22 more tests. Strike Force (11 / 11) and Total Carnage (13 / 13) pass every test and are **Verified**: all 8 games are verified (README status and progress bar: 8 / 8). 124 of 135 tests pass overall, none failed; the 11 left are core-wide tests (8 / 19 passed). Total Carnage's switch test (TC-08) passes with the Build 51 press length. Strike Force and Terminator 2 notes (SF-06, T2-10): their daily score table is not kept either, like Smash T.V.'s TODAY (planned: an OSD option to save it).
+
+## Build 51 (2026-10-20)
+
+**Changed**
+- Service Credit and Tilt (OSD DIP Switches, "Press"): the switch now stays closed for about half a second (30 frames; it was 8, about 0.15 s). Reported on Total Carnage, whose switch test showed no response: the lamp for a press lit for only the 0.15 s after the OSD closed, easy to miss. The game's wiring was checked against MAME (Tilt, Test and Service Credit are IN1 bits 3, 4 and 6 in both) and every game still takes exactly one credit or one slam from a press, however long it is held.
+
+**Docs & tools**
+- Total Carnage page: new Test menu section: how to light each lamp of the switch test. The Test Switch DIP (DS2:8) opens the game's test menu but never lights the TEST lamp (the same in MAME); the lamp follows Service Mode or the Test button.
+- README and Extra content: the DIP Switches text says a press closes the switch for about half a second.
+- TestPlan: TC-08 says what the switch test shows (the CSV has the same wording).
+
 ## Build 50 (2026-10-19)
 
 **Docs & tools**
