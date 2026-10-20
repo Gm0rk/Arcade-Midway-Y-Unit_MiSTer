@@ -15,6 +15,7 @@ Mortal Kombat and Terminator 2.
 
 - [Hardware](#hardware)
 - [Games](#games)
+- [Testing setup](#testing-setup)
 - [Features](#features)
 - [OSD](#osd)
 - [Controls](#controls)
@@ -45,7 +46,7 @@ listed in [Extra content](docs/ExtraContent.md).
 | Game | Main set | Status | Title Screen | Gameplay |
 |---|---|---|---|---|
 | [High Impact Football](docs/HighImpactFootball.md) | hiimpact (rev LA5) | Verified | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/High_Impact_Football.png" width="300" alt="High Impact Football title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/High_Impact_Football2.png" width="300" alt="High Impact Football gameplay"> |
-| [Mortal Kombat](docs/MortalKombat.md) | mkla4 (rev 4.0) | Verified | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Mortal_Kombat.png" width="300" alt="Mortal Kombat title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Mortal_Kombat_2.png" width="300" alt="Mortal Kombat gameplay"> |
+| [Mortal Kombat](docs/MortalKombat.md) | mkla4 (rev 4.0) | Awaiting hardware test | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Mortal_Kombat.png" width="300" alt="Mortal Kombat title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Mortal_Kombat_2.png" width="300" alt="Mortal Kombat gameplay"> |
 | [Smash T.V.](docs/SmashTV.md) | smashtv (rev 8.00) | Verified | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Smash_TV.png" width="300" alt="Smash T.V. title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Smash_TV_2.png" width="300" alt="Smash T.V. gameplay"> |
 | [Strike Force](docs/StrikeForce.md) | strkforc (rev 1) | Verified | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Strikeforce.png" width="300" alt="Strike Force title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Strikeforce_2.png" width="300" alt="Strike Force gameplay"> |
 | [Super High Impact](docs/SuperHighImpact.md) | shimpact (rev LA2) | Verified | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Super_High_Impact_Football.png" width="300" alt="Super High Impact title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Super_High_Impact_Football_2.png" width="300" alt="Super High Impact gameplay"> |
@@ -53,7 +54,7 @@ listed in [Extra content](docs/ExtraContent.md).
 | [Total Carnage](docs/TotalCarnage.md) | totcarn (rev LA1) | Verified | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Total_Carnage.png" width="300" alt="Total Carnage title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Total_Carnage_2.png" width="300" alt="Total Carnage gameplay"> |
 | [Trog](docs/Trog.md) | trog (rev LA5), prototype rev 4.00 | Verified | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Trog.png" width="300" alt="Trog title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Trog_2.png" width="300" alt="Trog gameplay"> |
 
-Verified on hardware: `[████████████████████]` 8 / 8
+Verified on hardware: `[█████████████████░░░]` 7 / 8
 
 A game is verified when it passes every test of the
 [test plan](docs/TestPlan.md), which tracks the progress.
@@ -62,11 +63,24 @@ Also included: Midway's board diagnostic, the
 [Y-Unit Test ROM](docs/YUnitTestROM.md). Other revisions, prototypes and
 hacks are in the `_alternatives` folder of the MRAs.
 
+## Testing setup
+
+The hardware tests behind the status above are run on:
+
+| | |
+|---|---|
+| MiSTer | DE10-Nano with the Analog I/O Board and 128 MB SDRAM |
+| Analog connection | Component (YPbPr) |
+| Digital connection | HDMI |
+| Consumer NTSC CRT | Sony KV-27FS120 |
+| Broadcast PVM | Sony PVM-14L5 |
+| Controllers | DualShock 4 (Bluetooth), Xbox 360 (USB) |
+
+> **Not tested:** consumer PAL TVs, and analog connections other than
+> component (YPbPr).
+
 ## Features
 
-- Analog sync centred on a standard 15 kHz screen
-- CRT Adjust for analog CRT output: H-Size, H-Position, V-Shift and CRT
-  Auto-Width
 - CRT V-Size (experimental), part of CRT Adjust: makes the picture taller
   ("+") or shorter ("-"), up to 7 steps of 3 lines (about 1 % each), in one
   of two modes:
@@ -85,7 +99,8 @@ hacks are in the `_alternatives` folder of the MRAs.
 - Video Timing: the board's own 54.7 Hz, or 57 Hz / 60 Hz frames for TVs
   that do not hold 54.7 Hz. Only blank lines are dropped, so the whole
   picture is still sent; games run about 4 % (57 Hz) or 10 % (60 Hz) faster,
-  while music and voices keep their normal pitch and tempo. At 60 Hz the
+  while music and voices keep their normal pitch and tempo. The loading
+  screen has the same timing. At 60 Hz the
   picture fills almost the whole frame, so a CRT may hide a few lines at the
   top or bottom; CRT V-Shift picks which
 - CMOS saved as NVRAM: settings, audits and high scores survive power-off.
@@ -97,8 +112,9 @@ hacks are in the `_alternatives` folder of the MRAs.
   their pages), with a message saying whether the menu opened or when the
   code works
 - Mortal Kombat: a Move List (each fighter's moves, fatality and the
-  distance it needs, on a page over the game) and Finishing Moves (the core
-  enters the winner's fatality or The Pit at FINISH HIM), with messages when
+  distance it needs, on a page over the game; close the OSD and press Left
+  or Right to turn the page) and Finishing Moves (the core enters the
+  winner's fatality at FINISH HIM), with messages when
   a move cannot be played; Reptile on demand: his fight next, the moon
   silhouettes and his hints every time (see the
   [Mortal Kombat page](docs/MortalKombat.md))
@@ -110,8 +126,8 @@ hacks are in the `_alternatives` folder of the MRAs.
 | Item | |
 |---|---|
 | Video Settings | Aspect ratio, scandoubler, scale, Video Timing, CRT Adjust (Auto-Width, H-Size, H-Position, V-Shift, V-Size, V-Size Mode) |
-| Move List | Mortal Kombat: Off, Page 1, Page 2; shows that page of the move list (four fighters, then three: special moves, fatality and the distance it needs, The Pit) over the game, which waits until it is Off |
-| Finishing Moves | Mortal Kombat: each fighter's fatality and The Pit, entered for you at the next FINISH HIM |
+| Move List | Mortal Kombat: Off, On; shows the move list (four fighters, then three: special moves, fatality and the distance it needs, The Pit's uppercut) over the game, which waits until it is Off; with the OSD closed, Left or Right turns the page |
+| Finishing Moves | Mortal Kombat: each fighter's fatality, entered for you at the next FINISH HIM |
 | Passwords | Total Carnage: Off, On; shows the warp codes (how to enter one, where each takes you, the two warp bonuses) over the game, which waits until it is Off |
 | DIP Switches | The game's DIP switches with Service Credit and Tilt (select "Press" to drop a service credit or close the slam switch; the switch stays closed for about half a second once the game runs again) and any game-specific entries; the switches and each one's settings in alphabetical order |
 | Hidden Items | Hidden developer menus, only for the games that have one; Mortal Kombat rev 3.0, 4.0 and Turbo also Reptile Fight Next, Moon Silhouettes Always and Reptile Hints Always |
