@@ -82,34 +82,33 @@ The hardware tests behind the status above are run on:
 
 ## Timing and resources
 
-From the Quartus Prime 17.0.2 Lite compilation of Build 61's RTL
-(2026-10-20), for the DE10-Nano's Cyclone V 5CSEBA6U23I7. The project runs
-one timing model, Slow 1100 mV 100 C. All 135 hardware tests pass (see the
+From the Quartus Prime 17.0.2 Lite compilation of Build 65 (2026-10-20), for
+the DE10-Nano's Cyclone V 5CSEBA6U23I7. The project runs one timing model,
+Slow 1100 mV 100 C. All 135 hardware tests pass (see the
 [test plan](docs/TestPlan.md)).
 
-**Timing is not met on one clock:** setup on the 96 MHz system clock fails by
-0.538 ns (total negative slack 10.583 ns; the clock's Fmax is 91.29 MHz). The
-worst path, the one the report lists, is inside the MiSTer framework's HQ2x
-scandoubler filter (`sys/hq2x.sv`, used only when Scandoubler Fx is HQ2x), not
-in the core's own logic. Every other clock, and every hold, recovery, removal
-and minimum pulse width check, is met.
+**Timing is met on every clock**, and so is every hold, recovery, removal and
+minimum pulse width check. The margin on the 96 MHz system clock is thin,
+0.067 ns (the clock's Fmax is 96.63 MHz), and it moves with every change to
+the design. The closest paths are in the CRT V-Size stage (`crt_vsize`: its
+line memory and the line-count arithmetic).
 
 | Clock | Frequency | Setup slack | Hold slack |
 |---|---|---|---|
-| System (core PLL) | 96 MHz | -0.538 ns (fails) | 0.242 ns |
-| HDMI PLL | 148.54 MHz | 0.785 ns | 0.195 ns |
-| HPS user clock | 100 MHz | 4.647 ns | 0.308 ns |
-| SPI | 100 MHz | 6.179 ns | 0.313 ns |
-| FPGA_CLK1_50 | 50 MHz | 8.761 ns | 0.339 ns |
-| FPGA_CLK2_50 | 50 MHz | 12.770 ns | 0.386 ns |
-| Audio PLL | 24.58 MHz | 14.901 ns | 0.392 ns |
+| System (core PLL) | 96 MHz | 0.067 ns | 0.247 ns |
+| HDMI PLL | 148.54 MHz | 0.680 ns | 0.255 ns |
+| HPS user clock | 100 MHz | 4.348 ns | 0.337 ns |
+| SPI | 100 MHz | 5.233 ns | 0.423 ns |
+| FPGA_CLK1_50 | 50 MHz | 7.504 ns | 0.416 ns |
+| FPGA_CLK2_50 | 50 MHz | 11.292 ns | 0.267 ns |
+| Audio PLL | 24.58 MHz | 14.864 ns | 0.261 ns |
 
-Worst recovery slack 2.802 ns, removal 0.699 ns, minimum pulse width 1.041 ns.
+Worst recovery slack 1.924 ns, removal 0.650 ns, minimum pulse width 1.041 ns.
 
 | Resource | Used |
 |---|---|
-| Logic (ALMs) | 28,508 / 41,910 (68 %) |
-| Registers | 29,528 |
+| Logic (ALMs) | 28,623 / 41,910 (68 %) |
+| Registers | 29,522 |
 | Block RAM (M10K blocks) | 403 / 553 (73 %) |
 | Block memory bits | 3,075,111 / 5,662,720 (54 %) |
 | DSP blocks | 68 / 112 (61 %) |
