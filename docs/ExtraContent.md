@@ -19,7 +19,7 @@ Every game gets the video, OSD, input and loading extras below.
 ### OSD
 
 - **DIP Switches page**: MAME's switches for the loaded game, in alphabetical order with each switch's settings in alphabetical order too. Changes apply after a reset and no longer reset the game by themselves.
-- **Service Credit and Tilt**: entries in the DIP Switches menu; each acts as one button press (select "Press"), and the switch closes once the game runs again.
+- **Service Credit and Tilt**: entries in the DIP Switches menu; each acts as one button press (select "Press"), and the switch stays closed for about half a second once the game runs again.
 - **Service Mode**: the cabinet's test switch, on the main page.
 - **Pause when OSD is open**: on by default.
 - **Reset and Reset and close OSD**: Reset keeps the OSD open.
