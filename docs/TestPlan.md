@@ -139,9 +139,9 @@ Main MRA: Super High Impact (rev LA2). [Controls and hidden menu](SuperHighImpac
 | SH-05 | Sound | Music, effects, announcer | Pass | |
 | SH-06 | Change a setting, open the OSD, reload | Kept, no CMOS error on boot | Pass | |
 | SH-07 | Players DIP switch at 2, reset | 2-player cabinet: only players 1-2 | Pass | |
-| SH-08 | Hidden Items → Octopus Bookkeeping while HIGHEST PAID SUPERSTARS shows | Octopus Bookkeeping opens; message "Octopus Bookkeeping: code entered" | Pass | Lost sound when exiting the octopus menu – Rest game fixes it |
+| SH-08 | Hidden Items → Octopus Bookkeeping while HIGHEST PAID SUPERSTARS shows | Octopus Bookkeeping opens; message "Octopus Bookkeeping: code entered" | Pass | Lost sound when exiting the octopus menu – Reset game fixes it |
 | SH-09 | The same on another attract screen | Nothing is pressed; message "Not now: the code works while the attract mode shows HIGHEST PAID SUPERSTARS" | Pass | |
-| SH-10 | SH-08 with the Players DIP switch at 2 | Opens | Pass | Lost sound when exiting the octopus menu – Rest game fixes it |
+| SH-10 | SH-08 with the Players DIP switch at 2 | Opens | Pass | Lost sound when exiting the octopus menu – Reset game fixes it |
 | SH-11 | A prototype MRA: Octopus Bookkeeping | Message "Not in this revision of the game" | Pass | |
 | SH-12 | Each MRA in `_alternatives/_Super High Impact` | Boots to attract and plays | Pass | |
 | SH-13 | DIP Switches → Coinage: select it repeatedly, then Free Play and reset | Six settings in turn (as HI-13); after the reset the game is on free play | Pass | |
