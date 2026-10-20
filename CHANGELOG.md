@@ -4,6 +4,39 @@ What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's 
 
 Build numbers count the core's development builds in order. Released RBF files are named by date. Builds 1 to 12 were named Arcade-MidwayY.
 
+## Build 61 (2026-10-20)
+
+**Fixed**
+- Video Timing 57 Hz / 60 Hz: the ROM loading screen (the board held in reset while the ROMs load, and for half a second after) was always the board's own 54.7 Hz, so a TV that needs 57 or 60 Hz to hold the picture, as a Sony KV-27FS120 does, bounced on it until the game started. The default raster that keeps the display locked in reset now drops its blank lines like the running board, so it is 277 lines (57.08 Hz) or 263 lines (60.12 Hz) as selected, and the frame length no longer changes when the game starts. The game itself is unchanged.
+
+**Docs & tools**
+- README and Extra content: the loading screen has the Video Timing too.
+- TestPlan: new core-wide test C-20 (loading screen at 57 / 60 Hz on analog), not run yet: core-wide 19 / 20, 135 tests overall (132 passed). The CSV has the same row.
+
+## Build 60 (2026-10-20)
+
+**Docs & tools**
+- README: Testing setup lists a Consumer NTSC CRT (Sony KV-27FS120), a Broadcast PVM (Sony PVM-14L5) and the controllers (DualShock 4 over Bluetooth, Xbox 360 over USB), and says that consumer PAL TVs and analog connections other than component (YPbPr) are not tested. The Features list no longer opens with the analog sync and CRT Adjust bullets (both are still described in Extra content and the OSD table).
+
+## Build 59 (2026-10-20)
+
+**Docs & tools**
+- README: new Testing setup section (DE10-Nano with the Analog I/O Board and 128 MB SDRAM; component (YPbPr) and HDMI connections; Sony KV-27FS120 NTSC CRT and Sony PVM-14L5).
+
+## Build 58 (2026-10-20)
+
+**Removed**
+- Mortal Kombat Finishing Moves: **The Pit**. It is an ordinary uppercut (D+HP, up close, on The Pit stage), so the core no longer enters it: Finishing Moves lists the seven fatalities only, and the message "Stage move: The Pit only" is gone. The Move List's footer still says how to do it.
+
+**Changed**
+- Move List: now **Off / On** (it was Off, Page 1, Page 2). Close the OSD to see the list in full screen and press **Left or Right** on either controller to turn to the other page; with the OSD open the d-pad steers the OSD, so the page stays. The list starts on page 1 each time it is switched On, and the page's second line says how to turn the page and switch it off. A Move List saved by an earlier build as Page 1 comes back On, Page 2 comes back Off.
+- The fatality player (rtl/yunit_fmoves.sv) no longer has the stage check or The Pit's own sequence; each move's record is one bit smaller. The fatalities themselves are played exactly as before (checked in simulation, 28 moves).
+
+**Docs & tools**
+- README, Mortal Kombat page and Extra content: the new Move List, no The Pit move.
+- TestPlan: MK-15 (The Pit) is removed and the later Mortal Kombat tests are renumbered (28 tests); the Move List test (MK-19) and the one that sets it during a fight (MK-23) are rewritten and wait for a hardware test, so Mortal Kombat is 26 / 28 and back to **Awaiting hardware test** (README progress bar: 7 / 8). 134 tests overall, 132 passed. The CSV has the same rows.
+- tools/yunit_fmoves.py, tools/yunit_window.py: no The Pit move; the window pages have the hint line.
+
 ## Build 57 (2026-10-20)
 
 **Docs & tools**
