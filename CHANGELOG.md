@@ -4,6 +4,12 @@ What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's 
 
 Build numbers count the core's development builds in order. Released RBF files are named by date. Builds 1 to 12 were named Arcade-MidwayY.
 
+## Build 62 (2026-10-20)
+
+**Docs & tools**
+- TestPlan: the last three tests pass (C-20 loading screen at 57 / 60 Hz, MK-19 Move List, MK-23 Move List during a fight). All 135 tests pass, none failed (core-wide 20 / 20, Mortal Kombat 28 / 28). Mortal Kombat is **Verified** again: all 8 games are verified (README status and progress bar: 8 / 8).
+- README: new Timing and resources section from the Build 61 compilation (Quartus Prime 17.0.2 Lite, Cyclone V 5CSEBA6U23I7): setup slack and hold slack of every clock, the other checks' worst slacks, and the resource use. Setup on the 96 MHz system clock is not met (-0.538 ns, total negative slack 10.583 ns); the worst path is in the framework's HQ2x scandoubler filter (sys/hq2x.sv).
+
 ## Build 61 (2026-10-20)
 
 **Fixed**
