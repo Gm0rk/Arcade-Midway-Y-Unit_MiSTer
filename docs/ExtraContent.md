@@ -11,9 +11,9 @@ Every game gets the video, OSD, input and loading extras below.
 ### Video output
 
 - **Centred analog sync**: the core measures where the picture is and makes new HSync / VSync at the broadcast position around it, for a standard 15 kHz screen.
-- **CRT Adjust**: H-Size, H-Position, V-Shift and CRT Auto-Width (Video Settings), for analog CRT output.
+- **CRT Adjust**: H-Size, H-Position and V-Shift (Video Settings), for analog CRT output.
 - **CRT V-Size (experimental)**: makes the picture taller ("+") or shorter ("-"), up to 7 steps of 3 lines, in PVM mode (changes the lines per frame, every line stays sharp) or Cabinet mode (native timing, neighbouring lines blended). "+" stops at the room the frame has.
-- **Video Timing**: the board's own 54.7 Hz, or 57 Hz / 60 Hz frames for TVs that do not hold 54.7 Hz. Only blank lines are dropped; games run about 4 % (57 Hz) or 10 % (60 Hz) faster, while music and voices keep their pitch and tempo. The loading screen (the board in reset while the ROMs load) has the same timing, so a TV that holds 57 / 60 Hz holds it too.
+- **Video Timing**: the board's own 54.7 Hz, or 57 Hz frames for TVs that do not hold 54.7 Hz. Only blank lines are dropped; games run about 4 % faster, while music and voices keep their pitch and tempo. The loading screen (the board in reset while the ROMs load) has the same timing, so a TV that holds 57 Hz holds it too.
 - **Black, locked picture while loading**: the screen stays black with sync running during a ROM or NVRAM download, the boot hold and an OSD Reset, so a second game never shows the first one's frame.
 
 ### OSD
