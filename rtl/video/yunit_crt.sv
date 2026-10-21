@@ -12,9 +12,6 @@
 //     (only the sync moves).
 //   - CRT Adjust (rmonic79's crt_adjust, content-shift mode) fed with the
 //     centred sync, so H-Position and V-Shift 0 are the centre of the screen.
-//   - CRT Auto-Width: picks the H-Size that makes the picture 48.75 us wide
-//     (about 93 % of a 52.66 us broadcast line); the OSD's H-Size trims from
-//     there.
 //   - H-Size about the middle: CRT Adjust stretches from HSync, so a centring
 //     table moves the content back by -m x H / (base + H) dots.
 //   - CRT V-Size (rmonic79's crt_vsize, experimental): vertical size, between
@@ -25,10 +22,11 @@
 //   - the OSD/HDMI window (DE) while CRT Adjust is on.
 //
 //  Ported from Arcade-ITech8 following its porting notes ("CRT Adjust and
-//  Auto-Width: Porting Handoff"). The Y Unit has one dot rate, 8 MHz, on the
-//  96 MHz clk, so the constants are ITech8's 8 MHz set:
+//  Auto-Width: Porting Handoff"; the Auto-Width part is not used). The Y Unit
+//  has one dot rate, 8 MHz, on the 96 MHz clk, so the constants are ITech8's
+//  8 MHz set:
 //    base 48 (4 x 12 clocks per dot), T2 572, HW 38, m 286,
-//    Auto-Width 18720 (48.75 us x 384), line 506 dots, frame 289 lines.
+//    line 506 dots, frame 289 lines.
 //
 //  Read clock: CRT Adjust reads one source dot every (base + h_eff)
 //  quarter-clocks, so a dot lasts (48 + h_eff) / 384 us (12 clocks at 0).
@@ -43,7 +41,6 @@ module yunit_crt
 
 	// OSD settings
 	input             crt_en,        // CRT Adjust on
-	input             autow,         // CRT Auto-Width on
 	input             scandoubler,   // any scandoubler effect: CRT Adjust off (read rate assumes 15 kHz)
 	input       [4:0] hsize_osd,     // H-Size, 5-bit two's complement
 	input       [6:0] hpos_osd,      // H-Position: 0..48 = 0..+48, 49..96 = -48..-1
@@ -87,7 +84,6 @@ localparam [7:0] RD_BASE = 8'd48;    // 4 x 96 MHz / 8 MHz
 // Settings, latched on the dot enable
 //----------------------------------------------------------------------------
 
-reg               autofill;
 reg  signed [4:0] hsize_s;
 reg         [6:0] hpos_d;
 reg  signed [5:0] vshift_s;
@@ -101,7 +97,6 @@ wire signed [4:0] vsize_step = (vsize_osd <= 4'd7) ? $signed({1'b0, vsize_osd})
                                                    : $signed({1'b0, vsize_osd}) - 5'sd15;
 always @(posedge clk) if (ce_pix) begin
 	crt_on      <= crt_en & ~scandoubler;
-	autofill    <= autow;
 	hsize_s     <= $signed(hsize_osd);
 	hpos_d      <= hpos_osd;
 	vshift_s    <= $signed({vshift_osd[4], vshift_osd});
@@ -139,49 +134,11 @@ sync_center #(.T2(572), .HW(38), .VC(138), .VW(3)) sync_center
 );
 
 //----------------------------------------------------------------------------
-// CRT Auto-Width: read period P = round(48.75 us x 384 / pic_dots), worked
-// out by a restoring divider one quotient bit per clock (15 bits, restarting
-// at once, so it follows pic_dots within 16 clocks). Kept only for a
-// plausible picture (>= 128 dots, P < 256); otherwise 0 = no Auto-Width.
+// H-Size in use: the OSD's value (-16..+15), sign-extended
 //----------------------------------------------------------------------------
 
-reg   [3:0] dv_n = 4'd0;             // 0: load, 1-15: quotient bits
-reg  [14:0] dv_num = 15'd0, dv_q = 15'd0;
-reg  [10:0] dv_den = 11'd0, dv_rem = 11'd0;
-reg   [7:0] fill_per = 8'd0;         // 0 = unknown
-
-wire [11:0] dv_try = {dv_rem, dv_num[14]};
-wire        dv_bit = dv_try >= {1'b0, dv_den};
-wire [14:0] dv_qn  = {dv_q[13:0], dv_bit};
-
-always @(posedge clk) begin
-	if (dv_n == 4'd0) begin
-		dv_num <= 15'd18720 + {5'd0, pic_dots[10:1]};   // 48.75 us x 384, rounded
-		dv_den <= pic_dots;
-		dv_rem <= 11'd0;
-		dv_q   <= 15'd0;
-		dv_n   <= 4'd1;
-	end
-	else begin
-		dv_num <= {dv_num[13:0], 1'b0};
-		dv_rem <= dv_bit ? 11'(dv_try - {1'b0, dv_den}) : dv_try[10:0];
-		dv_q   <= dv_qn;
-		dv_n   <= (dv_n == 4'd15) ? 4'd0 : dv_n + 4'd1;
-		if (dv_n == 4'd15)
-			fill_per <= (dv_den >= 11'd128 && dv_qn < 15'd256) ? dv_qn[7:0] : 8'd0;
-	end
-end
-
-// H-Size in use: Auto-Width's value plus the OSD's trim, kept to -16..+31
-// (registered steps: these change at most once a line)
-reg  signed [8:0] h_fill = 9'sd0, h_sum = 9'sd0;
 initial h_eff = 7'sd0;
-always @(posedge clk) begin
-	h_fill <= (autofill && fill_per != 8'd0)
-	          ? $signed({1'b0, fill_per}) - $signed({1'b0, RD_BASE}) : 9'sd0;
-	h_sum  <= h_fill + {{4{hsize_s[4]}}, hsize_s};
-	h_eff  <= (h_sum < -9'sd16) ? -7'sd16 : (h_sum > 9'sd31) ? 7'sd31 : h_sum[6:0];
-end
+always @(posedge clk) h_eff <= {{2{hsize_s[4]}}, hsize_s};
 
 //----------------------------------------------------------------------------
 // Read clock: one dot every (base + h_eff) quarter-clocks
@@ -329,9 +286,9 @@ crt_adjust #(
 //----------------------------------------------------------------------------
 // OSD/HDMI window while CRT Adjust is on: CRT Adjust's own picture area.
 // ITech8 used the native active area OR CRT Adjust's; on the Y Unit the
-// native area is a line earlier than CRT Adjust's (late) picture and, when
-// Auto-Width narrows the picture, wider than it, so the union added a black
-// line and black columns to the HDMI frame. CRT Adjust's area follows the
+// native area is a line earlier than CRT Adjust's (late) picture and, when a
+// negative H-Size narrows the picture, wider than it, so the union added a
+// black line and black columns to the HDMI frame. CRT Adjust's area follows the
 // picture through every H-Size, H-Position and V-Shift, and the frame inside
 // it is the plain picture, dot for dot.
 //----------------------------------------------------------------------------
