@@ -58,9 +58,8 @@ localparam CONF_STR = {
 	"P1O[5:3],Scandoubler Fx,None,HQ2x,CRT 25%,CRT 50%,CRT 75%;",
 	"P1O[7:6],Scale,Normal,V-Integer,Narrower HV-Integer,Wider HV-Integer;",
 	"P1-;",
-	"P1O[15:14],Video Timing,Native 54.7Hz,57Hz,60Hz;",
+	"P1O[15:14],Video Timing,Native 54.7Hz,57Hz;",
 	"P1O[101],CRT Adjust,Off,On;",
-	"H1P1O[102],CRT Auto-Width,Off,On;",
 	"H1P1O[100:96],CRT H-Size,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
 	"H1P1O[85:79],CRT H-Position,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,+16,+17,+18,+19,+20,+21,+22,+23,+24,+25,+26,+27,+28,+29,+30,+31,+32,+33,+34,+35,+36,+37,+38,+39,+40,+41,+42,+43,+44,+45,+46,+47,+48,-48,-47,-46,-45,-44,-43,-42,-41,-40,-39,-38,-37,-36,-35,-34,-33,-32,-31,-30,-29,-28,-27,-26,-25,-24,-23,-22,-21,-20,-19,-18,-17,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
 	"H1P1O[78:74],CRT V-Shift,0,+1,+2,+3,+4,+5,+6,+7,+8,+9,+10,+11,+12,+13,+14,+15,-16,-15,-14,-13,-12,-11,-10,-9,-8,-7,-6,-5,-4,-3,-2,-1;",
@@ -957,6 +956,12 @@ always @(posedge clk_sys) if (!msg_out) msg_num_q <= msg_num;
 assign info_req = msg_out;
 assign info     = {3'd0, msg_num_q};
 
+// Video Timing: the OSD lists 54.7 Hz and 57 Hz. The board still has its 60 Hz
+// frame (vtiming 2), hidden for now; a setting saved with it runs as 57 Hz.
+// To bring it back, add "60Hz" to the Video Timing line of CONF_STR and pass
+// status[15:14] straight to the board.
+wire [1:0] vtiming_osd = (status[15:14] == 2'd1 || status[15:14] == 2'd2) ? 2'd1 : 2'd0;
+
 midway_yunit board
 (
 	.clk            (clk_sys),
@@ -971,7 +976,7 @@ midway_yunit board
 	.t2_sound       (is_t2),
 	.mk_turbo       (cfg_turbo),
 	.flip_x         (is_t2),
-	.vtiming        (status[15:14]),    // 54.7 / 57 / 60 Hz frames (see midway_yunit.sv)
+	.vtiming        (vtiming_osd),      // 54.7 / 57 Hz frames (see midway_yunit.sv)
 
 	.patch_clr      (cfg1_start),
 	.patch_we       (cfg1_rep),
@@ -1222,7 +1227,7 @@ wire [7:0] av_r = vid_mute ? 8'h00 : ch_on0 ? 8'hFF : ch_on1 ? 8'h00 : core_r;
 wire [7:0] av_g = vid_mute ? 8'h00 : ch_on0 ? 8'h00 : ch_on1 ? 8'hFF : core_g;
 wire [7:0] av_b = vid_mute ? 8'h00 : ch_on0 ? 8'h00 : ch_on1 ? 8'h00 : core_b;
 
-// ---- analog CRT stage: centred sync, CRT V-Size, CRT Adjust, Auto-Width (rtl/video/yunit_crt.sv) ----
+// ---- analog CRT stage: centred sync, CRT V-Size, CRT Adjust (rtl/video/yunit_crt.sv) ----
 //
 // The analog sync is always the centred one (picture in the middle of a
 // standard 15 kHz line and frame); HDMI sees the same picture either way.
@@ -1242,7 +1247,6 @@ yunit_crt yunit_crt
 	.ce_pix      (ce_pix),
 
 	.crt_en      (status[101]),
-	.autow       (status[102]),
 	.scandoubler (scandoubler),
 	.hsize_osd   (status[100:96]),
 	.hpos_osd    (status[85:79]),
