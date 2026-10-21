@@ -7,10 +7,6 @@ An FPGA implementation of the Williams/Midway Y Unit arcade board (1990-1992),
 the TMS34010-based platform behind Smash T.V., Trog, High Impact Football,
 Mortal Kombat and Terminator 2.
 
-> **Status:** the core is currently undergoing testing. It can be compiled and is playable in its
-> current state, but bugs are expected. Issues and pull requests are not
-> accepted at the moment.  No "releases" until testing is complete.
-
 ## Table of Contents
 
 - [Hardware](#hardware)
