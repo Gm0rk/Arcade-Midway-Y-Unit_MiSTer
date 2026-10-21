@@ -47,7 +47,7 @@
 //      board's own sync passes through and `centred` is low.
 //
 //  `pic_dots` = a1 - a0, the picture width in dots (0 until measured), is
-//  what CRT Auto-Width uses.
+//  reported for simulation and debugging only.
 //
 //  The outputs are registers updated on `ce`, so they change one dot after
 //  the dot that decides them; the pulses are therefore triggered on the dot
