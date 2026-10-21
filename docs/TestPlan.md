@@ -51,8 +51,8 @@ Run with any game (Mortal Kombat or Smash T.V. covers them all).
 |---|---|---|---|---|
 | C-01 | Open the OSD | Main page: Video Settings, Move List and Finishing Moves (Mortal Kombat only), Passwords (Total Carnage only), DIP Switches, Hidden Items (games with a hidden menu only), Service Mode, Pause when OSD is open, Reset, Reset and close OSD | Pass | |
 | C-02 | Video Settings: Aspect Ratio, Scandoubler Fx, Scale | Each option changes the HDMI picture as named | Pass | |
-| C-03 | Video Timing 54.7 Hz / 57 Hz / 60 Hz | Picture stable on HDMI and analog at each; at 57 / 60 Hz the game runs a little faster, music keeps its pitch | Pass | |
-| C-04 | CRT Adjust: H-Size, H-Position, V-Shift, Auto-Width (analog) | The picture resizes and moves; Auto-Width fits it to the screen | Pass | |
+| C-03 | Video Timing 54.7 Hz / 57 Hz | Picture stable on HDMI and analog at each; at 57 Hz the game runs a little faster, music keeps its pitch | Pass | |
+| C-04 | CRT Adjust: H-Size, H-Position, V-Shift (analog) | The picture resizes and moves | Pass | |
 | C-05 | CRT V-Size, PVM and Cabinet modes (analog) | "+" taller, "-" shorter in both modes; the screen keeps sync, also while V-Size is turned on, changed or set back to 0 (PVM: no roll or tear) | Pass | |
 | C-06 | Pause when OSD is open: On, then Off | On: the game stops while the OSD is open. Off: it keeps running | Pass | |
 | C-07 | Pause button on the controller | Pauses and resumes the game | Pass | |
@@ -66,9 +66,9 @@ Run with any game (Mortal Kombat or Smash T.V. covers them all).
 | C-15 | Define joystick buttons for a game | The button names match the game's controls page | Pass | |
 | C-16 | Play a game, then load another game from the menu | The screen stays black behind the loading box | Pass | |
 | C-17 | Open DIP Switches in each game | The switches in alphabetical order (Service Credit and Tilt among them), and each switch's settings too; every value shows on its line | Pass | |
-| C-18 | Video Timing 57 Hz, then 60 Hz, with CRT Adjust on: CRT V-Size "+7" in PVM and in Cabinet mode | The whole picture stays on screen (the bottom rows too); "+" makes it only as tall as the frame allows | Pass | |
+| C-18 | Video Timing 57 Hz, with CRT Adjust on: CRT V-Size "+7" in PVM and in Cabinet mode | The whole picture stays on screen (the bottom rows too); "+" makes it only as tall as the frame allows | Pass | |
 | C-19 | Mortal Kombat: let the attract mode run into a demo fight and on; Smash T.V.: lose a game to GAME OVER | Each tune stops cleanly when the music changes or stops; no FM notes keep droning | Pass | |
-| C-20 | Video Timing 57 Hz or 60 Hz (analog, a TV that needs it): load a game from its MRA, and again after Reset | The ROM loading screen holds as steady as the game does (no bouncing or rolling) | Pass | |
+| C-20 | Video Timing 57 Hz (analog, a TV that needs it): load a game from its MRA, and again after Reset | The ROM loading screen holds as steady as the game does (no bouncing or rolling) | Pass | |
 
 ## Trog
 
