@@ -4,6 +4,39 @@ What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's 
 
 Build numbers count the core's development builds in order. Released RBF files are named by date. Builds 1 to 12 were named Arcade-MidwayY.
 
+## Build 72 (2026-10-21)
+
+**Docs & tools**
+- README: Timing and resources from the Build 71 compilation (the RTL of Build 70, with the SDRAM controller as it was): **timing is met on every clock**. Setup on the 96 MHz system clock has 0.530 ns to spare (total negative slack 0, Fmax 101.15 MHz; Build 70: 0.207 ns); the HDMI PLL clock is now the closest, 0.212 ns, in the framework's scaler, shadow mask and OSD (`sys/`); hold, recovery, removal and minimum pulse width are met (hold >= 0.164 ns, recovery 2.210 ns, removal 0.679 ns, minimum pulse width 1.041 ns). On the 96 MHz clock the closest paths run from the game-ID register into the CRT V-Size line memory. Resource use is still from the Build 68 compilation.
+
+## Build 71 (2026-10-21)
+
+**Docs & tools**
+- README: Timing and resources from the Build 70 compilation: **timing is met on every clock**. Setup on the 96 MHz system clock has 0.207 ns to spare (total negative slack 0, Fmax 97.95 MHz; Build 69: -0.109 ns); the HDMI PLL clock 0.454 ns; hold, recovery, removal and minimum pulse width are met. The closest paths are now the reset (the boot-hold counter's "not zero") into the TMS34010's function-unit data and multiplier registers, no longer the CRT V-Size stage. The margin is thin and moves from one compilation to the next. Resource use is from the Build 68 compilation.
+
+## Build 70 (2026-10-21)
+
+**Changed**
+- Timing: the Build 69 compilation missed setup on the 96 MHz system clock by 0.109 ns (total negative slack 0.211 ns, two endpoints); the squaring paths of Build 68 no longer fail. CRT V-Size's "room for +" calculation (rtl/crt_adjust/crt_vsize.sv) is worked out in three registered steps instead of one long adder chain: the same answer three clocks later, used once a frame. No change to what the core does: the analog output is the same on every clock as in Build 69, in Cabinet and PVM, for 289 / 277 / 270 / 266-line frames (checked in simulation).
+
+## Build 69 (2026-10-21)
+
+**Changed**
+- CRT V-Size, Cabinet mode: the blend squares the line memory's output one clock later, through one more register, and its remaining per-dot steps (mix, square root, output) move one clock later with it (rtl/crt_adjust/crt_vsize.sv). The Build 68 compilation missed setup on the 96 MHz system clock by 0.186 ns (total negative slack 0.374 ns, four endpoints, all in this stage): the line memory, its block-select mux and the squaring multiplier were all in one clock. The picture is the same: the analog output matches Build 68 on every clock (checked in simulation, Cabinet and PVM, for several H-Size, H-Position, V-Shift and V-Size settings). The README's timing report is still that of Build 65 until the next compilation.
+
+## Build 68 (2026-10-20)
+
+**Removed**
+- Removed 60 Hz option from the OSD because games run too fast with it enabled.
+
+## Build 67 (2026-10-20)
+
+**Removed**
+- CRT Adjust: **CRT Auto-Width** (Video Settings). It is not part of the official CRT Adjust; the OSD entry and the circuit behind it (the divider that worked out the H-Size from the picture width) are gone. It was Off unless turned on, and nothing else changes: H-Size, H-Position, V-Shift, V-Size and V-Size Mode work as before, and H-Size is the OSD's -16..+15 only. A saved setting from before is ignored. Checked in simulation with Auto-Width Off: the analog output (RGB, HSync, VSync, picture window, read clock) is identical clock for clock to the old circuit's, for 7 combinations of H-Size, H-Position, V-Shift and V-Size.
+
+**Docs & tools**
+- README, Extra content, TestPlan (C-04: CRT Adjust without Auto-Width; still Pass, 135 tests), the CSV and the release notes no longer mention it.
+
 ## Build 66 (2026-10-20)
 
 **Docs & tools**
