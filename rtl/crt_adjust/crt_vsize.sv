@@ -60,9 +60,10 @@
 //     later, so crt_adjust took the previous line's: first picture line lost).
 //   - PVM: output lines past the end of the native frame are blank (with
 //     vsize > 0 they showed the next frame's top under the picture).
-//   - Cabinet: the square root runs in four 2-step stages (phases 6-9)
-//     instead of two 4-step ones, for 96 MHz timing (needs >= 10 clocks a
-//     pixel; this core has 12). Same values.
+//   - Cabinet: the square root runs in four 2-step stages (phases 7-10)
+//     instead of two 4-step ones, and the squaring reads the line memory
+//     through one more register (ring_qd, phases 4-5), for 96 MHz timing
+//     (needs 12 clocks a pixel; this core has exactly 12). Same values.
 //   - "+" (taller, vsize < 0) is limited to the room the frame has, in both
 //     modes, so the picture is never cut (the 57/60 Hz video timings leave
 //     few blank lines: PVM sent no line past lines_out, Cabinet's window
@@ -304,8 +305,17 @@ module crt_vsize #(
     wire signed [11:0] c_ws   = s_ntop + 12'sd2;
     wire signed [11:0] c_cap  = (c_ws > s_vsl + 12'sd8) ? (c_ws - s_vsl - 12'sd4) : 12'sd0;
     wire signed [11:0] c_k    = (c_cap > 12'sd24) ? 12'sd24 : c_cap;
-    wire signed [11:0] fl_cab = s_anat - (s_lnat - 12'sd2 + c_k - c_ws);
-    wire signed [11:0] fl_any = tube_mode ? fl_cab : fl_pvm;
+    // Registered in steps (the measurements change at most once a frame, and
+    // vsize_tgt is used at VSync): fl_cab = s_anat - (s_lnat - 2 - c_ws) - c_k.
+    reg  signed [11:0] fl_pvm_r, fl_t_r, c_k_r, fl_cab_r;
+    initial begin fl_pvm_r = 0; fl_t_r = 0; c_k_r = 0; fl_cab_r = 0; end
+    always @(posedge clk) begin
+        fl_pvm_r <= fl_pvm;
+        fl_t_r   <= s_lnat - 12'sd2 - c_ws;
+        c_k_r    <= c_k;
+        fl_cab_r <= s_anat - fl_t_r - c_k_r;
+    end
+    wire signed [11:0] fl_any = tube_mode ? fl_cab_r : fl_pvm_r;
     reg  signed [5:0]  vs_floor;    // -31 .. 0
     reg  signed [5:0]  vsize_tgt;   // vsize, no further "+" than vs_floor
     initial begin vs_floor = 0; vsize_tgt = 0; end
@@ -547,6 +557,13 @@ module crt_vsize #(
         ring_q    <= ring[rd_addr_m];
     end
 
+    // [Arcade-Midway-Y-Unit] Cabinet mode squares ring_q one clock later, from
+    // this register: the RAM output, its block-select mux and the squaring
+    // multiplier were one 96 MHz clock (Build 68: -0.186 ns).
+    reg  [23:0]    ring_qd;
+    initial ring_qd = 0;
+    always @(posedge clk) ring_qd <= ring_q;
+
     wire in_window = out_running && (o_cline >= {10'd0, o_de_start}) && (o_px < o_pxcnt);
     reg  win_q;
     initial win_q = 0;
@@ -771,47 +788,48 @@ module crt_vsize #(
             end
         end
         // fasi (indirizzo registrato -> dato A in ring_q durante la fase 3,
-        // dato B durante la fase 4; quadrato calcolato direttamente li`):
+        // dato B durante la fase 4; [Arcade-Midway-Y-Unit] ring_qd li ripete
+        // un clock dopo, quindi i quadrati si calcolano nelle fasi 4 e 5):
         case (p_cnt)
             5'd0: rd_addr_t <= line_base(t_slotA) + t_px_l;
             5'd1: rd_addr_t <= line_base(t_slotB) + t_px_l;
-            5'd3: begin
-                t_sqa_r <= ring_q[23:16] * ring_q[23:16];
-                t_sqa_g <= ring_q[15:8]  * ring_q[15:8];
-                t_sqa_b <= ring_q[7:0]   * ring_q[7:0];
-            end
             5'd4: begin
-                t_sqb_r <= ring_q[23:16] * ring_q[23:16];
-                t_sqb_g <= ring_q[15:8]  * ring_q[15:8];
-                t_sqb_b <= ring_q[7:0]   * ring_q[7:0];
+                t_sqa_r <= ring_qd[23:16] * ring_qd[23:16];
+                t_sqa_g <= ring_qd[15:8]  * ring_qd[15:8];
+                t_sqa_b <= ring_qd[7:0]   * ring_qd[7:0];
             end
             5'd5: begin
+                t_sqb_r <= ring_qd[23:16] * ring_qd[23:16];
+                t_sqb_g <= ring_qd[15:8]  * ring_qd[15:8];
+                t_sqb_b <= ring_qd[7:0]   * ring_qd[7:0];
+            end
+            5'd6: begin
                 t_bl_r <= t_mix_r[23:8];
                 t_bl_g <= t_mix_g[23:8];
                 t_bl_b <= t_mix_b[23:8];
             end
             // [Arcade-Midway-Y-Unit] The 16->8 bit square root ran in two
-            // stages of four steps (phases 6 and 7), each a chain of four
-            // 16-bit compare/subtracts in one 96 MHz clock. With 12 clocks
-            // per dot (8 MHz) there are phases to spare, so it runs in four
-            // stages of two steps (phases 6-9); the result still reaches the
-            // output before the next dot enable (phase 11). Same values.
-            5'd6: begin
+            // stages of four steps, each a chain of four 16-bit
+            // compare/subtracts in one 96 MHz clock. With 12 clocks per dot
+            // (8 MHz) there are phases to spare, so it runs in four stages
+            // of two steps (phases 7-10); the result is ready in the clock
+            // of the next dot enable (phase 11). Same values.
+            5'd7: begin
                 t_h1_r <= isq_step(isq_step({t_bl_r, 16'd0}, 16'h4000), 16'h1000);
                 t_h1_g <= isq_step(isq_step({t_bl_g, 16'd0}, 16'h4000), 16'h1000);
                 t_h1_b <= isq_step(isq_step({t_bl_b, 16'd0}, 16'h4000), 16'h1000);
             end
-            5'd7: begin
+            5'd8: begin
                 t_h2_r <= isq_step(isq_step(t_h1_r, 16'h0400), 16'h0100);
                 t_h2_g <= isq_step(isq_step(t_h1_g, 16'h0400), 16'h0100);
                 t_h2_b <= isq_step(isq_step(t_h1_b, 16'h0400), 16'h0100);
             end
-            5'd8: begin
+            5'd9: begin
                 t_h3_r <= isq_step(isq_step(t_h2_r, 16'h0040), 16'h0010);
                 t_h3_g <= isq_step(isq_step(t_h2_g, 16'h0040), 16'h0010);
                 t_h3_b <= isq_step(isq_step(t_h2_b, 16'h0040), 16'h0010);
             end
-            5'd9: begin
+            5'd10: begin
                 t_out   <= {isq_last(t_h3_r), isq_last(t_h3_g), isq_last(t_h3_b)};
                 t_out_v <= t_fetch;
             end
