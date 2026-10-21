@@ -82,35 +82,38 @@ The hardware tests behind the status above are run on:
 
 ## Timing and resources
 
-From the Quartus Prime 17.0.2 Lite compilation of Build 65 (2026-10-20), for
-the DE10-Nano's Cyclone V 5CSEBA6U23I7. The project runs one timing model,
-Slow 1100 mV 100 C. All 135 hardware tests pass (see the
-[test plan](docs/TestPlan.md)).
+Timing is from the Quartus Prime 17.0.2 Lite compilation of Build 71
+(2026-10-21), resource use from that of Build 68 (Builds 69 to 71 only add a
+few pipeline registers), for the DE10-Nano's Cyclone V 5CSEBA6U23I7. The
+project runs one timing model, Slow 1100 mV 100 C. All 135 hardware tests pass
+(see the [test plan](docs/TestPlan.md)).
 
 **Timing is met on every clock**, and so is every hold, recovery, removal and
-minimum pulse width check. The margin on the 96 MHz system clock is thin,
-0.067 ns (the clock's Fmax is 96.63 MHz), and it moves with every change to
-the design. The closest paths are in the CRT V-Size stage (`crt_vsize`: its
-line memory and the line-count arithmetic).
+minimum pulse width check. The 96 MHz system clock has 0.530 ns to spare (the
+clock's Fmax is 101.15 MHz); the closest clock is the HDMI PLL's, with
+0.212 ns, in the MiSTer framework's scaler, shadow mask and OSD (`sys/`). The
+margins move with every change to the design and from one compilation to the
+next. On the 96 MHz clock the closest paths run from the game-ID register into
+the CRT V-Size line memory.
 
 | Clock | Frequency | Setup slack | Hold slack |
 |---|---|---|---|
-| System (core PLL) | 96 MHz | 0.067 ns | 0.247 ns |
-| HDMI PLL | 148.54 MHz | 0.680 ns | 0.255 ns |
-| HPS user clock | 100 MHz | 4.348 ns | 0.337 ns |
-| SPI | 100 MHz | 5.233 ns | 0.423 ns |
-| FPGA_CLK1_50 | 50 MHz | 7.504 ns | 0.416 ns |
-| FPGA_CLK2_50 | 50 MHz | 11.292 ns | 0.267 ns |
-| Audio PLL | 24.58 MHz | 14.864 ns | 0.261 ns |
+| System (core PLL) | 96 MHz | 0.530 ns | 0.247 ns |
+| HDMI PLL | 148.54 MHz | 0.212 ns | 0.164 ns |
+| HPS user clock | 100 MHz | 3.682 ns | 0.360 ns |
+| SPI | 100 MHz | 5.294 ns | 0.296 ns |
+| FPGA_CLK1_50 | 50 MHz | 8.738 ns | 0.414 ns |
+| FPGA_CLK2_50 | 50 MHz | 11.379 ns | 0.374 ns |
+| Audio PLL | 24.58 MHz | 13.991 ns | 0.245 ns |
 
-Worst recovery slack 1.924 ns, removal 0.650 ns, minimum pulse width 1.041 ns.
+Worst recovery slack 2.210 ns, removal 0.679 ns, minimum pulse width 1.041 ns.
 
 | Resource | Used |
 |---|---|
-| Logic (ALMs) | 28,623 / 41,910 (68 %) |
-| Registers | 29,522 |
+| Logic (ALMs) | 28,536 / 41,910 (68 %) |
+| Registers | 29,374 |
 | Block RAM (M10K blocks) | 403 / 553 (73 %) |
-| Block memory bits | 3,075,111 / 5,662,720 (54 %) |
+| Block memory bits | 3,074,807 / 5,662,720 (54 %) |
 | DSP blocks | 68 / 112 (61 %) |
 | PLLs | 3 / 6 (50 %) |
 | Pins | 145 / 314 (46 %) |
@@ -128,17 +131,14 @@ Worst recovery slack 1.924 ns, removal 0.650 ns, minimum pulse width 1.041 ns.
     will not follow a change of line rate
 
   The middle of the picture moves as it resizes; recentre it with V-Shift.
-  Changes are applied a line per frame. With the 57 Hz / 60 Hz Video Timing
-  there is little room around the picture, so "+" goes only as far as the
-  whole picture still fits (at 60 Hz hardly at all). On HDMI,
+  Changes are applied a line per frame. With the 57 Hz Video Timing there is
+  little room around the picture, so "+" goes only as far as the whole
+  picture still fits. On HDMI,
   PVM leaves the picture untouched and Cabinet shows the resized picture
-- Video Timing: the board's own 54.7 Hz, or 57 Hz / 60 Hz frames for TVs
-  that do not hold 54.7 Hz. Only blank lines are dropped, so the whole
-  picture is still sent; games run about 4 % (57 Hz) or 10 % (60 Hz) faster,
-  while music and voices keep their normal pitch and tempo. The loading
-  screen has the same timing. At 60 Hz the
-  picture fills almost the whole frame, so a CRT may hide a few lines at the
-  top or bottom; CRT V-Shift picks which
+- Video Timing: the board's own 54.7 Hz, or 57 Hz frames for TVs that do
+  not hold 54.7 Hz. Only blank lines are dropped, so the whole picture is
+  still sent; games run about 4 % faster, while music and voices keep their
+  normal pitch and tempo. The loading screen has the same timing
 - CMOS saved as NVRAM: settings, audits and high scores survive power-off.
   It is saved when the OSD is opened, if the game has changed it
 - DIP switches in the OSD, taken from MAME; changes apply after a reset
@@ -161,7 +161,7 @@ Worst recovery slack 1.924 ns, removal 0.650 ns, minimum pulse width 1.041 ns.
 
 | Item | |
 |---|---|
-| Video Settings | Aspect ratio, scandoubler, scale, Video Timing, CRT Adjust (Auto-Width, H-Size, H-Position, V-Shift, V-Size, V-Size Mode) |
+| Video Settings | Aspect ratio, scandoubler, scale, Video Timing, CRT Adjust (H-Size, H-Position, V-Shift, V-Size, V-Size Mode) |
 | Move List | Mortal Kombat: Off, On; shows the move list (four fighters, then three: special moves, fatality and the distance it needs, The Pit's uppercut) over the game, which waits until it is Off; with the OSD closed, Left or Right turns the page |
 | Finishing Moves | Mortal Kombat: each fighter's fatality, entered for you at the next FINISH HIM |
 | Passwords | Total Carnage: Off, On; shows the warp codes (how to enter one, where each takes you, the two warp bonuses) over the game, which waits until it is Off |
