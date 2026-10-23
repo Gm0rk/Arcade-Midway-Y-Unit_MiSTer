@@ -17,7 +17,7 @@ Mortal Kombat has the most extras: four OSD features and its own button layout.
 
 - **[Finishing Moves](#finishing-moves)** (main page): pick a fighter's fatality, and the core enters it on the round winner's controls at the next FINISH HIM, for either player. The distance is measured the way the game does it, from the fighters' centres. Messages say when the fighter is too far or too close, the move waits for another fighter's FINISH HIM, FINISH HIM is over, the move was not taken, or it was cleared. **Clear the set move** drops it.
 - **[Move List](#move-list)** (Off, On): a reference window over the dimmed title screen with each fighter's special moves, fatality and the distance it needs, and The Pit's uppercut in the footer. With the OSD closed, Left or Right turns to the other page. The game waits while it shows.
-- **[EJB Menu shortcut](#hidden-developer-menu-ejb-menu)** (Hidden Items, every revision except prototype 4.0): plays the 27-press code on the two Block buttons in about 3 seconds, for diagnostics, audits, enter initials and character endings. Start 1 and 2 are held released while it plays so a Start press cannot spoil it. Messages report the result.
+- **[EJB Menu shortcut](#hidden-developer-menu-ejb-menu)** (Hidden Items, every revision except prototype 4.0): plays the 27-press code on the two Block buttons in about 3 seconds, for diagnostics, audits, enter initials and character endings. The game takes the code only in attract mode, not during a game or the game-over screens that follow it. Start 1 and 2 are held released while it plays so a Start press cannot spoil it. Messages report the result.
 - **[Reptile on demand](#reptile)** (Hidden Items, rev 3.0, rev 4.0 and the Turbo hacks): Reptile Fight Next, Moon Silhouettes Always and Reptile Hints Always. The core changes a few of the game's instructions as the CPU fetches them; nothing is written to the ROM or the CMOS.
 - **Button layout**: High Punch, Low Punch, High Kick, Low Kick, Block, then Start, Coin, Test, Pause. The board's second Block input stays unused, as the cabinet has one block button per player.
 - **Coin 3** on the third controller's Coin button.
@@ -135,13 +135,25 @@ Every fighter, on The Pit stage only: an uppercut (D+HP), close. The core does n
 Every revision except prototype 4.0 hides the **EJB Menu**: diagnostics, coin
 bookkeeping, game audits, "Hello", enter initials and character endings.
 **OSD → Hidden Items → EJB Menu** enters the code for you (about 3 seconds; leave
-the controls alone). Use it any time in attract mode, before a game is
-started; with "Pause when OSD is open" it starts when the OSD closes.
+the controls alone); with "Pause when OSD is open" it starts when the OSD closes.
+
+**When it is accessible.** The game takes the code only while it is in its
+attract mode, whether the core enters it or you do by hand:
+
+- **Accessible:** the attract mode that runs from power-up until a game is
+  started, and again once a game is over, from the MIDWAY PRESENTS screen on.
+- **Not accessible:** during a game (character select, the fights, the
+  continue countdown) and during the game-over sequence that follows it: the
+  GAME OVER screen, the winning-streaks table and the Mortal Kombat comic book
+  offer. The game is not in attract mode yet, although it looks like it. In a
+  test game that was lost without entering anything this lasted about 47
+  seconds; wait for MIDWAY PRESENTS, then use the shortcut.
 
 A message says how it went: "EJB Menu: code entered" when the menu opens,
-"Not now: the code works in the attract mode" when used during a game (the
-code is not entered), "Code not taken: try again" if the menu did not open,
-and "Not in this revision of the game" on prototype 4.0.
+"Not now: the code works in the attract mode" when the game is not in attract
+mode (during a game or the game-over sequence; the code is not entered),
+"Code not taken: try again" if the menu did not open, and "Not in this revision
+of the game" on prototype 4.0.
 
 By hand: press P1 Block (0) and P2 Block (1) in the order
 `0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 0 0 1 0 0 1 1 1 0 0 0 0`, each press within
