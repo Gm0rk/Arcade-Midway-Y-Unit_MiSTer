@@ -51,10 +51,11 @@ listed in [Extra content](docs/ExtraContent.md).
 | [Total Carnage](docs/TotalCarnage.md) | totcarn (rev LA1) | Verified | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Total_Carnage.png" width="300" alt="Total Carnage title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Total_Carnage_2.png" width="300" alt="Total Carnage gameplay"> |
 | [Trog](docs/Trog.md) | trog (rev LA5), prototype rev 4.00 | Verified | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Trog.png" width="300" alt="Trog title screen"> | <img src="https://github.com/Gm0rk/Arcade-Midway-Y-Unit_MiSTer/blob/main/media/Trog_2.png" width="300" alt="Trog gameplay"> |
 
-Verified on hardware: `[████████████████████]` 8 / 8
+Verified on MiSTer hardware: `[████████████████████]` 8 / 8
 
 A game is verified when it passes every test of the
-[test plan](docs/TestPlan.md), which tracks the progress.
+[test plan](docs/TestPlan.md), which tracks the progress. All testing was done
+on MiSTer hardware (see [Testing setup](#testing-setup))
 
 Also included: Midway's board diagnostic, the
 [Y-Unit Test ROM](docs/YUnitTestROM.md). Other revisions, prototypes and
@@ -62,7 +63,8 @@ hacks are in the `_alternatives` folder of the MRAs.
 
 ## Testing setup
 
-The hardware tests behind the status above are run on:
+The tests behind the status above are run on MiSTer hardware, with this setup
+(the core has not been verified against an original Y Unit board):
 
 | | |
 |---|---|
@@ -81,7 +83,7 @@ The hardware tests behind the status above are run on:
 Timing is from the Quartus Prime 17.0.2 Lite compilation of Build 71
 (2026-10-21), resource use from that of Build 68 (Builds 69 to 71 only add a
 few pipeline registers), for the DE10-Nano's Cyclone V 5CSEBA6U23I7. The
-project runs one timing model, Slow 1100 mV 100 C. All 135 hardware tests pass
+project runs one timing model, Slow 1100 mV 100 C. All 135 MiSTer hardware tests pass
 (see the [test plan](docs/TestPlan.md)).
 
 **Timing is met on every clock**, and so is every hold, recovery, removal and
