@@ -2,11 +2,12 @@
 
 [Back to the main README](../README.md)
 
-The hardware tests each game needs before the core is considered done. Run
-them on a MiSTer with the game's main MRA (the alternatives have their own
-test), and write **Pass** or **Fail** in the Result column; an empty Result
-means not tested yet. Put what went wrong in Notes. If you are unsure what
-is correct, compare with MAME.
+The tests each game needs before the core is considered done. They are run on
+MiSTer hardware with the game's main MRA (the alternatives have their own
+test); the core has not been verified against an original Y Unit board. Write
+**Pass** or **Fail** in the Result column; an empty Result means not tested
+yet. Put what went wrong in Notes. If you are unsure what is correct, compare
+with MAME.
 
 The summary counts the passed tests in each section while testing is under
 way. A game is done when every test in its section passes: mark it Pass in
@@ -25,7 +26,7 @@ when every game and the core-wide tests pass.
 | [Super High Impact](#super-high-impact) | 13 | Pass |
 | [Strike Force](#strike-force) | 11 | Pass |
 | [Mortal Kombat](#mortal-kombat) | 28 | Pass |
-| [Terminator 2 - Judgment Day](#terminator-2---judgment-day) | 13 | Pass |
+| [Terminator 2 - Judgment Day](#terminator-2---judgment-day) | 12 | Pass |
 | [Total Carnage](#total-carnage) | 13 | Pass |
 | [Y-Unit Test ROM](#y-unit-test-rom) | 3 | Pass |
 
@@ -200,23 +201,22 @@ Main MRA: Mortal Kombat (rev 4.0). [Controls, move list, finishing moves, hidden
 
 ## Terminator 2 - Judgment Day
 
-Main MRA: Terminator 2 - Judgment Day (rev LA4). [Controls and gun options](Terminator2.md).
+Main MRA: Terminator 2 - Judgment Day (rev LA4). [Controls and gun control](Terminator2.md).
 
 | # | Test | Expected | Result | Notes |
 |---|---|---|---|---|
 | T2-01 | Boot | Attract mode: title, demo, high scores | Pass | |
 | T2-02 | Coin and Start for players 1-2; coins 3 and 4 | Credits added, each player joins | Pass | |
-| T2-03 | Aim with the left analog stick and shoot | The sight follows the stick across the whole screen; shots land where it points | Pass | |
-| T2-04 | Aim with the d-pad | The sight moves steadily | Pass | |
-| T2-05 | Gun Control "Mouse" (DIP Switches), aim player 1 with the mouse | The sight follows the mouse; left button fires, right throws a bomb | Pass | |
-| T2-06 | Crosshair Off | The sight is hidden | Pass | |
-| T2-07 | Trigger and Bomb, both players | Fire and bomb work | Pass | |
-| T2-08 | Play the first level with 2 players | Picture correct; the game does not freeze | Pass | |
-| T2-09 | Sound | Music, effects, voices | Pass | |
-| T2-10 | Set a high score, open the OSD, reload | Score kept, no CMOS error on boot | Pass | Just like Smash TV “Today’s” scores do not save after reset |
-| T2-11 | Test menu: switch test, sound test | Every switch shows; sounds play | Pass | |
-| T2-12 | Play to game over | Continue screen, initials entry | Pass | |
-| T2-13 | Each MRA in `_alternatives/_Terminator 2 - Judgment Day` | Boots to attract and plays | Pass | |
+| T2-03 | Aim with the left analog stick and shoot | The game's sight follows the stick across the whole screen; shots land where it points | Pass | |
+| T2-04 | Aim with the d-pad | The game's sight moves steadily | Pass | |
+| T2-05 | Gun Control "Mouse" (DIP Switches), aim player 1 with the mouse | The game's sight follows the mouse; left button fires, right throws a bomb | Pass | |
+| T2-06 | Trigger and Bomb, both players | Fire and bomb work | Pass | |
+| T2-07 | Play the first level with 2 players | Picture correct; the game does not freeze | Pass | |
+| T2-08 | Sound | Music, effects, voices | Pass | |
+| T2-09 | Set a high score, open the OSD, reload | Score kept, no CMOS error on boot | Pass | Just like Smash TV “Today’s” scores do not save after reset |
+| T2-10 | Test menu: switch test, sound test | Every switch shows; sounds play | Pass | |
+| T2-11 | Play to game over | Continue screen, initials entry | Pass | |
+| T2-12 | Each MRA in `_alternatives/_Terminator 2 - Judgment Day` | Boots to attract and plays | Pass | |
 
 ## Total Carnage
 
