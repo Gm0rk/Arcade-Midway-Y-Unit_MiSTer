@@ -89,7 +89,7 @@ Mortal Kombat has the most extras: four OSD features and its own button layout.
 
 - **Finishing Moves** (main page): pick a fighter's fatality, and the core enters it on the round winner's controls at the next FINISH HIM, for either player. The distance is measured the way the game does it, from the fighters' centres. Messages say when the fighter is too far or too close, the move waits for another fighter's FINISH HIM, FINISH HIM is over, the move was not taken, or it was cleared. **Clear the set move** drops it. Checked in MAME on all 11 Mortal Kombat sets.
 - **Move List** (Off, On): a reference window over the dimmed title screen with each fighter's special moves, fatality and the distance it needs, and The Pit's uppercut in the footer. Page 1 is Johnny Cage to Sonya, page 2 Raiden to Scorpion; close the OSD to see it in full screen and press Left or Right to turn the page. The game waits while it shows.
-- **EJB Menu shortcut** (Hidden Items, every revision except prototype 4.0): plays the 27-press code on the two Block buttons in about 3 seconds, for diagnostics, audits, enter initials and character endings. Start 1 and 2 are held released while it plays so a Start press cannot spoil it. Messages report the result.
+- **EJB Menu shortcut** (Hidden Items, every revision except prototype 4.0): plays the 27-press code on the two Block buttons in about 3 seconds, for diagnostics, audits, enter initials and character endings. The game takes the code only in attract mode, not during a game or the game-over screens that follow it. Start 1 and 2 are held released while it plays so a Start press cannot spoil it. Messages report the result.
 - **Reptile on demand** (Hidden Items, rev 3.0, rev 4.0 and the Turbo hacks):
   - **Reptile Fight Next**: Reptile comes after the next match you win in a 1-player game. One time, and select it again to cancel.
   - **Moon Silhouettes Always**: every match on The Pit has the silhouettes, and with them the chance of Reptile.
@@ -102,11 +102,10 @@ Mortal Kombat has the most extras: four OSD features and its own button layout.
 
 The game's own page: [Terminator 2: Judgment Day](Terminator2.md).
 
-Terminator 2 gets its gun controls as OSD entries in the DIP Switches menu.
+Terminator 2 gets its gun control as an OSD entry in the DIP Switches menu.
 
 - **Gun Control**: Joystick or Mouse for player 1.
-- **Crosshair**: Off or On.
-- **Aiming**: each player's gun is aimed with the left analog stick (it points directly) or the d-pad (it moves the sight); player 1 can also use the mouse.
+- **Aiming**: each player's gun is aimed with the left analog stick (it points directly) or the d-pad (it moves the aim); player 1 can also use the mouse. The crosshairs on screen are the game's own.
 - **Coins 3 and 4** on the third and fourth controllers' Coin buttons.
 
 ## Total Carnage
@@ -136,6 +135,6 @@ Mortal Kombat has the most game-specific extras, then Total Carnage; the rest ar
 | [Super High Impact](SuperHighImpact.md) | Octopus Bookkeeping | Short Coinage menu; coins 3 and 4 |
 | [Strike Force](StrikeForce.md) | None | Short DIP labels; coins 3 and 4 |
 | [Mortal Kombat](MortalKombat.md) | Finishing Moves, Move List, EJB Menu, 3 Reptile options | Button layout; coin 3 |
-| [Terminator 2](Terminator2.md) | Gun Control, Crosshair | Stick, d-pad or mouse aiming; coins 3 and 4 |
+| [Terminator 2](Terminator2.md) | Gun Control | Stick, d-pad or mouse aiming; coins 3 and 4 |
 | [Total Carnage](TotalCarnage.md) | Passwords | Twin-stick fire; Start/Bomb; coin 3 |
 | [Y-Unit Test ROM](YUnitTestROM.md) | Hidden Items shows an unused item | Own MRA |
