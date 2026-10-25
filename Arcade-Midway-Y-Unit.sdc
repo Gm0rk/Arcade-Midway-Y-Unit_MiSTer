@@ -20,6 +20,16 @@ set_multicycle_path -hold  -end 7 -from [get_registers {*|williams_sound:*|mc680
 set_multicycle_path -setup -end 8 -from [get_registers {*|williams_sound:*|din_r[*]}] -to [get_registers {*|williams_sound:*|mc6809is:cpu|*}]
 set_multicycle_path -hold  -end 7 -from [get_registers {*|williams_sound:*|din_r[*]}] -to [get_registers {*|williams_sound:*|mc6809is:cpu|*}]
 
+# Yawdim sound board (Z80 from rtl/tv80 in rtl/sound/yawdim_sound.sv): the Z80
+# gets a clock enable every 24 clocks and everything inside it changes only
+# on that clock, the board takes the Z80's address, data and control outputs
+# no earlier than 8 clocks after it, and the read data (din_r) has been
+# stable for at least 8 clocks when the next one comes.
+set_multicycle_path -setup -end 8 -from [get_registers {*|yawdim_sound:*|tv80cen:z80|*}] -to [get_keepers {*|yawdim_sound:*|*}]
+set_multicycle_path -hold  -end 7 -from [get_registers {*|yawdim_sound:*|tv80cen:z80|*}] -to [get_keepers {*|yawdim_sound:*|*}]
+set_multicycle_path -setup -end 8 -from [get_registers {*|yawdim_sound:*|din_r[*]}] -to [get_registers {*|yawdim_sound:*|tv80cen:z80|*}]
+set_multicycle_path -hold  -end 7 -from [get_registers {*|yawdim_sound:*|din_r[*]}] -to [get_registers {*|yawdim_sound:*|tv80cen:z80|*}]
+
 # YM2151 (jt51) phase generator: the keycode stage is clock-enabled at
 # 3.58 MHz and its inputs come from the clock-enabled register file, so the
 # detune/modulation adder chain in front of it has more than one clock.
