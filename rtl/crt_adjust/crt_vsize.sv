@@ -65,7 +65,7 @@
 //     through one more register (ring_qd, phases 4-5), for 96 MHz timing
 //     (needs 12 clocks a pixel; this core has exactly 12). Same values.
 //   - "+" (taller, vsize < 0) is limited to the room the frame has, in both
-//     modes, so the picture is never cut (the 57/60 Hz video timings leave
+//     modes, so the picture is never cut (the 57 Hz video timing leaves
 //     few blank lines: PVM sent no line past lines_out, Cabinet's window
 //     ran past the VSync it could delay).
 //   - PVM: each output frame keeps the parameters it started with (they were
