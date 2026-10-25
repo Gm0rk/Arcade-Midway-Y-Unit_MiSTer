@@ -8,6 +8,8 @@
 //    - any write to register 0 drops the completion interrupt (INT1)
 //    - completion is signalled 41 ns per drawn pixel after the start
 //    - X flip mirrors around the right edge and starts the source early
+//      (not on the Yawdim bootlegs: MAME's m_yawdim_dma leaves the source
+//      offset alone and takes the row width as for an unflipped blit)
 //    - clipping trims width/height but leaves the source offset where it was
 //    - rows whose source offset is at or beyond 0x06000000 are skipped
 //
@@ -30,6 +32,7 @@ module yunit_dma
 	input             reset,
 
 	input             bpp6,          // 6 bits per pixel (else 4)
+	input             yawdim,        // Yawdim bootlegs: X flip does not start the source early
 	input             fast,          // count the completion timer down by 2 this clock
 	                                 // (shorter video frames, see midway_yunit.sv)
 
@@ -273,8 +276,12 @@ always @(posedge clk) begin
 			B_SETUP: begin
 				// source adjustments for X flip (computed on the unclipped width)
 				if (flip) begin
-					gfxoff   <= gfxoff - 32'((width - 32'sd1) << 3);
-					rowbytes <= (rowbytes - width + 32'sd3) & ~32'sd3;
+					if (!yawdim) begin
+						gfxoff   <= gfxoff - 32'((width - 32'sd1) << 3);
+						rowbytes <= (rowbytes - width + 32'sd3) & ~32'sd3;
+					end
+					else
+						rowbytes <= (rowbytes + width + 32'sd3) & ~32'sd3;
 					xpos     <= xpos + width - 32'sd1;
 				end
 				else
