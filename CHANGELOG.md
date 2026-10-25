@@ -1,8 +1,141 @@
 # Changelog
 
-What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's changes are grouped by type: **Added**, **Changed**, **Fixed**, **Removed**, **Docs & tools**. Hardware test results are tracked in [docs/TestPlan.md](docs/TestPlan.md).
+What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's changes are grouped by type: **Added**, **Changed**, **Fixed**, **Removed**, **Docs & tools**. Test results, from MiSTer hardware, are tracked in [docs/TestPlan.md](docs/TestPlan.md).
 
 Build numbers count the core's development builds in order. Released RBF files are named by date. Builds 1 to 12 were named Arcade-MidwayY.
+
+## Build 90 (2026-10-25)
+
+**Docs & tools**
+- Test results: all 142 tests of the test plan now pass on MiSTer hardware, the last ones being the Maze bootleg (TR-12), the Reptile Man, Victor and Yawdim sets (MK-29 to MK-32) and the HDMI Top Row Pixel Fix (C-21 to C-23). Trog and Mortal Kombat are Verified: the README's progress bar is 8 / 8, and the test plan's summary says Pass for every section. MK-32 now reads "This bootleg is expected to have broken, missing, wrong audio".
+- README: the maintainer's edits are in: the AI disclosure, the CRT Adjust credit in Features, the wording of the HDMI Top Row Pixel Fix and the CMOS paragraphs (the "Today's Best" scores do not survive a power cycle on the real board either), FINISH HIM/HER, Reptile's moon silhouettes on The Pit stage, and a shorter Hidden Items row. The CRT V-Size note, the line about coins 3 and 4, and the note that split sets work are no longer in the README.
+
+## Build 87 (2026-10-24)
+
+**Docs & tools**
+- README: Timing from the Build 86 compilation (the one with the HDMI Top Row Pixel Fix): **timing is met on every clock**. Setup on the 96 MHz system clock has 0.599 ns to spare (total negative slack 0, Fmax 101.86 MHz; Build 81: 0.544 ns); the HDMI PLL clock has 0.460 ns, in the framework's scaler (`sys/`); hold (>= 0.228 ns), recovery (1.538 ns), removal (1.181 ns) and minimum pulse width (1.041 ns) are met. The closest paths on the 96 MHz clock are inside the framework's scaler (its input line memory into its input pixel registers); the core's own closest paths run from the reset hold-off counter into the TMS34010 and from the SDRAM controller's read-delay counter into the SDRAM address pins. The new option's logic and the scaler's pixel-enable logic are not among the closest 100 paths (all within 0.91 ns), and no unconstrained path was added. Resource use is still from the Build 68 compilation. No RTL change.
+
+## Build 86 (2026-10-24)
+
+**Added**
+- HDMI Top Row Pixel Fix (Video Settings, Off by default): hides the picture's first line on HDMI. Mortal Kombat draws a few stray pixels there (at the left of the title screen's top line, and a couple that blink during a fight); a cabinet's overscan hides them, HDMI shows the whole picture. With the option On the scaler gets a picture one line shorter (two lines with a Scandoubler Fx, which doubles every line), still 4:3. Only HDMI changes: the core takes the pixel enables of that line away, which the scaler needs to see a pixel and the analog output does not use, so the analog signal is the same with the option On or Off. Direct Video, which sends the analog signal over HDMI, shows the line too; an analog output that follows the scaler (`vga_scaler` in MiSTer.ini) loses it with the HDMI picture.
+  - It works for every game; the option is saved with the core's other settings.
+  - Checked in simulation on Mortal Kombat's own video through the core's video output (native, HQ2x and CRT scandoubler, forced scandoubler, CRT Adjust with size, shift and V-Size settings, and switching the option while the video runs): the scaler's picture is the plain picture without its first line (two with a scandoubler), the change comes between frames, and every analog signal is identical with the option On and Off. The recompile and a hardware test are still to do.
+
+**Docs & tools**
+- README, Extra content and the Mortal Kombat page describe the option.
+- TestPlan: three new core-wide tests, each waiting for a hardware test: C-21 (Mortal Kombat on HDMI, also with a Scandoubler Fx), C-22 (the analog output does not change) and C-23 (switching it with a game running, and the saved setting).
+
+## Build 85 (2026-10-24)
+
+**Docs & tools**
+- TestPlan: five new tests for the newest alternative sets, each waiting for a hardware test: TR-12 (the Maze bootleg of Trog LA4) and MK-29 to MK-32 (the Reptile Man hack, the Victor bootleg, the four Yawdim bootlegs, and the Yawdim sound). TR-11 and MK-22 now say which sets they do not cover; their results stay. Trog is 11 / 12 and Mortal Kombat 28 / 32, so both are back to **Awaiting hardware test** (README progress bar: 6 / 8). 139 tests overall, 134 passed. The CSV has the same rows.
+- README: the status of Trog and Mortal Kombat, the progress bar and the test count follow the test plan.
+
+## Build 84 (2026-10-24)
+
+**Added**
+- Trog: an MRA for the Maze bootleg of rev LA4 (mazebl) from MAME's merged `trog.zip`, in `_alternatives/_Trog`: "Maze (Trog rev LA4 3/11/91 bootleg)". It is Trog rev LA4 with the title logo changed to MAZE: the program is LA4's byte for byte, the sound ROM is LA4's three sound ROMs in one 256 KB chip (its fourth 64 KB bank is empty), and the graphics are LA4's with the logo changed (13,043 bytes differ) on larger chips. The core runs it like the other Trog sets: same board, sound board, DIP switches and controls.
+
+**Docs & tools**
+- Trog page: the Maze bootleg in the Sets row.
+- `tools/yunit_roms.py` reads MAME's `ROM_COPY` (the bootleg's sound ROM is one file that MAME copies into four banks); `tools/mra_gen.py` writes the MRA. The 52 existing MRAs come out unchanged.
+- Checked against MAME 0.289: the image the MRA delivers is byte for byte the program, graphics and sound CPU regions MAME has after starting the game. In simulation (empty CMOS, Start pressed as in MAME) the frames from 50 to 500, the MAZE title screens included, are pixel-identical to MAME's except frame 150, the CMOS message screen, where Trog LA5 differs the same way; frames 550 and 600 differ from MAME's by the same pixel counts as Trog LA5's (the colour-cycling phase after Start).
+
+## Build 83 (2026-10-24)
+
+**Docs & tools**
+- README: Timing and resources from the Build 81 compilation (the one with the Yawdim sound board): **timing is met on every clock**. Setup on the 96 MHz system clock has 0.544 ns to spare (total negative slack 0, Fmax 101.3 MHz; Build 80: 0.361 ns); the HDMI PLL clock has 0.453 ns, in the framework's scaler (`sys/`); hold (>= 0.207 ns), recovery (2.262 ns), removal (0.891 ns) and minimum pulse width (1.041 ns) are met. The closest paths on the 96 MHz clock run from the reset hold-off counter into the TMS34010's graphics unit, from the sound boards' sample requests and the SDRAM controller's read-delay counter into the SDRAM address pins, and from the CRT V-Size controller's registers into its pixel counter. The Z80 sound board's own logic is not among the closest 100 paths (all within 0.88 ns), and the timing constraints for it were read without a warning. Resource use is still from the Build 68 compilation. No RTL change.
+
+## Build 82 (2026-10-24)
+
+**Docs & tools**
+- README: Timing and resources from the Build 80 compilation: **timing is met on every clock**. Setup on the 96 MHz system clock has 0.361 ns to spare (total negative slack 0, Fmax 99.45 MHz; Build 75: 0.496 ns); the HDMI PLL clock has 0.661 ns, in the framework's scaler (`sys/`); hold (>= 0.224 ns), recovery (1.143 ns), removal (0.848 ns) and minimum pulse width (1.041 ns) are met. The closest paths on the 96 MHz clock are the CRT V-Size controller's registers into its blanking output, and the reset hold-off counter into the TMS34010's register file; the SDRAM controller's paths are not among the closest 100 (all within 0.62 ns). Resource use is still from the Build 68 compilation. Build 81 (the Yawdim sound board) is not in this compilation. No RTL change.
+
+## Build 81 (2026-10-23)
+
+**Added**
+- Mortal Kombat: MRAs for the four Yawdim bootlegs of MAME's merged `mk.zip` (mkyawdim, mkyawdim2, mkyawdim3, mkyawdim4), in `_alternatives/_Mortal Kombat`: "Mortal Kombat (Yawdim bootleg, set 1)" to "set 4". They are rev 3.0 with about 330 bytes of the program changed for a bootleg board that has no protection and no Williams sound board.
+- The bootleg sound board (new `rtl/sound/yawdim_sound.sv`): a Z80 at 4 MHz plays samples through an OKI M6295 at 1 MHz; the main board sends it a command byte. The Z80 is the open-source TV80 core (new `rtl/tv80`, with its licence), with a small change in its NMI handling: an interrupt edge that arrives while the Z80 is accepting the previous one is kept and taken after the first instruction of the handler, as on a real Z80 and in MAME (the original lost it). The core follows MAME's driver in the details that differ between the sets:
+  - Sets 1, 3 and 4 interrupt the Z80 with every command; set 2 holds the interrupt until the Z80 has read the command.
+  - The OKI plays from banks of 256 KB chosen by a Z80 write: two bits (1 MB of samples) in sets 1, 3 and 4, three bits (2 MB) in set 2, where a write also resets the chip when its bit 2 is low.
+- The bootleg's graphics hardware draws horizontally flipped sprites differently from the original board (MAME: `m_yawdim_dma`). The blitter has the same variant for these sets (`rtl/yunit_dma.sv`).
+- Game ids 15 (sets 1, 3, 4) and 16 (set 2): the Mortal Kombat board at 48 MHz without protection, with the new sound board. The Williams sound board is held in reset for these sets.
+- Finishing Moves, the EJB Menu shortcut and the Reptile lines are set up for all four sets from their program ROMs (the game's variables are at the same addresses as in rev 3.0).
+- The two T-Unit sets in `mk.zip` (mkr4, mktturbo) belong to the T-Unit core.
+
+**Changed**
+- OKI sound chip (rtl/jt6295): a new parameter `IGNORE_BUSY` makes the chip ignore a start command for a voice that is still playing, as MAME's OKI does. Only the Yawdim board uses it; the Williams ADPCM board is unchanged. Every sound command of the Yawdim sets interrupts the Z80 twice and the program starts the sample in both handlers, about 100 microseconds apart; without this the second start restarted the sample with the ADPCM step of the old run, which made some samples about twice as loud as in MAME.
+- ROM loading: the sound CPU region (0x900000) of the Yawdim sets is kept in a block RAM inside the new sound board as it arrives; the OKI samples (0xA00000) are read from the SDRAM. Every other game loads as before.
+- Timing constraints (`Arcade-Midway-Y-Unit.sdc`): the Z80 runs from a clock enable every 24 clocks of the 96 MHz clock, and the paths between it and the rest of the board are constrained as multicycle paths (setup 8, hold 7).
+
+**Docs & tools**
+- Mortal Kombat page, Extra content, README: the four sets, with a Yawdim section in "Hacks and bootlegs" (what is different on this board and what the core does about it).
+- `tools/mra_gen.py` writes the four MRAs (the Z80 program and the OKI samples in the places of the ROM image the core reads them from); `tools/yunit_roms.py` and `tools/yunit_fmoves.py` know the sets.
+- Checked against MAME 0.289: the image each MRA delivers is byte for byte the program, graphics, Z80 and OKI regions MAME has after starting the game (all four sets). The EJB code, replayed in MAME on each set, enters the menu. In simulation, the attract screens (frame 300 of each set, and frame 600 of set 2) match MAME's pixel for pixel, and the blitter's flipped-sprite variant gives the same pixels as MAME's routine for 18,000 random blits. The sound board was run on its own against MAME's recordings of the same commands: the Z80 and the OKI receive the same writes in the same order, within a few microseconds, and below 3 kHz the sound has MAME's level and volume envelope (sets 1 and 2: 28 seconds each; sets 3 and 4: 12 seconds). Above 3 kHz the core has more energy than MAME, as on the Williams ADPCM board: the chip's output is not smoothed after the 7.6 kHz sample rate. The Yawdim sets are not tested on MiSTer hardware yet, and the compilation of this build has not been looked at (timing, resources).
+
+## Build 80 (2026-10-23)
+
+**Added**
+- Mortal Kombat: MRAs for two more sets of MAME's merged `mk.zip`, in `_alternatives/_Mortal Kombat`:
+  - **Reptile Man hack** (mkrep): a hack of rev 4.0. MAME patches out its protection when it starts the game; the MRA does the same with three `<patch>` entries after the program ROM, so the core runs the program MAME runs.
+  - **Victor bootleg of rev 3.0** (mkla3bl): rev 3.0 on a bootleg board whose graphics ROMs are three 2 MB files with the bytes of the original ROMs interleaved in pairs. The core puts the bytes back in order while the ROMs load (new `rtl/yunit_dlmap.sv`); the MRA lists the three files as they are.
+  - Finishing Moves and the EJB Menu shortcut are set up for both from their program ROMs (the same addresses as rev 4.0 and rev 3.0; the EJB code was replayed in MAME on both and enters the menu). The Victor bootleg also has the Reptile options; the Reptile Man hack changes that part of the program, so it has none.
+- The other sets in `mk.zip` (the four Yawdim bootlegs) need a different sound board (a Z80 and an OKI) and are not in this build; the two T-Unit sets (mkr4, mktturbo) belong to the T-Unit core.
+
+**Changed**
+- ROM loading (rtl/yunit_dlmap.sv): the word-by-word writes of the ROM transfer to the SDRAM moved out of the top level into their own module. For every other set the writes are the same as before (checked over the whole 11 MB transfer against the old expression).
+
+**Docs & tools**
+- Mortal Kombat page, Extra content, README: the new sets, and the Reptile lines on the Victor bootleg; new section "Hacks and bootlegs" on the Mortal Kombat page.
+- `tools/mra_gen.py` writes `<patch>` elements and checks them in its port of the loader; `tools/yunit_fmoves.py` knows the two sets.
+- Checked against MAME 0.289: the image each MRA delivers (with the patches, and with the graphics put in order as the core does) is byte for byte the program, graphics, sound and OKI regions MAME has after starting the game. In simulation, the attract screens (frames 300 and 600) of both sets match MAME's pixel for pixel.
+
+## Build 79 (2026-10-23)
+
+**Docs & tools**
+- README: the Status note ("the core is currently undergoing testing ... No releases until testing is complete") is removed; the core is in production. No RTL change.
+
+## Build 78 (2026-10-23)
+
+**Docs & tools**
+- Mortal Kombat page: the EJB Menu section now says **when the menu is accessible**. The game takes the code only in its attract mode: from power-up until a game is started, and again from the MIDWAY PRESENTS screen once a game is over. It does not take it during a game, or during the game-over sequence that follows (GAME OVER, the winning-streaks table and the comic book offer, which looks like attract mode but is not: about 47 seconds in a test game), and there the OSD shortcut says "Not now: the code works in the attract mode". Checked in MAME with the full code played on both Block buttons: during the comic book page after a game over nothing happens (the game's state word is 11); in the attract mode that follows the menu opens (state 1, then 12). The summary lines in the Mortal Kombat and Extra content pages say the same in one sentence. No RTL change.
+
+## Build 77 (2026-10-23)
+
+**Docs & tools**
+- README, test plan, changelog introduction: the hardware testing is now stated as done on **MiSTer hardware**, and the core as not verified against an original Y Unit board. README: "Verified on MiSTer hardware", a sentence under the progress bar that the core has not been verified against an original board, the Testing setup paragraph, "All 134 tests pass on MiSTer hardware". `docs/TestPlan.md`: the tests are run on MiSTer hardware; the core has not been verified against an original Y Unit board. No RTL change.
+
+## Build 76 (2026-10-22)
+
+**Docs & tools**
+- README: Timing and resources from the Build 75 compilation (60 Hz code and Terminator 2 sight overlay gone): **timing is met on every clock**. Setup on the 96 MHz system clock has 0.496 ns to spare (total negative slack 0, Fmax 100.81 MHz; Build 73: 0.024 ns); the HDMI PLL clock has 0.541 ns, in the framework's scaler (`sys/`); hold (>= 0.247 ns), recovery (1.749 ns), removal (0.644 ns) and minimum pulse width (1.041 ns) are met. The closest paths on the 96 MHz clock are the reset hold-off counter into the TMS34010's graphics unit; the SDRAM controller's read-delay paths that limited Builds 69 and 73 are now 0.748 ns or more. Resource use is still from the Build 68 compilation.
+
+## Build 75 (2026-10-22)
+
+**Removed**
+- Video Timing: the 60 Hz frame (263 lines) and the speed-up that went with it are gone from the board (rtl/midway_yunit.sv: the `vtiming` input is one bit, 54.7 Hz or 57 Hz; its CPU machine-cycle and blitter steps for 60 Hz are removed). The OSD had stopped listing 60 Hz in Build 68 because games run too fast with it; now the code is gone too. A 60 Hz setting saved by an earlier build runs as 57 Hz, as before. Checked in simulation: Smash T.V., Mortal Kombat and Terminator 2 (the three CPU speeds), 100 frames each at 54.7 Hz and 57 Hz, give the same frames, the same audio and the same cycle counts as Build 74 (24 of 24 files identical; 54.73 and 57.08 Hz), and the timing registers match for every setting.
+
+**Changed**
+- Terminator 2: the DIP switch **Cabinet?** is now **Cabinet** (Dedicated or Kit; MAME's name has a question mark, Trog already said Cabinet). Only the name changed in the six Terminator 2 MRAs: the bit, values and default are the same, so saved settings carry over. The MRA generator (`tools/mra_gen.py`) and the DIP checker use the same name; the checker finds 0 differences with MAME's driver in all 46 MRAs.
+
+**Docs & tools**
+- Comments that mentioned 60 Hz are reworded (rtl/tms34010/tms34010.sv, rtl/video/yunit_crt.sv, rtl/crt_adjust/crt_vsize.sv, the top level); no logic changed in those three files.
+- The README's timing report is still that of Build 73 until the next compilation (this build removes logic, so the fit changes). Lint: no errors, the same 230 warnings as Build 74.
+
+## Build 74 (2026-10-22)
+
+**Docs & tools**
+- README: Timing and resources from the Build 73 compilation (Terminator 2's sight overlay gone): **timing is met on every clock**, but the margin on the 96 MHz system clock is very thin: 0.024 ns (total negative slack 0, Fmax 96.23 MHz; Build 71: 0.530 ns); the HDMI PLL clock has 0.633 ns; hold (>= 0.214 ns), recovery (2.373 ns), removal (0.909 ns) and minimum pulse width (1.041 ns) are met. The closest paths on the 96 MHz clock are the SDRAM controller's read-delay register into its address pins, the same family as in Build 69. Resource use is still from the Build 68 compilation.
+
+## Build 73 (2026-10-22)
+
+**Removed**
+- Terminator 2: the **Crosshair** option and the red and green sights the core drew over the picture. The game draws its own crosshairs, so the core's were a second set on top (and a green one for player 2 even in a one-player game); the picture is the game's own again. **Gun Control** (Joystick or Mouse) stays. The Crosshair entry is gone from the DIP Switches menu of all six Terminator 2 MRAs (the main set and the five alternatives); a saved Crosshair setting is ignored. Nothing else changes in the picture or the controls.
+
+**Docs & tools**
+- TestPlan: T2-06 (Crosshair Off) is removed with the option and the Terminator 2 tests after it move up (T2-06 to T2-12); T2-03 to T2-05 now say "the game's sight". Terminator 2 is 12 of 12, 134 tests in all. README, the Terminator 2 and Extra content pages, the test plan CSV and the release notes follow; `tools/mra_gen.py` no longer adds the Crosshair entry.
+- The README's timing report is still that of Build 71 until the next compilation (this build removes logic, so the fit changes).
 
 ## Build 72 (2026-10-21)
 
