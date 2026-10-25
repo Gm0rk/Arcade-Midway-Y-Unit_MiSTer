@@ -284,6 +284,11 @@ MK_SETS = {
     'mkprot9': ('proto', 'FFDDBFA0', 'FFCDE780'), 'mkprot8': ('proto', 'FFDD7850', 'FFCDB6E0'),
     'mknifty': ('proto', 'FFDDBFA0', 'FFCDE780'), 'mknifty666': ('proto', 'FFDDBFA0', 'FFCDE780'),
     'mkprot4': ('proto4', 'FFDCCC20', 'FFCD9070'),
+    # Reptile Man hack: rev 4.0 with a few changes; Victor bootleg: rev 3.0 as dumped
+    'mkrep': ('mkla', 'FFDF3660', 'FFCE54B0'), 'mkla3bl': ('mkla', 'FFDF3280', 'FFCE51A0'),
+    # Yawdim bootlegs: the programs of rev 3.0 (the same addresses as mkla3)
+    'mkyawdim': ('mkla', 'FFDF3280', 'FFCE51A0'), 'mkyawdim2': ('mkla', 'FFDF3280', 'FFCE51A0'),
+    'mkyawdim3': ('mkla', 'FFDF3280', 'FFCE51A0'), 'mkyawdim4': ('mkla', 'FFDF3280', 'FFCE51A0'),
 }
 MK_LAYOUT = {
     # state, p1c, p2c, p1e, p2e, p1o, p2o, p1p, p2p, stage, flag, menu state
@@ -336,6 +341,9 @@ def scan(prog_bytes):
 #   0x60-0x61    the word address of the Reptile flag (set when his fight
 #                starts: Reptile Fight Next is then used up)
 # Only as many words as hold data are written (at least up to 0x34).
+# MRA game ids of the Mortal Kombat boards (6 rev 1-4, 7 prototypes, 8 Turbo
+# hacks, 14 the Victor bootleg of rev 3.0, 15 and 16 the Yawdim bootlegs)
+MK_IDS = (6, 7, 8, 14, 15, 16)
 CFG_FM = 0x10
 CFG_SEC = 0x30
 CFG_REP = 0x40
@@ -456,6 +464,16 @@ REP_SETS = {
               '3:04A130=0300:C81D 3:04A134=C009:09C0', 0x0104E660),
     'mkla3': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 2:04B1AD=0300:CB1A '
               '3:04A11C=0300:C81D 3:04A120=C009:09C0', 0x0104E660),
+    'mkla3bl': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 2:04B1AD=0300:CB1A '
+                '3:04A11C=0300:C81D 3:04A120=C009:09C0', 0x0104E660),
+    'mkyawdim': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 2:04B1AD=0300:CB1A '
+                 '3:04A11C=0300:C81D 3:04A120=C009:09C0', 0x0104E660),
+    'mkyawdim2': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 2:04B1AD=0300:CB1A '
+                  '3:04A11C=0300:C81D 3:04A120=C009:09C0', 0x0104E660),
+    'mkyawdim3': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 2:04B1AD=0300:CB1A '
+                  '3:04A11C=0300:C81D 3:04A120=C009:09C0', 0x0104E660),
+    'mkyawdim4': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 2:04B1AD=0300:CB1A '
+                  '3:04A11C=0300:C81D 3:04A120=C009:09C0', 0x0104E660),
     'mkyturbo': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 '
                  '3:04A11C=0300:C81D 3:04A120=C009:09C0', 0x0104E660),
     'mkyturboe': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 '
@@ -477,13 +495,13 @@ def reptile_stored(setname):
 
 
 def build(gid, setname, prog_bytes=None):
-    """ROM index 1 words (bytes) and notes. gid: the MRA game id (6-8 MK, 3
+    """ROM index 1 words (bytes) and notes. gid: the MRA game id (MK_IDS, 3
     High Impact, 4 Super High Impact)."""
     w = [0] * CFG_WORDS
     w[0] = gid
     notes = []
     sec, page = None, None
-    if gid in (6, 7, 8):
+    if gid in MK_IDS:
         r = stored(setname)
         if prog_bytes is not None:
             s = scan(prog_bytes)
@@ -504,7 +522,7 @@ def build(gid, setname, prog_bytes=None):
         sec, page = SHI_STATE, SHI_PAGE
     elif gid == 3:
         sec = HI_STATE
-    if gid in (6, 7, 8):
+    if gid in MK_IDS:
         rp = reptile_stored(setname)
         if prog_bytes is not None:
             sc = reptile_scan(Prog(prog_bytes))
@@ -516,7 +534,7 @@ def build(gid, setname, prog_bytes=None):
                 w[CFG_REP + 4 * n:CFG_REP + 4 * n + 4] = [a & 0xFFFF, o << 8 | a >> 16, nw, v]
             w[CFG_REP_FLAG], w[CFG_REP_FLAG + 1] = (flag >> 4) & 0xFFFF, flag >> 20
             notes.append('Reptile: %d program patches, flag %08X' % (len(patches), flag))
-    if gid in (3, 4, 6, 7, 8):
+    if gid in (3, 4) + MK_IDS:
         if setname in NO_MENU:
             w[CFG_SEC + 4] = 2
             notes.append('no hidden menu')
