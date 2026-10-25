@@ -13,7 +13,7 @@ import os, re, sys, hashlib, zipfile, datetime
 from xml.sax.saxutils import escape, quoteattr
 
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
-from yunit_roms import parse_driver, build_image, RomSource, REGION_BASE
+from yunit_roms import parse_driver, build_image, RomSource, REGION_BASE, SOUND_CPU, OKI
 import yunit_fmoves
 
 MAMEVERSION = '0289'
@@ -23,11 +23,16 @@ RBF = 'Arcade-Midway-Y-Unit'
 GAME_ID = {
 	'trog': 0, 'trog4': 0, 'trog3': 0, 'trog3a': 0, 'trogpa6': 0, 'trogpa5': 0,
 	'trogpa4': 1,
+	'mazebl': 0,            # bootleg of Trog LA4: same program, other graphics, one more sound bank
 	'smashtv': 2, 'smashtv6': 2, 'smashtv5': 2, 'smashtv4': 2, 'smashtv3': 2,
 	'hiimpact': 3, 'hiimpact4': 3, 'hiimpact3': 3, 'hiimpact2': 3, 'hiimpact1': 3, 'hiimpactp': 3,
 	'shimpact': 4, 'shimpactl1': 4, 'shimpactp6': 4, 'shimpactp5': 4, 'shimpactp4': 4,
 	'strkforc': 5, 'saurnfrnt': 5,
-	'mkla4': 6, 'mkla3': 6, 'mkla2': 6, 'mkla1': 6,
+	'mkla4': 6, 'mkla3': 6, 'mkla2': 6, 'mkla1': 6, 'mkrep': 6,
+	'mkla3bl': 14,          # graphics files in the bootleg's order (rtl/yunit_dlmap.sv puts them right)
+	# Yawdim bootlegs: no protection, Z80 + OKI sound board (set 2: the command latch drives NMI,
+	# 3-bit OKI bank); X flip as MAME's yawdim_dma
+	'mkyawdim': 15, 'mkyawdim3': 15, 'mkyawdim4': 15, 'mkyawdim2': 16,
 	'mkprot9': 7, 'mkprot8': 7, 'mkprot4': 7,
 	'mkyturbo': 8, 'mkyturboe': 8, 'mknifty': 8, 'mknifty666': 8,
 	'term2': 9, 'term2la3': 10, 'term2la2': 11, 'term2la1': 12, 'term2pa2': 12, 'term2lg1': 12,
@@ -36,6 +41,28 @@ GAME_ID = {
 	# protection, High Impact controls); sound and graphics ROMs never dumped
 	'yunittst': 4,
 }
+
+# Program ROM changes MAME's init functions make before the game runs (byte
+# offset in the program ROM, 16-bit words as the TMS34010 reads them).
+# They go into the MRA as <patch> elements, applied by Main_MiSTer after the
+# program ROM is read; the md5 attribute covers the files only.
+PATCHES = {
+	# init_mkrep: "HACK: patch out protection"
+	'mkrep': [(0x94234, [0x05a0, 0xe660, 0x0104]),
+	          (0x9637c, [0x0d3f, 0xf343, 0x4c00]),
+	          (0x9c476, [0xb5a0, 0x0030, 0x1420, 0xb00d, 0x0030])],
+}
+PATCH_NOTE = {
+	'mkrep': 'protection patched out as MAME does (init_mkrep)',
+}
+
+# extra lines for the MRA's <romstruct>
+STRUCT_NOTE = {
+	'mkla3bl': '(the graphics are the bootleg\'s three 2 MB files as they are; the core puts their bytes in MAME\'s order while loading)',
+}
+
+def patch_bytes(words):
+	return b''.join(w.to_bytes(2, 'little') for w in words)
 
 # main set of each family (goes in the mra folder, clones in _alternatives)
 MAIN_SETS = {'trog', 'trogpa4', 'smashtv', 'hiimpact', 'shimpact', 'strkforc', 'mkla4', 'term2', 'totcarn', 'yunittst'}
@@ -58,7 +85,7 @@ def buttons_for(setname, gid):
 		return f'Fire Up,Fire Down,Fire Left,Fire Right,-,-,{start},Coin,Test,Pause', 'X,B,Y,A,-,-,Start,Select,-,-'
 	if gid == 5:
 		return 'Fire,Weapon,Weapon Select,-,-,-,Start/Transform,Coin,Test,Pause', 'A,B,X,-,-,-,Start,Select,-,-'
-	if gid in (6, 7, 8):
+	if gid in yunit_fmoves.MK_IDS:
 		# the cabinet's five buttons (one block button; the board's "Block 2"
 		# input is left open). The "-" keeps Start, Coin, Test and Pause on
 		# the joystick bits every game uses; MiSTer skips it when defining
@@ -175,14 +202,14 @@ def dsw_fields_all(ports, name):
 
 # MiSTer entries added to the OSD DIP Switches menu with the board's own
 # switches (the menu and each switch's settings are in alphabetical order),
-# in DIP bits 16-19 (default 0; see Arcade-Midway-Y-Unit.sv):
+# in DIP bits 16-18 (default 0; see Arcade-Midway-Y-Unit.sv):
 # Service Credit and Tilt are buttons (each selection flips the bit, which
 # the core takes as one press, so both values read "Press"); Terminator 2
-# also gets its gun control and crosshair settings.
+# also gets its gun control setting (the sights are the game's own).
 def mister_dips(gid):
 	d = [('16', 'Service Credit', 'Press,Press'), ('17', 'Tilt', 'Press,Press')]
 	if gid in (9, 10, 11, 12):
-		d += [('18', 'Gun Control', 'Joystick,Mouse'), ('19', 'Crosshair', 'On,Off')]
+		d += [('18', 'Gun Control', 'Joystick,Mouse')]
 	return d
 
 # MiSTer's DIP menu (Main_MiSTer menu.cpp) right-aligns each value on a
@@ -194,7 +221,8 @@ def mister_dips(gid):
 # "2 Coins/1 Credit 4/3") become "1C/1C - 2C/3C", "2C/1C - 4C/3C".
 OSD_LINE = 26
 OSD_TEXT = 31
-NAME_SHORT = {'Points for Extra Ship': 'Extra Ship Points'}     # Strike Force
+NAME_SHORT = {'Points for Extra Ship': 'Extra Ship Points',     # Strike Force
+              'Cabinet?': 'Cabinet'}                            # Terminator 2 (MAME's question mark)
 
 def short_label(lb):
 	m = (re.match(r'^(\d+) Coins?/(\d+) Credits? - (\d+) Coins?/(\d+) Credits?$', lb) or
@@ -263,8 +291,14 @@ class Parts:
 		if n > 0:
 			self.lines.append(f'\t\t<part repeat="0x{n:X}">00</part>')
 			self.pos += n
-	def file(self, ld, comment=None):
-		self.lines.append(f'\t\t<part crc="{ld["crc"]}" name="{ld["file"]}"/>')
+	def file(self, ld, fsize=None):
+		# a whole file, or a piece of it (MAME's ROM_CONTINUE / ROM_RELOAD)
+		part = f'crc="{ld["crc"]}" name="{ld["file"]}"'
+		if fsize is not None and (ld.get('fileoff', 0) or ld['size'] != fsize):
+			if ld.get('fileoff', 0):
+				part += f' offset="0x{ld["fileoff"]:X}"'
+			part += f' length="0x{ld["size"]:X}"'
+		self.lines.append(f'\t\t<part {part}/>')
 		self.pos += ld['size']
 	def pair(self, lo, hi):
 		self.lines.append('\t\t<interleave output="16">')
@@ -275,19 +309,48 @@ class Parts:
 	def comment(self, text):
 		self.lines.append(f'\t\t<!-- {text} -->')
 
-def rom_parts(regions, adpcm):
+def resolve_loads(loads):
+	"""The pieces of a region that stay visible once every load is in: MAME
+	loads in order and a later load overwrites an earlier one (the Yawdim set
+	2 sound ROM is loaded twice at 0, the second half of the file wins)."""
+	segs = []
+	for ld in loads:
+		s, e = ld['offset'], ld['offset'] + ld['size']
+		new = []
+		for (a, b, l, fo) in segs:
+			if b <= s or a >= e:
+				new.append((a, b, l, fo))
+				continue
+			if a < s:
+				new.append((a, s, l, fo))
+			if b > e:
+				new.append((e, b, l, fo + (e - a)))
+		new.append((s, e, ld, ld.get('fileoff', 0)))
+		segs = new
+	segs.sort(key=lambda x: x[0])
+	return [dict(ld, offset=a, size=b - a, fileoff=fo) for (a, b, ld, fo) in segs]
+
+def rom_parts(regions, adpcm, patches=(), note=None):
 	p = Parts()
-	order = ['maindata', 'gfx', 'cvsd:cpu' if not adpcm else 'adpcm:cpu']
-	if adpcm:
-		order.append('adpcm:oki')
 	byname = {r['name']: r for r in regions}
+	order = ['maindata', 'gfx']
+	order += [n for n in SOUND_CPU if n in byname]
+	order += [n for n in OKI if n in byname]
+	# size of each file of the set (the pieces MAME takes of it add up to it)
+	fsize = {}
+	for r in regions:
+		for l in r['loads']:
+			fsize[l['crc']] = max(fsize.get(l['crc'], 0), l.get('fileoff', 0) + l['size'])
 	for ri, rname in enumerate(order):
 		reg = byname[rname]
 		base, mbase, win = REGION_BASE[rname]
 		assert p.pos == base, (rname, hex(p.pos), hex(base))
 		p.comment({'maindata': 'program ROM', 'gfx': 'graphics', 'cvsd:cpu': 'sound CPU',
-		           'adpcm:cpu': 'sound CPU', 'adpcm:oki': 'OKI samples'}[rname])
+		           'adpcm:cpu': 'sound CPU', 'audiocpu': 'sound CPU (Z80)', 'adpcm:oki': 'OKI samples',
+		           'oki': 'OKI samples'}[rname])
 		loads = [l for l in reg['loads'] if l['offset'] >= mbase]
+		if not any(l['byte16'] for l in loads):
+			loads = resolve_loads(loads)
 		loads.sort(key=lambda l: (l['offset'] & ~1, l['offset'] & 1))
 		i = 0
 		while i < len(loads):
@@ -302,13 +365,18 @@ def rom_parts(regions, adpcm):
 			else:
 				assert base + off >= p.pos, ('overlap', ld)
 				p.fill(base + off - p.pos)
-				p.file(ld)
+				p.file(ld, fsize[ld['crc']])
 				i += 1
 		# the last region is not padded (shorter download), except one with no
 		# dumped ROM at all, which MAME reads as zeros: the core must too
 		last = (ri == len(order) - 1)
 		if not last or not loads:
 			p.fill(base + win - p.pos)
+		if rname == 'maindata' and patches:
+			if note:
+				p.comment(note)
+			for off, words in patches:
+				p.lines.append(f'\t\t<patch offset="0x{off:06X}">' + ' '.join('%02X' % b for b in patch_bytes(words)) + '</patch>')
 	return p
 
 # ---------------------------------------------------------------- MRA loader (port of Main_MiSTer)
@@ -372,6 +440,11 @@ def mister_load(mra_xml, src, index='0'):
 		repeat = int(el.get('repeat', '1'), 0)
 		if el.get('name'):
 			buf = src.get(el.get('crc'))
+			start = int(el.get('offset', '0'), 0)         # rom_file(): seek, then at most `length` bytes
+			length = int(el.get('length', '0'), 0)
+			buf = buf[start:]
+			if 0 < length < len(buf):
+				buf = buf[:length]
 		else:
 			buf = bytes.fromhex(''.join((el.text or '').split()))
 		for _ in range(repeat):
@@ -388,6 +461,16 @@ def mister_load(mra_xml, src, index='0'):
 			for p_el in el:
 				part(p_el, int(p_el.get('map', '0'), 16))
 			st['unitlen'] = 1
+		elif el.tag == 'patch':
+			buf = bytes.fromhex(''.join((el.text or '').split()))
+			offset = int(el.get('offset', '0'), 0)
+			if offset + len(buf) > romlen[0]:
+				raise ValueError('patch beyond the data read so far')
+			if el.get('operation') == 'xor':
+				for j, b in enumerate(buf):
+					data[offset + j] ^= b
+			else:
+				data[offset:offset + len(buf)] = buf
 	return bytes(data[:romlen[0]]), md5.hexdigest()
 
 # ---------------------------------------------------------------- GAME list
@@ -449,7 +532,9 @@ def main():
 		gid = GAME_ID[name]
 		regs = romdefs[name]
 		adpcm = any(r['name'].startswith('adpcm') for r in regs)
-		parts = rom_parts(regs, adpcm)
+		yawdim = any(r['name'] == 'audiocpu' for r in regs)         # Z80 + OKI bootleg sound board
+		oki_len = max([r['size'] for r in regs if r['name'] in OKI] + [0x100000])
+		parts = rom_parts(regs, adpcm, PATCHES.get(name, ()), PATCH_NOTE.get(name))
 		fam = family_of(g, bynm)
 		parent = g['parent'] if g['parent'] != '0' else None
 		zipattr = f'{name}.zip' + (f'|{parent}.zip' if parent else '')
@@ -461,6 +546,9 @@ def main():
 		if src:
 			try:
 				img = build_image(regs, src, adpcm)
+				for off, words in PATCHES.get(name, ()):
+					b = patch_bytes(words)
+					img[off:off + len(b)] = b
 				img = img[:parts.pos]
 				verified = True
 			except KeyError:
@@ -484,8 +572,12 @@ def main():
 		mra.append(f'\t<buttons names="{names}" default="{defaults}"/>')
 		mra.append('\t<romstruct>')
 		mra.append('0x000000 program ROM (1 MB, 16-bit little endian)')
-		mra.append('0x100000 graphics ROM (8 MB, MAME gfx region)')
-		mra.append('0x900000 sound CPU ROM (MAME region from 0x10000)')
+		mra.append('0x100000 graphics ROM (8 MB, MAME gfx region)' + (' ' + STRUCT_NOTE[name] if name in STRUCT_NOTE else ''))
+		if yawdim:
+			mra.append('0x900000 sound CPU ROM (Z80 program, MAME audiocpu region)')
+			mra.append(f'0xA00000 OKI M6295 samples ({oki_len >> 20} MB, MAME oki region: banks of 256 KB)')
+		else:
+			mra.append('0x900000 sound CPU ROM (MAME region from 0x10000)')
 		if adpcm:
 			mra.append('0xA00000 OKI M6295 samples (1 MB)')
 		mra.append('\t</romstruct>')
