@@ -6,7 +6,7 @@
 
 | | |
 |---|---|
-| Sets | trog (rev LA5, main MRA); LA4, LA3 (2-14-91), LA3 (2-10-91), prototypes PA6-PAC and PA5-PAC; prototype rev 4.00 (trogpa4, its own MRA) |
+| Sets | trog (rev LA5, main MRA); LA4, LA3 (2-14-91), LA3 (2-10-91), prototypes PA6-PAC and PA5-PAC; the Maze bootleg of rev LA4 (mazebl); prototype rev 4.00 (trogpa4, its own MRA) |
 | ROM zip | `trog.zip` (merged set) |
 | Players | 4 |
 | Sound | CVSD board |
