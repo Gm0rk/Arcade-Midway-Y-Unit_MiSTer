@@ -13,11 +13,10 @@
 
 ## Extra content
 
-Terminator 2 gets its gun controls as [OSD entries](#osd) in the DIP Switches menu.
+Terminator 2 gets its gun control as an [OSD entry](#osd) in the DIP Switches menu.
 
 - **Gun Control**: Joystick or Mouse for player 1.
-- **Crosshair**: Off or On.
-- **Aiming**: each player's gun is aimed with the left analog stick (it points directly) or the d-pad (it moves the sight); player 1 can also use the mouse.
+- **Aiming**: each player's gun is aimed with the left analog stick (it points directly) or the d-pad (it moves the aim); player 1 can also use the mouse. The crosshairs on screen are the game's own.
 - **Coins 3 and 4** on the third and fourth controllers' Coin buttons.
 
 The [core-wide extras](ExtraContent.md#core-wide-features) (CRT Adjust, CRT V-Size, Video Timing, DIP Switches, Service Mode and the rest) apply to every game.
@@ -25,8 +24,8 @@ The [core-wide extras](ExtraContent.md#core-wide-features) (CRT Adjust, CRT V-Si
 ## Controls
 
 Terminator 2 is a gun game; each player's gun is aimed with the left analog
-stick (it points directly), the d-pad (moves the sight) or, for player 1,
-the mouse.
+stick (it points directly), the d-pad (moves the aim) or, for player 1,
+the mouse. The crosshairs are the game's own.
 
 | Input | Use |
 |---|---|
@@ -38,10 +37,9 @@ the mouse.
 
 ## OSD
 
-Two entries in the DIP Switches menu (with the game's switches, in alphabetical
+One entry in the DIP Switches menu (with the game's switches, in alphabetical
 order):
 
 | Entry | |
 |---|---|
 | Gun Control | Joystick or Mouse (player 1) |
-| Crosshair | Off or On |
