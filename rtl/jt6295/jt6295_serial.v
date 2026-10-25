@@ -41,6 +41,13 @@ module jt6295_serial(
 
 localparam CSRW = 18+19+4+1;
 
+// (Y Unit core) IGNORE_BUSY = 1: a start for a voice that is playing is
+// acknowledged but does nothing. MAME's okim6295 does that ("if
+// (!voice.m_playing)"); jt6295 restarts the voice with the ADPCM state of the
+// old run (step index and signal), and the sound is then too loud or too
+// quiet until the step index reaches an end of its range.
+parameter IGNORE_BUSY = 0;
+
 reg  [ 3:0] ch;
 wire [ 3:0] att_in, att_out;
 wire [18:0] cnt, cnt_next, cnt_in;
@@ -48,6 +55,7 @@ wire [17:0] ch_end, stop_in, stop_out;
 wire        update;
 wire        over, busy_in, busy_out, cont;
 reg         up_start, up_stop;
+wire        new_start;
 
 // current channel
 always @(posedge clk, posedge rst) begin
@@ -104,13 +112,14 @@ always @(posedge clk, posedge rst ) begin
 end
 
 assign zero     = ch[0];
-assign update   = up_start | up_stop;
 assign cont     = busy_out & ~over;
+assign new_start = up_start & ~(IGNORE_BUSY != 0 && cont);
+assign update   = new_start | up_stop;
 assign cnt_next = cont      ? cnt+19'd1 : cnt;
-assign stop_in  = up_start  ? stop_addr : stop_out;
-assign cnt_in   = up_start  ? {start_addr, 1'b0} : cnt_next;
-assign att_in   = up_start  ? att : att_out;
-assign busy_in  = update    ? (up_start & ~up_stop) : cont;
+assign stop_in  = new_start ? stop_addr : stop_out;
+assign cnt_in   = new_start ? {start_addr, 1'b0} : cnt_next;
+assign att_in   = new_start ? att : att_out;
+assign busy_in  = update    ? (new_start & ~up_stop) : cont;
 
 wire [CSRW-1:0] csr_in, csr_out;
 assign csr_in = { stop_in, cnt_in, att_in, busy_in };

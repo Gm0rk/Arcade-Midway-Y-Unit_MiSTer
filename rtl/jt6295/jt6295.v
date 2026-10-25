@@ -34,6 +34,9 @@ module jt6295(
     output                 sample   // 48 kHz for a 1.000 MHz cen
 );
 
+parameter IGNORE_BUSY=0; // (Y Unit core) 1 = a start command for a voice that is still
+                      //     playing is ignored, as in MAME; 0 = the
+                      //     voice restarts (jt6295 as it was)
 parameter INTERPOL=0; // 0 = no interpolator
                       // 1 = 4x upsampling, LPF at 0.25*pi
                       // 2 = 4x upsampling, LPF at 0.5*pi (use if there's already)
@@ -120,7 +123,7 @@ jt6295_ctrl u_ctrl(
     .zero       ( zero          )
 );
 
-jt6295_serial u_serial(
+jt6295_serial #(.IGNORE_BUSY(IGNORE_BUSY)) u_serial(
     .rst        ( rst           ),
     .clk        ( clk           ),
     .cen        ( cen_sr        ),
