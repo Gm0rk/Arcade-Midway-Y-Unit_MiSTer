@@ -9,11 +9,18 @@ set_global_assignment -name SYSTEMVERILOG_FILE rtl/midway_yunit.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound/pia6821.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound/hc55516.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound/williams_sound.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/sound/yawdim_sound.sv
 set_global_assignment -name VERILOG_FILE rtl/mc6809/mc6809is.v
+set_global_assignment -name VERILOG_FILE rtl/tv80/tv80_alu.v
+set_global_assignment -name VERILOG_FILE rtl/tv80/tv80_core.v
+set_global_assignment -name VERILOG_FILE rtl/tv80/tv80_mcode.v
+set_global_assignment -name VERILOG_FILE rtl/tv80/tv80_reg.v
+set_global_assignment -name VERILOG_FILE rtl/tv80/tv80cen.v
 set_global_assignment -name QIP_FILE rtl/jt51/jt51.qip
 set_global_assignment -name QIP_FILE rtl/jt6295/jt6295.qip
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/sdram.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/secret_menu.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/yunit_dlmap.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/yunit_fmoves.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/yunit_listpage.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/yunit_window.sv
@@ -21,6 +28,7 @@ set_global_assignment -name SYSTEMVERILOG_FILE rtl/crt_adjust/crt_vsize.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/crt_adjust/crt_adjust.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/sync_center.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/yunit_crt.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/video/yunit_hdmi_trim.sv
 set_global_assignment -name QIP_FILE rtl/pll.qip
 set_global_assignment -name SDC_FILE Arcade-Midway-Y-Unit.sdc
 set_global_assignment -name SYSTEMVERILOG_FILE Arcade-Midway-Y-Unit.sv
