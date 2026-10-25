@@ -697,8 +697,8 @@ wire  [9:0] vcnt_next = (vcnt >= t_vtotal) ? 10'd0 : vcnt + 10'd1;
 // Shorter frames (MiSTer option for 15 kHz TVs, not part of the chip)
 //
 // Every Y Unit game runs a 289-line frame (54.7 Hz). With frame_lines set,
-// blank lines are dropped until a frame is frame_lines long (277: 57.1 Hz,
-// 263: 60.1 Hz); the line itself is unchanged. Lines are dropped in frame
+// blank lines are dropped until a frame is frame_lines long (the board uses
+// 277: 57.1 Hz); the line itself is unchanged. Lines are dropped in frame
 // order, starting right after VSBLNK and running on to the end of the frame,
 // then from VESYNC up to VEBLNK. Never dropped:
 //   - the picture (VEBLNK..VSBLNK-1);
@@ -767,8 +767,8 @@ always @(posedge clk) if (ce) begin
 		// the CRT timing keeps running (the default raster, the registers
 		// being zero) so the display stays locked while the board is held
 		// in reset, e.g. during a ROM download; blank lines are dropped as
-		// when the board runs (Video Timing), so a TV that needs 57 or
-		// 60 Hz also holds the loading screen
+		// when the board runs (Video Timing), so a TV that needs 57 Hz
+		// also holds the loading screen
 		if (ce_vclk)
 			hcnt <= line_wrap ? 10'd0 : hcnt + 10'd1;
 		if (line_wrap) begin
