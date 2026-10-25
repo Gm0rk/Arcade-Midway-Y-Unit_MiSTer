@@ -19,13 +19,13 @@ when every game and the core-wide tests pass.
 
 | Game | Tests | Result |
 |---|---|---|
-| [Core-wide](#core-wide) | 20 | Pass |
-| [Trog](#trog) | 11 | Pass |
+| [Core-wide](#core-wide) | 23 | Pass |
+| [Trog](#trog) | 12 | Pass |
 | [Smash T.V.](#smash-tv) | 10 | Pass |
 | [High Impact Football](#high-impact-football) | 13 | Pass |
 | [Super High Impact](#super-high-impact) | 13 | Pass |
 | [Strike Force](#strike-force) | 11 | Pass |
-| [Mortal Kombat](#mortal-kombat) | 28 | Pass |
+| [Mortal Kombat](#mortal-kombat) | 32 | Pass |
 | [Terminator 2 - Judgment Day](#terminator-2---judgment-day) | 12 | Pass |
 | [Total Carnage](#total-carnage) | 13 | Pass |
 | [Y-Unit Test ROM](#y-unit-test-rom) | 3 | Pass |
@@ -70,6 +70,9 @@ Run with any game (Mortal Kombat or Smash T.V. covers them all).
 | C-18 | Video Timing 57 Hz, with CRT Adjust on: CRT V-Size "+7" in PVM and in Cabinet mode | The whole picture stays on screen (the bottom rows too); "+" makes it only as tall as the frame allows | Pass | |
 | C-19 | Mortal Kombat: let the attract mode run into a demo fight and on; Smash T.V.: lose a game to GAME OVER | Each tune stops cleanly when the music changes or stops; no FM notes keep droning | Pass | |
 | C-20 | Video Timing 57 Hz (analog, a TV that needs it): load a game from its MRA, and again after Reset | The ROM loading screen holds as steady as the game does (no bouncing or rolling) | Pass | |
+| C-21 | HDMI Top Row Pixel Fix, Mortal Kombat on HDMI: look at the title screen's top line and at a fight with the option Off, then On; also with a Scandoubler Fx (HQ2x, CRT 25 %) | Off: a few stray pixels at the left of the top line on the title screen and a couple that blink during a fight (the game draws them). On (Scale Normal): the first line is gone and the picture is enlarged by about 0.4 % to fill the same space; still 4:3 | Pass | |
+| C-22 | HDMI Top Row Pixel Fix, analog output (a CRT or monitor that shows the whole picture, or a capture card) | With the option On the analog picture is the same as with Off: the first line is still there (Mortal Kombat's title screen shows its stray pixels) and nothing moves or changes size | Pass | |
+| C-23 | HDMI Top Row Pixel Fix: switch it On and Off while a game runs (also with CRT Adjust On), then leave it On, power off and load a game again | The HDMI picture changes by one line without rolling, flashing or losing sync; the analog picture does not react; the setting is still On after the reload | Pass | |
 
 ## Trog
 
@@ -87,7 +90,8 @@ Main MRA: Trog (rev LA5). [Controls](Trog.md).
 | TR-08 | Test menu: switch test, sound test | Every switch shows; sounds play | Pass | |
 | TR-09 | Change a DIP switch, reset | Applied | Pass | |
 | TR-10 | Trog (prototype, rev 4.00) MRA | Boots; 8-way stick, Bone button | Pass | |
-| TR-11 | Each MRA in `_alternatives/_Trog` | Boots to attract and plays | Pass | |
+| TR-11 | Each MRA in `_alternatives/_Trog` except the Maze bootleg (TR-12) | Boots to attract and plays | Pass | |
+| TR-12 | Maze (Trog rev LA4 bootleg) MRA | Boots; the title reads MAZE; plays and sounds like the other Trog sets | Pass | |
 
 ## Smash T.V.
 
@@ -191,13 +195,17 @@ Main MRA: Mortal Kombat (rev 4.0). [Controls, move list, finishing moves, hidden
 | MK-19 | Move List: On, close the OSD, then press Left or Right on either controller | Over the dimmed title screen, MOVE LIST 1/2 (Johnny Cage to Sonya), full screen with the OSD closed; each press of Left or Right turns to the other page (2/2: Raiden to Scorpion); special moves, fatality with its distance, the Pit's D+HP uppercut at the bottom; the text reads clearly; with the OSD open the d-pad steers the OSD and the page stays; Off and On again starts at 1/2 | Pass | |
 | MK-20 | Hidden Items → EJB Menu in the attract mode | EJB Menu opens; message "EJB Menu: code entered" | Pass | |
 | MK-21 | The same during a fight | Nothing is pressed; message "Not now: the code works in the attract mode" | Pass | |
-| MK-22 | Each MRA in `_alternatives/_Mortal Kombat` | Boots to attract and plays; prototype 4.0's EJB Menu says "Not in this revision of the game" | Pass | |
+| MK-22 | Each MRA in `_alternatives/_Mortal Kombat` except those of MK-29 to MK-32 | Boots to attract and plays; prototype 4.0's EJB Menu says "Not in this revision of the game" | Pass | |
 | MK-23 | Set Move List On during a fight, close the OSD, then open it and set Move List Off | The fight waits behind the page and goes on where it was once Off | Pass | |
 | MK-24 | Hidden Items → Reptile Fight Next, then win a match in a 1-player game | Message "Reptile fight set: win a match in a 1-player game"; after the win "YOU HAVE FOUND ME", then the fight with Reptile below The Pit | Pass | |
 | MK-25 | Reptile Fight Next twice | Message "Reptile fight cleared"; the next win goes on as usual | Pass | |
 | MK-26 | Moon Silhouettes Always On, play to The Pit | Silhouettes cross the moon in every round there | Pass | |
 | MK-27 | Reptile Hints Always On, start a match | Reptile drops in with a hint before each round's "FIGHT!"; the EJB Menu's game audits are not cleared | Pass | |
 | MK-28 | Hidden Items on rev 2.0 or a prototype | Only EJB Menu (no Reptile lines); on rev 3.0 and the Turbo hacks the Reptile lines show | Pass | |
+| MK-29 | Reptile Man hack MRA | Boots to attract and plays; Hidden Items shows only EJB Menu (no Reptile lines) and the EJB Menu opens in the attract mode | Pass | |
+| MK-30 | Victor bootleg of rev 3.0 MRA | Boots to attract and plays; fighters, backgrounds and text are drawn correctly; Hidden Items shows EJB Menu and the Reptile lines | Pass | |
+| MK-31 | Yawdim bootleg MRAs, sets 1 to 4 | Each boots to attract and plays; picture correct, flipped sprites too; Hidden Items shows EJB Menu and the Reptile lines | Pass | |
+| MK-32 | Yawdim bootleg MRAs, sound | Music, effects and voices in the attract mode and in a fight on each of the four sets, no crackle or missing sounds (This bootleg is expected to have broken, missing, wrong audio) | Pass | |
 
 ## Terminator 2 - Judgment Day
 
