@@ -57,6 +57,7 @@ localparam CONF_STR = {
 	"P1O[2:1],Aspect Ratio,Original,Full Screen,[ARC1],[ARC2];",
 	"P1O[5:3],Scandoubler Fx,None,HQ2x,CRT 25%,CRT 50%,CRT 75%;",
 	"P1O[7:6],Scale,Normal,V-Integer,Narrower HV-Integer,Wider HV-Integer;",
+	"P1O[109],HDMI Top Row Pixel Fix,Off,On;",
 	"P1-;",
 	"P1O[15:14],Video Timing,Native 54.7Hz,57Hz;",
 	"P1O[101],CRT Adjust,Off,On;",
@@ -109,7 +110,7 @@ wire        ioctl_rd;
 wire [26:0] ioctl_addr;
 wire [15:0] ioctl_dout;
 wire [15:0] ioctl_din;
-reg         ioctl_wait;
+wire        ioctl_wait;
 
 reg   [4:0] game_id;
 wire        is_t2;
@@ -224,6 +225,9 @@ localparam G_TERM2LA3 = 5'd10;
 localparam G_TERM2LA2 = 5'd11;
 localparam G_TERM2LA1 = 5'd12;   // LA1, PA2, LG1
 localparam G_TOTCARN  = 5'd13;
+localparam G_MKBL     = 5'd14;   // Mortal Kombat rev 3.0 bootleg with scrambled graphics (mkla3bl)
+localparam G_YAWDIM   = 5'd15;   // Mortal Kombat Yawdim bootlegs, sets 1, 3, 4 (Z80 + OKI sound board)
+localparam G_YAWDIM2  = 5'd16;   // Yawdim bootleg set 2 (the sound latch drives the Z80's NMI)
 
 reg   [1:0] cfg_speed;           // 0: 40 MHz, 1: 48 MHz, 2: 50 MHz
 reg         cfg_bpp6;
@@ -234,6 +238,7 @@ reg   [1:0] cfg_sprot_mode;
 reg  [15:0] cfg_sprot_start;
 reg  [15:0] cfg_sprot_end;
 reg         cfg_turbo;
+reg         cfg_yawdim;          // Yawdim bootleg: Z80 sound board, its own blitter X flip
 reg   [2:0] cfg_layout;
 
 localparam L_TROG = 3'd0, L_HIIMP = 3'd1, L_SMASH = 3'd2, L_STRK = 3'd3, L_MK = 3'd4, L_T2 = 3'd5;
@@ -248,6 +253,7 @@ always @(posedge clk_sys) begin
 	cfg_sprot_start <= 16'h0000;
 	cfg_sprot_end   <= 16'h0000;
 	cfg_turbo       <= 1'b0;
+	cfg_yawdim      <= 1'b0;
 	cfg_layout      <= L_TROG;
 
 	case (game_id)
@@ -277,12 +283,19 @@ always @(posedge clk_sys) begin
 			cfg_sprot_mode <= 2'd1; cfg_sprot_start <= 16'h9F7D; cfg_sprot_end <= 16'h9FA7;
 			cfg_layout <= L_STRK;
 		end
-		G_MK, G_MKPROT, G_MKTURBO: begin
+		G_MK, G_MKPROT, G_MKTURBO, G_MKBL: begin
 			cfg_speed <= (game_id == G_MKPROT) ? 2'd2 : 2'd1;
 			cfg_adpcm <= 1'b1;
 			cfg_prot  <= 3'd5;
 			cfg_turbo <= (game_id == G_MKTURBO);
 			cfg_sprot_mode <= 2'd2; cfg_sprot_start <= 16'hFB9C; cfg_sprot_end <= 16'hFBC6;
+			cfg_layout <= L_MK;
+		end
+		G_YAWDIM, G_YAWDIM2: begin
+			// no protection, no Williams sound board. The bootleg PCB has the
+			// 48 MHz oscillator (MAME's driver clocks the 34010 at 40 MHz)
+			cfg_speed  <= 2'd1;
+			cfg_yawdim <= 1'b1;
 			cfg_layout <= L_MK;
 		end
 		G_TERM2, G_TERM2LA3, G_TERM2LA2, G_TERM2LA1: begin
@@ -314,8 +327,9 @@ assign is_t2 = (cfg_layout == L_T2);
 // SDRAM line holds every plane of 8 pixels):
 //   0x000000  program, 1 MB (16-bit little endian)
 //   0x100000  graphics, 8 MB (MAME "gfx" region)
-//   0x900000  sound CPU, from MAME region offset 0x10000
-//   0xA00000  OKI samples, 1 MB (ADPCM games)
+//   0x900000  sound CPU, from MAME region offset 0x10000 (Yawdim bootlegs:
+//             the Z80 program, MAME region offset 0, also kept in a block RAM)
+//   0xA00000  OKI samples, 1 MB (ADPCM games; Yawdim bootlegs: 1 or 2 MB)
 //////////////////////////////////////////////////////////////////
 
 reg  [63:0] dsw;
@@ -328,11 +342,12 @@ always @(posedge clk_sys) begin
 end
 
 // DIP bits 0-15 are the board's switches (input port 3). The MRAs add
-// MiSTer entries to the same OSD DIP menu in bits 16-19:
+// MiSTer entries to the same OSD DIP menu in bits 16-18:
 //   16  Service Credit  } buttons: every selection flips the bit, which is
 //   17  Tilt            } taken as one press (both values read "Press")
 //   18  Gun Control (Terminator 2): 0 joystick, 1 mouse
-//   19  Crosshair   (Terminator 2): 0 on, 1 off
+// (Bit 19 was Terminator 2's Crosshair, the core's own overlay on top of the
+// game's built-in sights; removed in Build 73, the bit is unused.)
 // The first DIP transfer after a ROM load only sets the reference for the
 // two buttons (it is the saved setting, not a press).
 reg  [1:0] dip_btn_ref;
@@ -351,27 +366,30 @@ always @(posedge clk_sys) begin
 end
 
 wire gun_mouse = dsw[18];                   // Terminator 2 DIP "Gun Control"
-wire xhair_off = dsw[19];                   // Terminator 2 DIP "Crosshair"
 
-wire [24:0] dl_off  = ioctl_addr[24:0] - 25'h010_0000;
-wire        dl_gfx  = (ioctl_addr[26:20] >= 7'h01) && (ioctl_addr[26:20] < 7'h09);
-wire [24:0] dl_sdram = dl_gfx ? (25'h010_0000 + {2'b00, dl_off[20:1], dl_off[22:21], 1'b0}) : ioctl_addr[24:0];
-
-reg  [24:1] sd_wr_addr;
-reg  [15:0] sd_wr_data;
-reg         sd_wr_req;
+// The words of the ROM transfer go to the SDRAM write channel; rtl/yunit_dlmap.sv
+// interleaves the graphics and, for the Victor bootleg of rev 3.0 (mkla3bl),
+// puts its scrambled graphics files in order.
+wire [24:1] sd_wr_addr;
+wire [15:0] sd_wr_data;
+wire  [1:0] sd_wr_be;
+wire        sd_wr_req;
 wire        sd_wr_ack;
 
-always @(posedge clk_sys) begin
-	if (ioctl_wr && rom_download) begin
-		sd_wr_addr <= dl_sdram[24:1];
-		sd_wr_data <= ioctl_dout;
-		sd_wr_req  <= ~sd_wr_req;
-		ioctl_wait <= 1'b1;
-	end
-	else if (sd_wr_req == sd_wr_ack)
-		ioctl_wait <= 1'b0;
-end
+yunit_dlmap dlmap
+(
+	.clk     (clk_sys),
+	.bl_gfx  (game_id == G_MKBL),
+	.wr      (ioctl_wr && rom_download),
+	.addr    (ioctl_addr),
+	.din     (ioctl_dout),
+	.sd_addr (sd_wr_addr),
+	.sd_data (sd_wr_data),
+	.sd_be   (sd_wr_be),
+	.sd_req  (sd_wr_req),
+	.sd_ack  (sd_wr_ack),
+	.busy    (ioctl_wait)
+);
 
 // NVRAM (CMOS): loaded through port B of the CMOS RAM, cleared when a new
 // ROM set arrives so a game never sees another game's settings
@@ -554,7 +572,7 @@ always @(*) begin
 			in1[10]    = joy1[7];                 // P2 low kick
 			in0[13]    = joy1[8];                 // P2 block
 			in1[8]     = joy2[11];                // coin 3
-			in1[14]    = adpcm_irq;
+			in1[14]    = adpcm_irq & ~cfg_yawdim; // (the Yawdim bootlegs have no ADPCM board: open)
 		end
 		L_T2: begin
 			in0[4]  = joy0[4] | mouse_btn[0];  in0[5]  = joy0[5] | mouse_btn[1];
@@ -603,7 +621,7 @@ wire [95:0] in_ports = {16'hFFFF, 16'hFFFF, dsw[15:0], ~in2, ~in1, ~in0};
 // Terminator 2 guns
 //
 // Joystick: the left analog stick points directly, the d-pad moves the
-// sight. Mouse: player 1 follows the mouse. Positions are 0-255 across the
+// aim. Mouse: player 1 follows the mouse. Positions are 0-255 across the
 // picture; the ADC sees X reversed (MAME PORT_REVERSE) because the cabinet
 // shows a mirrored picture.
 //////////////////////////////////////////////////////////////////
@@ -743,7 +761,8 @@ end
 // PAID SUPERSTARS is on screen). Revisions without the menu ignore it.
 //////////////////////////////////////////////////////////////////
 
-assign sec_ejb  = (game_id == G_MK) | (game_id == G_MKPROT) | (game_id == G_MKTURBO);
+assign sec_ejb  = (game_id == G_MK) | (game_id == G_MKPROT) | (game_id == G_MKTURBO) | (game_id == G_MKBL)
+                | (game_id == G_YAWDIM) | (game_id == G_YAWDIM2);
 assign sec_octo = (game_id == G_HIIMPACT) | (game_id == G_SHIMPACT);
 assign is_mk    = sec_ejb;
 assign is_tc    = (game_id == G_TOTCARN);
@@ -956,11 +975,9 @@ always @(posedge clk_sys) if (!msg_out) msg_num_q <= msg_num;
 assign info_req = msg_out;
 assign info     = {3'd0, msg_num_q};
 
-// Video Timing: the OSD lists 54.7 Hz and 57 Hz. The board still has its 60 Hz
-// frame (vtiming 2), hidden for now; a setting saved with it runs as 57 Hz.
-// To bring it back, add "60Hz" to the Video Timing line of CONF_STR and pass
-// status[15:14] straight to the board.
-wire [1:0] vtiming_osd = (status[15:14] == 2'd1 || status[15:14] == 2'd2) ? 2'd1 : 2'd0;
+// Video Timing: the OSD lists 54.7 Hz and 57 Hz. A setting saved with the 60 Hz
+// entry of earlier builds (status[15:14] = 2) runs as 57 Hz.
+wire vtiming_osd = (status[15:14] == 2'd1) || (status[15:14] == 2'd2);
 
 midway_yunit board
 (
@@ -970,6 +987,7 @@ midway_yunit board
 
 	.cpu_speed      (cfg_speed),
 	.bpp6           (cfg_bpp6),
+	.yawdim_dma     (cfg_yawdim),
 	.prot_id        (cfg_prot),
 	.t2_hack        (cfg_t2hack),
 	.t2_adc         (is_t2),
@@ -1043,12 +1061,16 @@ assign DDRAM_CLK = clk_sys;
 // Sound board
 //////////////////////////////////////////////////////////////////
 
-wire signed [15:0] audio;
+wire signed [15:0] audio, w_audio, y_audio;
+wire [24:3] w_oki_addr, y_oki_addr;
+wire        w_oki_req,  y_oki_req;
 
+// Williams boards (CVSD or ADPCM, a 6809); held in reset for the Yawdim
+// bootlegs, whose Z80 board follows
 williams_sound sound
 (
 	.clk        (clk_sys),
-	.reset      (reset),
+	.reset      (reset | cfg_yawdim),
 	.pause      (pause),
 
 	.adpcm      (cfg_adpcm),
@@ -1065,13 +1087,44 @@ williams_sound sound
 	.rom_ack    (snd_sd_ack),
 	.rom_data   (snd_sd_data),
 
-	.oki_addr   (oki_sd_addr),
-	.oki_req    (oki_sd_req),
+	.oki_addr   (w_oki_addr),
+	.oki_req    (w_oki_req),
 	.oki_ack    (oki_sd_ack),
 	.oki_data   (oki_sd_data),
 
-	.audio      (audio)
+	.audio      (w_audio)
 );
+
+// Yawdim bootleg board (Z80 + OKI, rtl/sound/yawdim_sound.sv): the Z80 program
+// words of the ROM transfer (0x900000-0x907FFF) are copied into its block RAM
+wire zrom_we = ioctl_wr && rom_download && (ioctl_addr[26:15] == 12'h120);
+
+yawdim_sound yawdim
+(
+	.clk        (clk_sys),
+	.reset      (reset | ~cfg_yawdim),
+	.pause      (pause),
+
+	.set2       (game_id == G_YAWDIM2),
+
+	.cmd_wr     (snd_wr),
+	.cmd_data   (snd_data),
+
+	.zrom_we    (zrom_we),
+	.zrom_wa    (ioctl_addr[14:1]),
+	.zrom_wd    (ioctl_dout),
+
+	.oki_addr   (y_oki_addr),
+	.oki_req    (y_oki_req),
+	.oki_ack    (oki_sd_ack),
+	.oki_data   (oki_sd_data),
+
+	.audio      (y_audio)
+);
+
+assign oki_sd_addr = cfg_yawdim ? y_oki_addr : w_oki_addr;
+assign oki_sd_req  = cfg_yawdim ? y_oki_req  : w_oki_req;
+assign audio       = cfg_yawdim ? y_audio    : w_audio;
 
 assign AUDIO_L   = audio;
 assign AUDIO_R   = audio;
@@ -1122,7 +1175,7 @@ sdram sdram
 
 	.wr_addr     (sd_wr_addr),
 	.wr_data     (sd_wr_data),
-	.wr_be       (2'b11),
+	.wr_be       (sd_wr_be),
 	.wr_req      (sd_wr_req),
 	.wr_ack      (sd_wr_ack)
 );
@@ -1131,51 +1184,8 @@ sdram sdram
 // Video
 //////////////////////////////////////////////////////////////////
 
-// beam position on the output, for the crosshair and CRT Adjust
-reg  [9:0] out_x, out_y, act_w, act_h;
-reg        hb_d, vb_d, hs_d;
-always @(posedge clk_sys) begin
-	if (ce_pix) begin
-		hb_d <= core_hb;
-		hs_d <= core_hs;
-		if (!core_hb) out_x <= out_x + 10'd1;
-		if (core_hb & ~hb_d) begin
-			act_w <= out_x;
-			out_x <= 10'd0;
-			if (!core_vb) out_y <= out_y + 10'd1;
-		end
-		vb_d <= core_vb;
-		if (core_vb & ~vb_d) begin
-			act_h <= out_y;
-			out_y <= 10'd0;
-		end
-	end
-end
-
-// T2 crosshairs: positions scaled from 0-255 to the active picture
-reg  [17:0] ch_x0, ch_y0, ch_x1, ch_y1;
-always @(posedge clk_sys) begin
-	ch_x0 <= gun_x[0] * act_w;
-	ch_y0 <= gun_y[0] * act_h;
-	ch_x1 <= gun_x[1] * act_w;
-	ch_y1 <= gun_y[1] * act_h;
-end
-
-function automatic xhair(input [9:0] x, input [9:0] y, input [9:0] cx, input [9:0] cy);
-	xhair = ((x == cx) && (y + 10'd4 >= cy) && (y <= cy + 10'd4)) ||
-	        ((y == cy) && (x + 10'd4 >= cx) && (x <= cx + 10'd4));
-endfunction
-
-// The flags are registered: the multiplier output, the compare and the colour
-// mux below feed the CRT V-Size line RAM, which was too much for one 96 MHz
-// clock. out_x / out_y change only on ce_pix and yunit_crt samples the colour
-// only on ce_pix (12 clocks apart), so the flags a clock late are stable well
-// before they are used and the crosshair stays on the same pixel.
-reg ch_on0, ch_on1;
-always @(posedge clk_sys) begin
-	ch_on0 <= is_t2 && !xhair_off && xhair(out_x, out_y, ch_x0[17:8], ch_y0[17:8]);
-	ch_on1 <= is_t2 && !xhair_off && xhair(out_x, out_y, ch_x1[17:8], ch_y1[17:8]);
-end
+// Terminator 2's sights are the game's own: it reads the guns and draws its
+// crosshairs itself. The core adds nothing to the picture.
 
 // ---- Information window (rtl/yunit_window.sv) ----
 //
@@ -1223,9 +1233,9 @@ yunit_window yunit_window
 reg        vid_mute = 1'b1;
 always @(posedge clk_sys) vid_mute <= reset;
 
-wire [7:0] av_r = vid_mute ? 8'h00 : ch_on0 ? 8'hFF : ch_on1 ? 8'h00 : core_r;
-wire [7:0] av_g = vid_mute ? 8'h00 : ch_on0 ? 8'h00 : ch_on1 ? 8'hFF : core_g;
-wire [7:0] av_b = vid_mute ? 8'h00 : ch_on0 ? 8'h00 : ch_on1 ? 8'h00 : core_b;
+wire [7:0] av_r = vid_mute ? 8'h00 : core_r;
+wire [7:0] av_g = vid_mute ? 8'h00 : core_g;
+wire [7:0] av_b = vid_mute ? 8'h00 : core_b;
 
 // ---- analog CRT stage: centred sync, CRT V-Size, CRT Adjust (rtl/video/yunit_crt.sv) ----
 //
@@ -1313,7 +1323,24 @@ arcade_video #(.WIDTH(512), .DW(24), .GAMMA(1)) arcade_video
 	.gamma_bus          (gamma_bus)
 );
 
-assign CE_PIXEL = crt_on ? rd_ce  : mix_ce;
+// HDMI Top Row Pixel Fix (rtl/video/yunit_hdmi_trim.sv): the pixel enable of
+// the picture's first line is taken away, so the scaler (HDMI) never sees
+// that line; every other signal, and so the analog output, is the same with
+// the option on or off.
+wire ce_vid = crt_on ? rd_ce  : mix_ce;
+wire de_vid = crt_on ? de_osd : mix_de;
+
+yunit_hdmi_trim yunit_hdmi_trim
+(
+	.clk    (CLK_VIDEO),
+	.enable (status[109]),
+	.lines2 (scandoubler),
+	.ce_in  (ce_vid),
+	.de_in  (de_vid),
+	.vs_in  (VGA_VS),
+	.ce_out (CE_PIXEL)
+);
+
 assign VGA_R    = crt_on ? str_r  : mix_r;
 assign VGA_G    = crt_on ? str_g  : mix_g;
 assign VGA_B    = crt_on ? str_b  : mix_b;
@@ -1334,7 +1361,7 @@ video_freak video_freak
 	.VIDEO_ARX   (VIDEO_ARX),
 	.VIDEO_ARY   (VIDEO_ARY),
 
-	.VGA_DE_IN   (crt_on ? de_osd : mix_de),
+	.VGA_DE_IN   (de_vid),
 	.ARX         ((ar == 2'd0) ? 12'd4 : ({10'd0, ar} - 12'd1)),
 	.ARY         ((ar == 2'd0) ? 12'd3 : 12'd0),
 	.CROP_SIZE   (12'd0),
