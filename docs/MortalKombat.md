@@ -6,10 +6,10 @@
 
 | | |
 |---|---|
-| Sets | mkla4 (rev 4.0, main MRA); rev 3.0, 2.0, 1.0; prototypes 9.0, 8.0, 4.0; Turbo 3.0 / 3.1 and Nifty Kombo / Nifty Kombo 666 hacks |
+| Sets | mkla4 (rev 4.0, main MRA); rev 3.0, 2.0, 1.0; prototypes 9.0, 8.0, 4.0; Turbo 3.0 / 3.1, Nifty Kombo / Nifty Kombo 666 and Reptile Man hacks; the Victor bootleg of rev 3.0; the four Yawdim bootlegs |
 | ROM zip | `mk.zip` (MAME's merged Mortal Kombat set) |
 | Players | 2 |
-| Sound | ADPCM board |
+| Sound | ADPCM board (the Yawdim bootlegs: a Z80 with an OKI M6295) |
 
 ## Extra content
 
@@ -18,11 +18,13 @@ Mortal Kombat has the most extras: four OSD features and its own button layout.
 - **[Finishing Moves](#finishing-moves)** (main page): pick a fighter's fatality, and the core enters it on the round winner's controls at the next FINISH HIM, for either player. The distance is measured the way the game does it, from the fighters' centres. Messages say when the fighter is too far or too close, the move waits for another fighter's FINISH HIM, FINISH HIM is over, the move was not taken, or it was cleared. **Clear the set move** drops it.
 - **[Move List](#move-list)** (Off, On): a reference window over the dimmed title screen with each fighter's special moves, fatality and the distance it needs, and The Pit's uppercut in the footer. With the OSD closed, Left or Right turns to the other page. The game waits while it shows.
 - **[EJB Menu shortcut](#hidden-developer-menu-ejb-menu)** (Hidden Items, every revision except prototype 4.0): plays the 27-press code on the two Block buttons in about 3 seconds, for diagnostics, audits, enter initials and character endings. The game takes the code only in attract mode, not during a game or the game-over screens that follow it. Start 1 and 2 are held released while it plays so a Start press cannot spoil it. Messages report the result.
-- **[Reptile on demand](#reptile)** (Hidden Items, rev 3.0, rev 4.0 and the Turbo hacks): Reptile Fight Next, Moon Silhouettes Always and Reptile Hints Always. The core changes a few of the game's instructions as the CPU fetches them; nothing is written to the ROM or the CMOS.
+- **[Reptile on demand](#reptile)** (Hidden Items, rev 3.0, rev 4.0, the Turbo hacks, the Victor bootleg and the Yawdim bootlegs): Reptile Fight Next, Moon Silhouettes Always and Reptile Hints Always. The core changes a few of the game's instructions as the CPU fetches them; nothing is written to the ROM or the CMOS.
 - **Button layout**: High Punch, Low Punch, High Kick, Low Kick, Block, then Start, Coin, Test, Pause. The board's second Block input stays unused, as the cabinet has one block button per player.
 - **Coin 3** on the third controller's Coin button.
 
 The [core-wide extras](ExtraContent.md#core-wide-features) (CRT Adjust, CRT V-Size, Video Timing, DIP Switches, Service Mode and the rest) apply to every game.
+
+The game draws a few stray pixels in the first line of the picture: at the left of the title screen, and a couple that blink during a fight. A cabinet's overscan hides them; on HDMI, turn on [HDMI Top Row Pixel Fix](ExtraContent.md#video-output) in Video Settings to hide that line (the analog output does not change).
 
 ## Controls
 
@@ -161,8 +163,10 @@ about a quarter of a second of the last.
 
 ## Reptile
 
-Rev 4.0, rev 3.0 and the two Turbo hacks have Reptile, the secret green
-ninja (the older revisions, the prototypes and Nifty Kombo do not). In the
+Rev 4.0, rev 3.0, the two Turbo hacks, the Victor bootleg and the Yawdim
+bootlegs (rev 3.0's program) have Reptile, the secret green ninja (the older revisions, the
+prototypes and Nifty Kombo do not; the Reptile Man hack changes this part of
+the program, so the core offers no Reptile options on it). In the
 game you meet him in a 1-player game, after a match on The Pit while a
 silhouette crosses the moon: win both rounds flawless, never press Block and
 finish with a fatality, and Reptile challenges you on the spikes below. The
@@ -192,3 +196,43 @@ Always the core skips that, so the audits are kept.
 The Turbo hacks changed the rules: Turbo 3.0 drops the moon and block
 conditions, Turbo 3.1 also lets two players and the second stage bring
 Reptile and needs no flawless rounds. The options work the same on them.
+
+## Hacks and bootlegs
+
+Some sets of the `_alternatives` folder need a word:
+
+- **Reptile Man hack** (mkrep): a hack of rev 4.0 (9/28/92). MAME marks it as
+  not working because its protection is not emulated, and patches that
+  protection out when it starts the game; the MRA does the same with three
+  `<patch>` entries after the program ROM, so the program the core runs is the
+  one MAME runs. Finishing Moves and the EJB Menu shortcut work as on rev 4.0;
+  Hidden Items has no Reptile lines (see [Reptile](#reptile)).
+- **Victor bootleg of rev 3.0** (mkla3bl): rev 3.0's program with its sound,
+  on a bootleg board whose graphics ROMs are three 2 MB files with the bytes of
+  the original ROMs interleaved in pairs. MAME puts them back in order when it
+  starts; the core does it while the ROMs load (the MRA lists the three files as
+  they are). Everything else is rev 3.0: Finishing Moves, the EJB Menu shortcut
+  and the Reptile lines work as on it.
+- **Yawdim bootlegs** (mkyawdim, mkyawdim2, mkyawdim3, mkyawdim4: "Mortal Kombat
+  (Yawdim bootleg, set 1)" to "set 4"): rev 3.0 (about 330 bytes of its program
+  changed for the bootleg board) on a board with no protection and without
+  Williams' sound board. The sound comes from a Z80 (4 MHz)
+  that plays samples through an OKI M6295 (1 MHz, no music chip); the main board
+  sends it a command byte and the Z80 starts the sample. The core has this board
+  (a Z80 core under `rtl/tv80`, `rtl/sound/yawdim_sound.sv`), and it follows
+  MAME's driver in the details that differ between the sets:
+  - Sets 1, 3 and 4 interrupt the Z80 with every command; set 2 holds the interrupt
+    until the Z80 has read the command.
+  - The OKI plays from banks of 256 KB, chosen by a Z80 write: two bits (1 MB of
+    samples) in sets 1, 3 and 4, three bits (2 MB) in set 2.
+  - The bootleg's graphics hardware draws horizontally flipped sprites differently
+    from the original board; the core does it the way MAME does for these sets.
+  - The ADPCM board's interrupt line (input bit 14) is not connected.
+
+  The bootleg board has a 48 MHz oscillator (MAME's driver runs the 34010 at 40 MHz),
+  and the core runs it at 48 MHz, like Mortal Kombat. MAME marks sets 3 and 4 as
+  having imperfect sound and says that some sound effects are missing on the real
+  PCB of set 2; the core plays what MAME plays. Finishing Moves, the EJB Menu
+  shortcut and the Reptile lines work as on rev 3.0 (the game's variables are at the
+  same addresses in all four sets). Sets 1 and 2 have the same program; sets 3 and 4
+  differ from set 1 by 3 and 27 bytes.
