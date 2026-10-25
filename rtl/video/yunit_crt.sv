@@ -265,7 +265,7 @@ crt_adjust #(
 	.hsize      (h_eff[4:0]),        // not used inside (the read rate comes from rd_ce)
 	.hoffset    (hpos_off),
 	.voffset    (vshift_s),
-	.vtotal_in  (vz_lines),          // 57/60 Hz video timings and PVM V-Size change the frame
+	.vtotal_in  (vz_lines),          // 57 Hz video timing and PVM V-Size change the frame
 	.r_in       (vz_r),
 	.g_in       (vz_g),
 	.b_in       (vz_b),
@@ -305,8 +305,8 @@ crt_adjust #(
 //----------------------------------------------------------------------------
 
 // VSync on the picture. With the board's own 289-line frame there are 33
-// blank lines; the 57/60 Hz video timings leave 21/7, so a V-Shift can put
-// VSync on the picture (at 60 Hz any shift does). The picture is then split:
+// blank lines; the 57 Hz video timing leaves 21, so a V-Shift can put
+// VSync on the picture. The picture is then split:
 // lines after VSync are drawn at the top of the new field, lines before it
 // at the bottom of the old one. The smaller part would wrap to the wrong
 // edge of the screen (and the HDMI frame would wrap the same way), so it is
