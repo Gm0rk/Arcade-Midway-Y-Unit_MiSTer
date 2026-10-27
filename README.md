@@ -89,8 +89,7 @@ Every other clock has at least 4.2 ns of setup slack.
 - Service Mode, Service Credit and Tilt in the OSD; pause from a button or
   while the OSD is open
 - Shortcuts to the hidden developer menus of the games that have one
-- Mortal Kombat: Move List, Finishing Moves, Reptile on demand and Fixed AI
-  Difficulty (see the [Mortal Kombat page](docs/MortalKombat.md))
+- Mortal Kombat: Move List, Finishing Moves, and Reptile on demand. (see the [Mortal Kombat page](docs/MortalKombat.md))
 - Total Carnage: a Passwords page with every warp code (see the
   [Total Carnage page](docs/TotalCarnage.md))
 
