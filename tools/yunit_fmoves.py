@@ -340,6 +340,10 @@ def scan(prog_bytes):
 #                Reptile Hints Always; rtl/midway_yunit.sv applies them)
 #   0x60-0x61    the word address of the Reptile flag (set when his fight
 #                starts: Reptile Fight Next is then used up)
+#   0x62         Fixed AI Difficulty (Mortal Kombat): the main RAM word address
+#                (bit address >> 4, low 16 bits) of the CPU level word, 0 =
+#                none (see "Fixed AI Difficulty" below; the board stores the
+#                chosen level on every CPU write to it)
 # Only as many words as hold data are written (at least up to 0x34).
 # MRA game ids of the Mortal Kombat boards (6 rev 1-4, 7 prototypes, 8 Turbo
 # hacks, 14 the Victor bootleg of rev 3.0, 15 and 16 the Yawdim bootlegs)
@@ -348,7 +352,8 @@ CFG_FM = 0x10
 CFG_SEC = 0x30
 CFG_REP = 0x40
 CFG_REP_FLAG = 0x60
-CFG_WORDS = 0x62
+CFG_LVL = 0x62
+CFG_WORDS = 0x63
 CFG_MIN_WORDS = 0x35
 
 # sets whose program has the hidden menu's code (the others of the family
@@ -494,6 +499,44 @@ def reptile_stored(setname):
     return out, flag
 
 
+# Fixed AI Difficulty (Options: Off, 0 to 9; the Mortal Kombat: Legacy
+# Kollection has the same setting). The game keeps the CPU opponent's level,
+# 0 (easiest) to 9, in one word of main RAM and indexes the AI's tables by it
+# (many 10-entry tables in the program ROM, read through two lookup helpers).
+# It is written by four places only (checked in MAME 0.289, mkla4, a 1-player
+# game won through five matches, with a write tap):
+#   - the game start (RAM clear, then the start level from the DIP
+#     difficulty: 0, 0, 0, 3, 4 for the five settings)
+#   - the adjust function (FFCB48F0 in rev 4.0): level + A1, clamped to 0-9;
+#     called after a won match with +1, +1, +1, +2, +3 (by the DIP
+#     difficulty) and after a lost one with -2, -2, -1, -1, 0
+#   - after a won match, with 3 or more wins in a row: the level is raised to
+#     a floor of 2, 3, 3, 4, 5
+#   - after a lost match, with the counter at 8 or more: a floor of 0, 0, 1,
+#     3, 4
+# The board replaces the data of every CPU write to the word with the chosen
+# level, so the level never moves; this needs only the word's address, which
+# level_scan finds in every set from the adjust function:
+#   MOVE @L,A0 / ADD A1,A0 / JRNN +1 / CLR A0 / CMPI 9,A0 / JRLS +1 / MOVK 9,A0
+#   / MOVE A0,@L / RETS
+LVL_SETS = {
+    'mkla4': 0x0104D6E0, 'mkla3': 0x0104D6E0, 'mkla2': 0x0104D6E0, 'mkla1': 0x0104D6E0,
+    'mkyturbo': 0x0104D6E0, 'mkyturboe': 0x0104D6E0, 'mkrep': 0x0104D6E0, 'mkla3bl': 0x0104D6E0,
+    'mkyawdim': 0x0104D6E0, 'mkyawdim2': 0x0104D6E0, 'mkyawdim3': 0x0104D6E0, 'mkyawdim4': 0x0104D6E0,
+    'mkprot9': 0x0104D6C0, 'mkprot8': 0x0104D6C0, 'mknifty': 0x0104D6C0, 'mknifty666': 0x0104D6C0,
+    'mkprot4': 0x0104D6D0,
+}
+
+
+def level_scan(p):
+    """The bit address of the CPU level word of an MK program ROM, or None."""
+    w = p.w
+    h = [i for i in _find(p, [0x05A0, X, X, 0x4020, 0xCF01, 0x5600, 0x0B40, 0xFFF6, 0xC201, 0x1920,
+                              0x0580, X, X, 0x0960])
+         if w[i + 1] == w[i + 11] and w[i + 2] == w[i + 12]]
+    return p.u32(h[0] + 1) if len(h) == 1 else None
+
+
 def build(gid, setname, prog_bytes=None):
     """ROM index 1 words (bytes) and notes. gid: the MRA game id (MK_IDS, 3
     High Impact, 4 Super High Impact)."""
@@ -534,6 +577,17 @@ def build(gid, setname, prog_bytes=None):
                 w[CFG_REP + 4 * n:CFG_REP + 4 * n + 4] = [a & 0xFFFF, o << 8 | a >> 16, nw, v]
             w[CFG_REP_FLAG], w[CFG_REP_FLAG + 1] = (flag >> 4) & 0xFFFF, flag >> 20
             notes.append('Reptile: %d program patches, flag %08X' % (len(patches), flag))
+    if gid in MK_IDS:
+        lv = LVL_SETS.get(setname)
+        if prog_bytes is not None:
+            sc = level_scan(Prog(prog_bytes))
+            if lv != sc:
+                raise ValueError('%s: the CPU level word differs from the stored one' % setname)
+        if lv:
+            if lv >> 20 != 0x10:
+                raise ValueError('%s: the CPU level word is not in main RAM' % setname)
+            w[CFG_LVL] = (lv >> 4) & 0xFFFF
+            notes.append('Fixed AI Difficulty: CPU level word %08X' % lv)
     if gid in (3, 4) + MK_IDS:
         if setname in NO_MENU:
             w[CFG_SEC + 4] = 2
