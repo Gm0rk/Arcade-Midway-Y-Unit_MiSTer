@@ -50,6 +50,13 @@ module midway_yunit
 	input      [15:0] patch_wd,
 	input       [2:0] patch_en,      // options 1-3 on
 
+	// Mortal Kombat's CPU level pinned (ROM index 1 word 0x62; see "Fixed AI
+	// difficulty" below): while lvl_on, a CPU write to the main RAM word
+	// lvl_wa stores lvl_val
+	input             lvl_on,
+	input       [3:0] lvl_val,       // 0 (easiest) to 9
+	input      [15:0] lvl_wa,        // the level word's main RAM word address (bit address >> 4)
+
 	// inputs (active low as the CPU reads them), port 0-5
 	input      [95:0] in_ports,
 	input       [7:0] gun_p1_x,      // gun positions for the T2 ADC
@@ -894,6 +901,18 @@ reg         vram_sent;
 // taken (b_stale), the same request is not served again.
 wire        req = (b_rd | b_wr) & ~mem_ack & ~b_stale;
 
+// Fixed AI difficulty (Mortal Kombat). The game keeps the CPU opponent's
+// level, 0 to 9, in one main RAM word (rev 1.0-4.0 @0104D6E0, the prototypes
+// and Nifty Kombat @0104D6C0 / @0104D6D0): set when a game starts (from the
+// DIP difficulty), raised after a won match, with a floor after a winning
+// streak, lowered after a lost one (tools/yunit_fmoves.py, level_scan). The AI's
+// tables are indexed by it. While the option is on, every CPU write of a
+// level (0 to 9, all the game ever writes there) to that word stores the
+// chosen level instead, so the level never moves. Other values pass: the test
+// menu's CPU board test writes patterns all over main RAM and reads them back
+// (the top level also turns the option off while the test menu is selected).
+wire        lvl_hit = lvl_on && sel_ram && (wa[15:0] == lvl_wa) && (b_wdata < 16'd10);
+
 // Terminator 2 freeze workaround (MAME term2*_hack_w): one main RAM word is
 // forced to zero when written by one specific instruction
 wire        t2_hack_hit = (t2_hack != 3'd0) && sel_ram && (wa[15:1] == 15'h5507) &&
@@ -983,7 +1002,7 @@ always @(posedge clk) begin
 						if (sel_ram) begin
 							ram_we <= 1'b1;
 							ram_wa <= wa[15:0];
-							ram_wd <= t2_hack_hit ? 16'h0000 : b_wdata;
+							ram_wd <= t2_hack_hit ? 16'h0000 : lvl_hit ? {12'h000, lvl_val} : b_wdata;
 						end
 						if (sel_cmos)
 							cmos_we <= 1'b1;
