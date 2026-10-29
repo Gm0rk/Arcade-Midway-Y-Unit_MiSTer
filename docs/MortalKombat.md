@@ -17,7 +17,7 @@ Mortal Kombat has the most extras: five OSD features and its own button layout.
 
 - **[Finishing Moves](#finishing-moves)** (main page): pick a fighter's fatality, and the core enters it on the round winner's controls at the next FINISH HIM, for either player. The distance is measured the way the game does it, from the fighters' centres. Messages say when the fighter is too far or too close, the move waits for another fighter's FINISH HIM, FINISH HIM is over, the move was not taken, or it was cleared. **Clear the set move** drops it.
 - **[Move List](#move-list)** (Off, On): a reference window over the dimmed title screen with each fighter's special moves, fatality and the distance it needs, and The Pit's uppercut in the footer. With the OSD closed, Left or Right turns to the other page. The game waits while it shows.
-- **[Fixed AI Difficulty](#fixed-ai-difficulty)** (main page: Off, 0 to 9; Off by default): holds the CPU opponent at one of the game's ten levels, 0 (easiest) to 9, from the first fight to the last, as the Fixed AI Difficulty of Mortal Kombat: Legacy Kollection does. Off is the game's own curve, which starts easy and gets harder with every match you win. Set it before you press Start.
+- **[Fixed AI Difficulty](#fixed-ai-difficulty)** (main page: Off, 0 to 9; Off by default): holds the CPU opponent at one of the game's ten levels, 0 (easiest) to 9, from the first fight to the last, as the Fixed AI Difficulty of Mortal Kombat: Legacy Kollection does. Off is the game's own curve, which starts easy and gets harder with every match you win. Set it in the OSD before you press Start to begin a game. Shang Tsung follows it like any fighter; Goro much less (see [Fixed AI Difficulty](#fixed-ai-difficulty)).
 - **[EJB Menu shortcut](#hidden-developer-menu-ejb-menu)** (Hidden Items, every revision except prototype 4.0): plays the 27-press code on the two Block buttons in about 3 seconds, for diagnostics, audits, enter initials and character endings. The game takes the code only in attract mode, not during a game or the game-over screens that follow it. Start 1 and 2 are held released while it plays so a Start press cannot spoil it. Messages report the result.
 - **[Reptile on demand](#reptile)** (Hidden Items, rev 3.0, rev 4.0, the Turbo hacks, the Victor bootleg and the Yawdim bootlegs): Reptile Fight Next, Moon Silhouettes Always and Reptile Hints Always. The core changes a few of the game's instructions as the CPU fetches them; nothing is written to the ROM or the CMOS.
 - **Button layout**: High Punch, Low Punch, High Kick, Low Kick, Block, then Start, Coin, Test, Pause. The board's second Block input stays unused, as the cabinet has one block button per player.
@@ -148,10 +148,30 @@ level at the one you pick, so the CPU is as hard in the last fight as in the
 first. It is modelled on the setting of the same name in Mortal Kombat:
 Legacy Kollection, with the same range. Off leaves the game's own curve.
 
-- Set it **before you press Start** to hold the level from the first fight.
-  Changed during a game, it takes effect when the game next sets the level,
-  which is when the match ends.
+- **When to set it:** in the OSD, before you press Start to begin a game. The
+  game sets the level the moment Start is pressed, before the character
+  select, and the core replaces that level with yours, so the first fight is
+  already at it. Putting the coin in before or after changes nothing; it is
+  Start that counts. The attract mode's demo fights use it too.
+- **Changed during a game** (character select, a fight, the continue
+  countdown), it takes effect at the next level the game sets, which is when
+  the current match ends. Until then the CPU stays at the level it had. Set
+  back to Off during a game, the level stays where it is and the game's own
+  curve carries on from there: up after a match you win, down after one you
+  lose.
 - It is for 1-player games; a 2-player game has no CPU opponent.
+- **Goro and Shang Tsung** have no difficulty curve of their own: like every
+  other fighter they read the game's one level word. **Shang Tsung** follows
+  it like the normal fighters: in MAME, replaying the start of his fight at
+  level 0 and at level 9 with the same inputs, the two fights part within about
+  two seconds, as Johnny Cage's and Sub-Zero's do. **Goro** follows it much
+  less: his fight is identical at both levels for the first four and a half
+  seconds, and after that the game reads the level only now and then, in
+  short bursts, where the other fighters read it all the time. So the option
+  changes Goro far less than anyone else; expect him to stay hard at a low
+  setting and not to get much harder at a high one. How large the
+  difference is (his damage, how often he attacks) was not measured, and these
+  tests were run in MAME on mkla4 with one fighter, not on hardware.
 - What the CPU does at each level is the game's own: the option picks the
   level, it does not change the game's AI.
 - It is off while the test menu is selected (Service Mode, a Test button or
