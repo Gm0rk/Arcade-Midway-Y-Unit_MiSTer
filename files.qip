@@ -23,6 +23,7 @@ set_global_assignment -name SYSTEMVERILOG_FILE rtl/secret_menu.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/yunit_dlmap.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/yunit_fmoves.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/yunit_listpage.sv
+set_global_assignment -name SYSTEMVERILOG_FILE rtl/yunit_opposite.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/yunit_window.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/crt_adjust/crt_vsize.sv
 set_global_assignment -name SYSTEMVERILOG_FILE rtl/crt_adjust/crt_adjust.sv
