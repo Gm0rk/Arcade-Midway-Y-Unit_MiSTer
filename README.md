@@ -104,7 +104,7 @@ Every other clock has at least 2.7 ns of setup slack.
 | Video Settings | Aspect ratio, scandoubler, scale, HDMI Top Row Pixel Fix, Video Timing, CRT Adjust |
 | Move List | Mortal Kombat: shows each fighter's moves over the game; with the OSD closed, Left or Right turns the page |
 | Finishing Moves | Mortal Kombat: enters the chosen fatality at the next FINISH HIM/HER |
-| Fixed AI Difficulty | Mortal Kombat: Off, or 0 (easiest) to 9; set it before pressing Start |
+| Fixed AI Difficulty | Mortal Kombat: Off, or 0 (easiest) to 9; set it in the OSD before you press Start to begin a game; Shang Tsung follows it like any fighter, Goro much less |
 | Passwords | Total Carnage: shows the warp codes over the game |
 | DIP Switches | The game's DIP switches, with Service Credit and Tilt |
 | Hidden Items | Hidden developer menus and extras, for the games that have them |
