@@ -68,6 +68,7 @@ localparam CONF_STR = {
 	"H1P1O[108],CRT V-Size Mode,PVM,Cabinet;",
 	"-;",
 	`FMOVES_MENU,
+	"H5HBO[113:110],Fixed AI Difficulty,Off,0,1,2,3,4,5,6,7,8,9;",
 	"H7O[44],Passwords,Off,On;",
 	"H5-;",
 	"H7-;",
@@ -118,6 +119,7 @@ wire        sec_ejb, sec_octo;              // the game has a hidden menu (see s
 wire        is_mk;                          // Mortal Kombat: Move List and Finishing Moves
 wire        is_tc;                          // Total Carnage: Passwords
 wire        rep_items;                      // Mortal Kombat with Reptile: his Hidden Items lines
+wire        lvl_items;                      // Mortal Kombat with the CPU level's address: Fixed AI Difficulty
 wire        info_req;
 wire  [7:0] info;
 
@@ -133,7 +135,7 @@ hps_io #(.CONF_STR(CONF_STR), .CONF_STR_BRAM(1), .WIDE(1)) hps_io
 
 	.buttons             (buttons),
 	.status              (status),
-	.status_menumask     ({5'd0, status[30:28], ~is_tc, ~rep_items, ~is_mk, ~(sec_ejb | sec_octo), ~sec_octo, ~sec_ejb, ~status[101], 1'b0}),
+	.status_menumask     ({4'd0, ~lvl_items, status[30:28], ~is_tc, ~rep_items, ~is_mk, ~(sec_ejb | sec_octo), ~sec_octo, ~sec_ejb, ~status[101], 1'b0}),
 	.info_req            (info_req),
 	.info                (info),
 
@@ -448,22 +450,36 @@ assign joy[1] = joy1;
 assign joy[2] = joy2;
 assign joy[3] = joy3;
 
+// Opposite directions held together (Up+Down, Left+Right): the one pressed
+// last wins, in every game. A cabinet stick cannot do this, a mapped button
+// can, and Smash T.V. crashes on it. The Trog filter below and the move
+// sticks both take the filtered directions.
+genvar gi;
+wire [15:0] jd_flat;
+wire  [3:0] jd [0:3];
+generate
+	for (gi = 0; gi < 4; gi = gi + 1) begin : g_opp
+		yunit_opposite u_opp (.clk(clk_sys), .in(joy[gi][3:0]), .out(jd_flat[4*gi +: 4]));
+		assign jd[gi] = jd_flat[4*gi +: 4];
+	end
+endgenerate
+
 // 4-way joysticks (Trog): on a diagonal the axis pressed last wins
 reg   [3:0] dir4 [0:3];
 reg   [3:0] last_raw [0:3];
 integer p;
 always @(posedge clk_sys) begin
 	for (p = 0; p < 4; p = p + 1) begin
-		last_raw[p] <= joy[p][3:0];
-		if ((joy[p][3] | joy[p][2]) && (joy[p][1] | joy[p][0])) begin
+		last_raw[p] <= jd[p];
+		if ((jd[p][3] | jd[p][2]) && (jd[p][1] | jd[p][0])) begin
 			// keep the axis of the newly pressed direction
-			if ((joy[p][3:2] & ~last_raw[p][3:2]) != 2'b00)
-				dir4[p] <= {joy[p][3:2], 2'b00};
-			else if ((joy[p][1:0] & ~last_raw[p][1:0]) != 2'b00)
-				dir4[p] <= {2'b00, joy[p][1:0]};
+			if ((jd[p][3:2] & ~last_raw[p][3:2]) != 2'b00)
+				dir4[p] <= {jd[p][3:2], 2'b00};
+			else if ((jd[p][1:0] & ~last_raw[p][1:0]) != 2'b00)
+				dir4[p] <= {2'b00, jd[p][1:0]};
 		end
 		else
-			dir4[p] <= joy[p][3:0];
+			dir4[p] <= jd[p];
 	end
 end
 
@@ -473,10 +489,9 @@ function automatic [3:0] udlr(input [3:0] j);
 endfunction
 
 wire [3:0] pdir [0:3];
-genvar gi;
 generate
 	for (gi = 0; gi < 4; gi = gi + 1) begin : g_dir
-		assign pdir[gi] = udlr(((game_id == G_TROG) ? dir4[gi] : joy[gi][3:0]));
+		assign pdir[gi] = udlr(((game_id == G_TROG) ? dir4[gi] : jd[gi]));
 	end
 endgenerate
 
@@ -493,8 +508,12 @@ function automatic [3:0] fire_dir(input [31:0] j, input [15:0] ra);
 	end
 endfunction
 
-wire [3:0] fire1 = fire_dir(joy0, joy0_ra);
-wire [3:0] fire2 = fire_dir(joy1, joy1_ra);
+// Up with Down and Left with Right on the fire sticks get the same filter
+wire [3:0] fire1_raw = fire_dir(joy0, joy0_ra);
+wire [3:0] fire2_raw = fire_dir(joy1, joy1_ra);
+wire [3:0] fire1, fire2;
+yunit_opposite u_opp_f1 (.clk(clk_sys), .in(fire1_raw), .out(fire1));
+yunit_opposite u_opp_f2 (.clk(clk_sys), .in(fire2_raw), .out(fire2));
 
 wire       test_sw = status[9] | joy0[12] | joy1[12];
 reg  [5:0] svc_cnt  = 6'd0;                 // service credit held while non-zero
@@ -863,6 +882,36 @@ assign rep_items = is_mk & rep_has;
 wire [2:0] rep_patch_en = {3{rep_items}} & {status[19], status[18], rep_arm};
 
 //////////////////////////////////////////////////////////////////
+// Fixed AI Difficulty (Mortal Kombat)
+//
+// The game keeps the CPU opponent's level, 0 (easiest) to 9, in one main RAM
+// word and indexes the AI's tables by it; it starts a game at a level from
+// the DIP difficulty, raises it after a won match, floors it after a winning
+// streak and lowers it after a lost match. With the option at a level, the
+// board stores that level on every CPU write to the word, so it never moves
+// (rtl/midway_yunit.sv, "Fixed AI difficulty"); it is off while the test menu
+// is selected, whose CPU board test writes patterns over main RAM (Service
+// Mode, a Test button or the Test Switch DIP, which is DIP bit 8 in every
+// Mortal Kombat set). ROM index 1 word 0x62 is the
+// word's main RAM word address (tools/yunit_fmoves.py, level_scan); 0: the
+// MRA has none, and the option is hidden. O[113:110]: 0 Off, 1-10 level 0-9.
+//////////////////////////////////////////////////////////////////
+
+reg  [15:0] lvl_wa = 16'd0;
+always @(posedge clk_sys) begin
+	if (cfg1_start)
+		lvl_wa <= 16'd0;
+	else if (cfg1_wr && ioctl_addr[26:9] == 18'd0 && cfg1_word == 8'h62)
+		lvl_wa <= ioctl_dout;
+end
+
+assign lvl_items = is_mk && (lvl_wa != 16'd0);
+wire [3:0] lvl_opt = status[113:110];
+wire       lvl_test = test_sw | ~dsw[8];     // the test menu is selected (Service Mode, Test button, Test Switch DIP)
+wire       lvl_on  = lvl_items && !lvl_test && (lvl_opt != 4'd0) && (lvl_opt <= 4'd10);
+wire [3:0] lvl_val = lvl_opt - 4'd1;
+
+//////////////////////////////////////////////////////////////////
 // Finishing moves (Mortal Kombat)
 //
 // The Finishing Moves page picks a fighter (O[30:28]; the menu mask's bits
@@ -1001,6 +1050,10 @@ midway_yunit board
 	.patch_wa       (5'(cfg1_word - 8'h40)),
 	.patch_wd       (ioctl_dout),
 	.patch_en       (rep_patch_en),
+
+	.lvl_on         (lvl_on),
+	.lvl_val        (lvl_val),
+	.lvl_wa         (lvl_wa),
 
 	.in_ports       (in_ports),
 	.gun_p1_x       (~gun_x[0]),
