@@ -13,10 +13,11 @@
 
 ## Extra content
 
-Mortal Kombat has the most extras: four OSD features and its own button layout.
+Mortal Kombat has the most extras: five OSD features and its own button layout.
 
 - **[Finishing Moves](#finishing-moves)** (main page): pick a fighter's fatality, and the core enters it on the round winner's controls at the next FINISH HIM, for either player. The distance is measured the way the game does it, from the fighters' centres. Messages say when the fighter is too far or too close, the move waits for another fighter's FINISH HIM, FINISH HIM is over, the move was not taken, or it was cleared. **Clear the set move** drops it.
 - **[Move List](#move-list)** (Off, On): a reference window over the dimmed title screen with each fighter's special moves, fatality and the distance it needs, and The Pit's uppercut in the footer. With the OSD closed, Left or Right turns to the other page. The game waits while it shows.
+- **[Fixed AI Difficulty](#fixed-ai-difficulty)** (main page: Off, 0 to 9; Off by default): holds the CPU opponent at one of the game's ten levels, 0 (easiest) to 9, from the first fight to the last, as the Fixed AI Difficulty of Mortal Kombat: Legacy Kollection does. Off is the game's own curve, which starts easy and gets harder with every match you win. Set it before you press Start.
 - **[EJB Menu shortcut](#hidden-developer-menu-ejb-menu)** (Hidden Items, every revision except prototype 4.0): plays the 27-press code on the two Block buttons in about 3 seconds, for diagnostics, audits, enter initials and character endings. The game takes the code only in attract mode, not during a game or the game-over screens that follow it. Start 1 and 2 are held released while it plays so a Start press cannot spoil it. Messages report the result.
 - **[Reptile on demand](#reptile)** (Hidden Items, rev 3.0, rev 4.0, the Turbo hacks, the Victor bootleg and the Yawdim bootlegs): Reptile Fight Next, Moon Silhouettes Always and Reptile Hints Always. The core changes a few of the game's instructions as the CPU fetches them; nothing is written to the ROM or the CMOS.
 - **Button layout**: High Punch, Low Punch, High Kick, Low Kick, Block, then Start, Coin, Test, Pause. The board's second Block input stays unused, as the cabinet has one block button per player.
@@ -131,6 +132,38 @@ one of rev 4.0; the prototypes may differ.
 |  | Fatality: Fire Breath | (BL) U U | Sweep to jump |
 
 Every fighter, on The Pit stage only: an uppercut (D+HP), close. The core does not enter it.
+
+## Fixed AI Difficulty
+
+The game keeps the CPU opponent's difficulty as a **level from 0 (easiest) to
+9**, and the CPU's behaviour follows it: the game's tables of how the CPU
+fights are indexed by the level. A 1-player game starts at a level from the
+game's own difficulty adjustment (0 on its default setting), the level goes up
+after every match you win (by 1 on the default setting; more on the harder
+ones), it is held at a minimum while you are on a winning streak, and it goes
+down after a match you lose. That is why the CPU gets harder as you go.
+
+**OSD → Fixed AI Difficulty** (Off, then 0 to 9; Off by default) holds the
+level at the one you pick, so the CPU is as hard in the last fight as in the
+first. It is modelled on the setting of the same name in Mortal Kombat:
+Legacy Kollection, with the same range. Off leaves the game's own curve.
+
+- Set it **before you press Start** to hold the level from the first fight.
+  Changed during a game, it takes effect when the game next sets the level,
+  which is when the match ends.
+- It is for 1-player games; a 2-player game has no CPU opponent.
+- What the CPU does at each level is the game's own: the option picks the
+  level, it does not change the game's AI.
+- It is off while the test menu is selected (Service Mode, a Test button or
+  the Test Switch DIP). The test menu's CPU board test writes patterns over
+  the whole RAM and reads them back; with the level held it would report a
+  fault.
+- The core does it on the board: every time the game writes a level (0 to 9)
+  to its level word, the level you picked is stored instead. The program ROM
+  is not changed. The word is at 0104D6E0 in rev 1.0 to 4.0, the Turbo hacks,
+  the Reptile Man hack and the bootlegs, at 0104D6C0 or 0104D6D0 in the
+  prototypes and Nifty Kombo (`tools/yunit_fmoves.py`, `level_scan`, finds it
+  in every set from the routine that moves the level).
 
 ## Hidden developer menu: EJB Menu
 
