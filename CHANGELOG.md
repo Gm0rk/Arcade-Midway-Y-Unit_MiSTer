@@ -1,14 +1,66 @@
 # Changelog
 
-What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's changes are grouped by type: **Added**, **Changed**, **Fixed**, **Removed**, **Docs & tools**. Test results, from MiSTer hardware, are tracked in [docs/TestPlan.md](docs/TestPlan.md).
+What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's changes are grouped by type: **Added**, **Changed**, **Fixed**, **Removed**, **Docs & tools**.
 
 Build numbers count the core's development builds in order. Released RBF files are named by date. Builds 1 to 12 were named Arcade-MidwayY.
+
+## Build 93 (2026-10-28)
+
+**Changed**
+- Fitter seed 2 (was 1). The Build 92 program compiled with seed 1 met every timing check but one: the 96 MHz setup check by 0.129 ns (3 endpoints, 0.198 ns in total), in the framework's composite / S-Video encoder (`yc_out`, in `sys/`), a block this core does not change. With seed 2 every check is met. The program (the RTL) is Build 92's.
+
+**Docs & tools**
+- README: the timing and resource figures are those of this compilation: setup slack 0.477 ns (96 MHz) and 0.283 ns (HDMI PLL), at least 2.7 ns on every other clock; hold, recovery, removal and minimum pulse width met; 29,246 ALMs (70 %), 437 M10K blocks (79 %), 65 DSP blocks (58 %). The margins move a little with every compilation.
+
+## Build 92 (2026-10-28)
+
+**Added**
+- **Opposite directions: the last press wins**, in every game. When Up and Down, or Left and Right, are held together, only the one pressed last reaches the game; letting it go hands control back to the one still held. If both are pressed in the same instant the axis reads neutral until one is let go; a single direction, and a diagonal, are as before. It applies to every player's stick (Trog's 4-way filter included) and to the fire directions of Smash T.V. and Total Carnage (B1-B4 and the right analog stick). A cabinet's stick cannot hold opposite directions, but a d-pad, a keyboard or buttons mapped to directions can, and Smash T.V. is reported to crash on it. It is always on; there is no OSD item.
+  - Checked in simulation: the filter was run for 1 million clock cycles of random presses against a second, independent model (the one pressed last wins, by time of press) and gave the same output on every cycle, and the outputs never hold both directions of an axis, never add a direction that is not held and never change a lone direction. The core's top level, where it is wired in, is checked by the lint only. The reported crash itself was not reproduced in MAME (one run each, with the first player's stick forced: with Up+Down held the game played on; with Left+Right held the player was not in the arena and the score stayed at 0), so whether it is gone needs a hardware test. The recompile is still to do.
+
+**Docs & tools**
+- README, Extra content, the Smash T.V. and Total Carnage pages and the release notes describe the filter. The README's timing report is still that of Build 86 until the next compilation (this build adds six small filters of 8 flip-flops each to the controls).
+- Test plan CSV: four new rows, each waiting for a hardware test: C-24 (opposite directions in any game), ST-11 and TC-14 (move and fire sticks in Smash T.V. and Total Carnage) and TR-13 (Trog). 148 tests in all.
+
+## Build 91 (2026-10-26)
+
+**Added**
+- Mortal Kombat: **Fixed AI Difficulty** (main page, below Finishing Moves; Off by default): Off, or 0 (easiest) to 9. The game keeps the CPU opponent's difficulty as a level from 0 to 9 and its fighting follows it; it starts a 1-player game at a level from the game's difficulty adjustment (0 on the default setting), raises it after every match you win, holds a minimum under it on a winning streak and lowers it after a match you lose. With a level chosen here the CPU stays at that level from the first fight to the last, as the Fixed AI Difficulty of Mortal Kombat: Legacy Kollection does with the same range; Off is the game's own curve.
+  - Set it before pressing Start to hold the level from the first fight; changed during a game it takes effect when the game next sets the level, which is when the match ends. It is for 1-player games.
+  - The core stores your level every time the game writes its level (a value from 0 to 9) to its level word, on the board; the program ROM is not changed and what the CPU does at each level is the game's own. The word is at 0104D6E0 in rev 1.0 to 4.0, the Turbo hacks, the Reptile Man hack, the Victor bootleg and the Yawdim bootlegs, at 0104D6C0 or 0104D6D0 in the prototypes and Nifty Kombo.
+  - The option is off while the test menu is selected (Service Mode, a Test button or the Test Switch DIP): the test menu's CPU board test writes patterns over the whole RAM and reads them back, and writes of other values than a level always pass unchanged.
+  - Checked in MAME 0.289 on mkla4 with write taps on the level word through a 1-player game won match after match (the level went from 0 to 7 over seven won matches): the game start, one adjust routine and two minimum rules are the only writers. With every write replaced by one level, as the core does, the word reads that level from the first fight on and the CPU fights to it: an idle player was beaten in about 500 frames at level 0 (what the game does on a new game without the option) and in 330 to 400 frames at levels 1 to 9. In simulation (mkla4, 330 frames of boot and attract mode) the word is the chosen level from the board's first RAM clear and stays there while the words next to it stay 0, and the video frames are identical with and without the option. The test menu's CPU board test was run in MAME to see what it writes (patterns, from one routine). All 17 Mortal Kombat sets have the same adjust routine, and the tool finds the word in each. The recompile and a hardware test are still to do.
+
+**Changed**
+- The 17 Mortal Kombat MRAs have one more word in their ROM index 1, the level word's address (the item is hidden with an older MRA). The other 36 MRAs are the same as before.
+
+**Docs & tools**
+- README, Mortal Kombat page, Extra content and the release notes describe the option. README: Mortal Kombat is **Awaiting hardware test** again (progress bar 7 / 8), 142 of the 144 tests pass, and the resource note lists the new compare and multiplexer. The README's timing report is still that of Build 86 until the next compilation (this build adds logic to the board's RAM write path).
+- TestPlan: two new Mortal Kombat tests, each waiting for a hardware test: MK-33 (Fixed AI Difficulty: 0, 9 and Off in a 1-player game) and MK-34 (a level set, then the test menu's CPU board test); C-01's list of the main page has the new item. Mortal Kombat is 32 of 34, 144 tests in all. The CSV has the same rows.
+- `tools/yunit_fmoves.py`: `level_scan` finds the level word from the routine that moves the level, and the MRA generator checks it against the stored addresses of the 17 sets.
 
 ## Build 90 (2026-10-25)
 
 **Docs & tools**
 - Test results: all 142 tests of the test plan now pass on MiSTer hardware, the last ones being the Maze bootleg (TR-12), the Reptile Man, Victor and Yawdim sets (MK-29 to MK-32) and the HDMI Top Row Pixel Fix (C-21 to C-23). Trog and Mortal Kombat are Verified: the README's progress bar is 8 / 8, and the test plan's summary says Pass for every section. MK-32 now reads "This bootleg is expected to have broken, missing, wrong audio".
 - README: the maintainer's edits are in: the AI disclosure, the CRT Adjust credit in Features, the wording of the HDMI Top Row Pixel Fix and the CMOS paragraphs (the "Today's Best" scores do not survive a power cycle on the real board either), FINISH HIM/HER, Reptile's moon silhouettes on The Pit stage, and a shorter Hidden Items row. The CRT V-Size note, the line about coins 3 and 4, and the note that split sets work are no longer in the README.
+
+## Build 89 (2026-10-25)
+
+**Removed**
+- Top Row Fix Scale (added in Build 88): the Video Settings item is gone, and the HDMI Top Row Pixel Fix works as it did in Build 86 (the program is the Build 86 one; Build 88 only added the item). With Scale on Normal the picture is enlarged by about 0.4 % to fill the space the missing line leaves; the Scale item's V-Integer avoids that.
+
+**Docs & tools**
+- Extra content, the test plan and the release notes keep the corrected statement that the picture is enlarged by about 0.4 % with Scale on Normal (Build 86 said the rest of the picture stays the same). Test plan: back to 142 tests, C-21 corrected, C-24 and C-25 removed.
+
+## Build 88 (2026-10-25)
+
+**Added**
+- Top Row Fix Scale (Video Settings, below HDMI Top Row Pixel Fix, shown while that is On): *Use Scale* (default), *V-Integer*, *HV-Integer*. With the Top Row Pixel Fix the scaler gets one line less, and with Scale on Normal it fills the same space with it, so the whole picture is enlarged by about 0.4 % (one line in 254; seen on hardware with Build 86). V-Integer and HV-Integer give every picture line a whole number of screen lines instead, so nothing is enlarged: at 1080p each line is 4 screen lines and the picture is 1012 lines high (1016 without the fix). *Use Scale* is the Build 86 behaviour. While the fix is On the item takes the place of the Scale item; with the fix Off the Scale item works as before. Saved with the core's other settings.
+  - Checked in simulation on Mortal Kombat's own video through the core's video output: with V-Integer the size the scaler gets is 1349 x 1012 at 1080p (a 253-line picture at 4 screen lines per line; Scale on V-Integer with the fix Off: 1354 x 1016), 674 x 506 at 720p and 2698 x 2024 at 4K, also with a Scandoubler Fx, CRT Adjust and a CRT V-Size change; the analog signals are identical in every case, and Use Scale gives the Build 86 result. HV-Integer was not simulated (the framework's HV code does not run in the simulator); its sizes follow from the framework's code. A hardware test is waiting.
+
+**Docs & tools**
+- The HDMI Top Row Pixel Fix text now says that with Scale on Normal the picture is enlarged by about 0.4 % (Build 86 said the rest of the picture stays the same); Extra content, README, Mortal Kombat page. Test plan: C-21 corrected, new C-24 (V-Integer) and C-25 (HV-Integer, menu, saved setting).
 
 ## Build 87 (2026-10-24)
 
