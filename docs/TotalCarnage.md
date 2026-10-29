@@ -15,6 +15,7 @@
 
 - **[Passwords](#passwords)** (main page, Off or On): a window over the game, on Total Carnage's own title screen, with how to enter a warp code at the PASSWORD REQUIRED disc, the 16 codes by mission with where each warps to, and the Weasel and Orcus warp bonuses. The game waits while it shows.
 - **Twin-stick fire** from B1-B4 (two together fire diagonally) or the right analog stick.
+- **Opposite directions**: Up with Down and Left with Right never reach the game, on the move stick or the fire stick; the one pressed last wins.
 - **Start/Bomb**: Start also throws a bomb in a game.
 - **Coin 3** on the third controller's Coin button.
 
@@ -26,8 +27,8 @@ Total Carnage is a twin-stick game: one stick moves, the other fires.
 
 | Input | Use |
 |---|---|
-| Stick (d-pad / left stick) | Move |
-| B1-B4 | Fire up, down, left, right (pressing two fires diagonally) |
+| Stick (d-pad / left stick) | Move (Up with Down or Left with Right: the last press wins) |
+| B1-B4 | Fire up, down, left, right (pressing two fires diagonally; opposite ones: the last press wins) |
 | Right analog stick | Fire in the direction it points, instead of B1-B4 |
 | Start | Start; in a game it throws a bomb |
 | Coin | Players 1-2; the third controller's Coin is coin 3 |
