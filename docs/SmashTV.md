@@ -16,6 +16,7 @@
 Smash T.V. has no game-specific OSD items.
 
 - **Fire from buttons or the right stick**: B1-B4 fire up, down, left and right (two together fire diagonally), or the right analog stick fires in the direction it points.
+- **Opposite directions**: Up with Down and Left with Right never reach the game, on the move stick or the fire stick; the one pressed last wins.
 - **Coin 3** on the third controller's Coin button.
 
 The [core-wide extras](ExtraContent.md#core-wide-features) (CRT Adjust, CRT V-Size, Video Timing, DIP Switches, Service Mode and the rest) apply to every game.
@@ -30,8 +31,8 @@ Smash T.V. is a twin-stick game: one stick moves, the other fires.
 
 | Input | Use |
 |---|---|
-| Stick (d-pad / left stick) | Move |
-| B1-B4 | Fire up, down, left, right (pressing two fires diagonally) |
+| Stick (d-pad / left stick) | Move (Up with Down or Left with Right: the last press wins) |
+| B1-B4 | Fire up, down, left, right (pressing two fires diagonally; opposite ones: the last press wins) |
 | Right analog stick | Fire in the direction it points, instead of B1-B4 |
 | Start / Coin | Players 1-2; the third controller's Coin is coin 3 |
 | Test, Pause | Service mode switch, pause |
