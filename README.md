@@ -52,24 +52,24 @@ listed in [Extra content](docs/ExtraContent.md).
 ## Timing and resources
 
 Built with Quartus Prime 17.0.2 Lite for the DE10-Nano (Cyclone V
-5CSEBA6U23I7), timing model Slow 1100 mV 100 C. Timing is from the Build 86
-compilation and resource use from Build 68; later builds added a little logic.
+5CSEBA6U23I7), timing model Slow 1100 mV 100 C. Timing and resource use are
+from the Build 93 compilation.
 
 Timing is met on every clock, and on every hold, recovery, removal and minimum
 pulse width check. The margins move a little with every compilation.
 
 | Clock | Frequency | Setup slack |
 |---|---|---|
-| System (core PLL) | 96 MHz | 0.599 ns |
-| HDMI PLL | 148.54 MHz | 0.460 ns |
+| System (core PLL) | 96 MHz | 0.477 ns |
+| HDMI PLL | 148.54 MHz | 0.283 ns |
 
-Every other clock has at least 4.2 ns of setup slack.
+Every other clock has at least 2.7 ns of setup slack.
 
 | Resource | Used |
 |---|---|
-| Logic (ALMs) | 28,536 / 41,910 (68 %) |
-| Block RAM (M10K blocks) | 403 / 553 (73 %) |
-| DSP blocks | 68 / 112 (61 %) |
+| Logic (ALMs) | 29,246 / 41,910 (70 %) |
+| Block RAM (M10K blocks) | 437 / 553 (79 %) |
+| DSP blocks | 65 / 112 (58 %) |
 
 ## Features
 
@@ -89,7 +89,11 @@ Every other clock has at least 4.2 ns of setup slack.
 - Service Mode, Service Credit and Tilt in the OSD; pause from a button or
   while the OSD is open
 - Shortcuts to the hidden developer menus of the games that have one
-- Mortal Kombat: Move List, Finishing Moves, and Reptile on demand. (see the [Mortal Kombat page](docs/MortalKombat.md))
+- Opposite directions held together (Up with Down, Left with Right) never
+  reach the game: the one pressed last wins. This covers every player's stick
+  and the fire sticks of Smash T.V. and Total Carnage
+- Mortal Kombat: Move List, Finishing Moves, Reptile on demand and Fixed AI
+  Difficulty (see the [Mortal Kombat page](docs/MortalKombat.md))
 - Total Carnage: a Passwords page with every warp code (see the
   [Total Carnage page](docs/TotalCarnage.md))
 
@@ -100,6 +104,7 @@ Every other clock has at least 4.2 ns of setup slack.
 | Video Settings | Aspect ratio, scandoubler, scale, HDMI Top Row Pixel Fix, Video Timing, CRT Adjust |
 | Move List | Mortal Kombat: shows each fighter's moves over the game; with the OSD closed, Left or Right turns the page |
 | Finishing Moves | Mortal Kombat: enters the chosen fatality at the next FINISH HIM/HER |
+| Fixed AI Difficulty | Mortal Kombat: Off, or 0 (easiest) to 9; set it before pressing Start |
 | Passwords | Total Carnage: shows the warp codes over the game |
 | DIP Switches | The game's DIP switches, with Service Credit and Tilt |
 | Hidden Items | Hidden developer menus and extras, for the games that have them |
