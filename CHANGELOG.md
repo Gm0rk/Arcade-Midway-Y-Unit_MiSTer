@@ -4,6 +4,18 @@ What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's 
 
 Build numbers count the core's development builds in order. Released RBF files are named by date. Builds 1 to 12 were named Arcade-MidwayY.
 
+## Build 95 (2026-10-29)
+
+**Docs & tools**
+- Mortal Kombat, Fixed AI Difficulty: the README, Extra content, the Mortal Kombat page and the release notes now say how the option treats the two bosses. Goro and Shang Tsung have no difficulty curve of their own; they read the same level word as every other fighter. Shang Tsung follows it like the normal fighters. Goro follows it much less: in MAME on mkla4, his fight replayed at level 0 and at level 9 with the same inputs stayed identical for the first four and a half seconds, and afterwards the game reads the level only in short bursts, where the other fighters read it all the time. Expect Goro to stay hard at a low setting and not to get much harder at a high one. How large the difference is was not measured, and the tests were run in MAME with one fighter, not on hardware.
+- No change to the core: the program is Build 93's.
+
+## Build 94 (2026-10-29)
+
+**Docs & tools**
+- Mortal Kombat, Fixed AI Difficulty: the README, Extra content, the Mortal Kombat page and the release notes now say exactly when the option takes effect. Set it in the OSD before you press Start to begin a game: the game sets the CPU level the moment Start is pressed, before the character select (checked in MAME on mkla4), and the core replaces it with yours, so the first fight is already at your level. Putting the coin in before or after makes no difference, and the attract mode's demo fights use the level too. Changed during a game, it takes effect when the current match ends; set back to Off during a game, the level stays where it is and the game's own curve carries on from there.
+- No change to the core: the program is Build 93's.
+
 ## Build 93 (2026-10-28)
 
 **Changed**
