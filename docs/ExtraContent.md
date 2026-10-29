@@ -30,6 +30,7 @@ Every game gets the video, OSD, input and loading extras below.
 ### Saves and inputs
 
 - **NVRAM**: settings, audits and high scores survive power-off. The CMOS is saved when the OSD is opened, if the game changed it.
+- **Opposite directions: the last press wins.** A cabinet's stick cannot hold Up with Down or Left with Right, but a d-pad, a keyboard or buttons mapped to directions can, and Smash T.V. is reported to crash on it. When two opposite directions are held, only the one pressed last reaches the game, and letting it go hands control back to the one still held (pressed in the same instant, they cancel until one is let go). It is always on, for every player's stick and for the fire sticks of Smash T.V. and Total Carnage.
 - **Every controller has Start, Coin, Test and Pause.** Coins 3 and 4 are on the third and fourth controllers' Coin buttons wherever the game has them. Each game's controls were checked against MAME's input ports (784 cases).
 
 ### Loading
@@ -54,6 +55,7 @@ The game's own page: [Smash T.V.](SmashTV.md).
 Smash T.V. gets the core-wide extras and a gamepad-friendly twin-stick layout.
 
 - **Fire from buttons or the right stick**: B1-B4 fire up, down, left and right (two together fire diagonally), or the right analog stick fires in the direction it points.
+- **Opposite directions**: Up with Down and Left with Right never reach the game, on the move stick or the fire stick; the one pressed last wins.
 - **Coin 3** on the third controller's Coin button.
 
 ## High Impact Football
@@ -86,10 +88,11 @@ Strike Force has no game-specific OSD items.
 
 The game's own page: [Mortal Kombat](MortalKombat.md).
 
-Mortal Kombat has the most extras: four OSD features and its own button layout.
+Mortal Kombat has the most extras: five OSD features and its own button layout.
 
 - **Finishing Moves** (main page): pick a fighter's fatality, and the core enters it on the round winner's controls at the next FINISH HIM, for either player. The distance is measured the way the game does it, from the fighters' centres. Messages say when the fighter is too far or too close, the move waits for another fighter's FINISH HIM, FINISH HIM is over, the move was not taken, or it was cleared. **Clear the set move** drops it. Checked in MAME on all 11 Mortal Kombat sets.
 - **Move List** (Off, On): a reference window over the dimmed title screen with each fighter's special moves, fatality and the distance it needs, and The Pit's uppercut in the footer. Page 1 is Johnny Cage to Sonya, page 2 Raiden to Scorpion; close the OSD to see it in full screen and press Left or Right to turn the page. The game waits while it shows.
+- **Fixed AI Difficulty** (main page: Off, 0 to 9; Off by default): holds the CPU opponent at one of the game's ten levels, 0 (easiest) to 9, from the first fight to the last, as the Fixed AI Difficulty of Mortal Kombat: Legacy Kollection does. Off is the game's own curve, which starts easy and gets harder with every match you win. Set it before you press Start. See the [Mortal Kombat page](MortalKombat.md#fixed-ai-difficulty).
 - **EJB Menu shortcut** (Hidden Items, every revision except prototype 4.0): plays the 27-press code on the two Block buttons in about 3 seconds, for diagnostics, audits, enter initials and character endings. The game takes the code only in attract mode, not during a game or the game-over screens that follow it. Start 1 and 2 are held released while it plays so a Start press cannot spoil it. Messages report the result.
 - **Reptile on demand** (Hidden Items, rev 3.0, rev 4.0, the Turbo hacks, the Victor bootleg of rev 3.0 and the Yawdim bootlegs):
   - **Reptile Fight Next**: Reptile comes after the next match you win in a 1-player game. One time, and select it again to cancel.
@@ -115,6 +118,7 @@ The game's own page: [Total Carnage](TotalCarnage.md).
 
 - **Passwords** (main page, Off or On): a window over the game, on Total Carnage's own title screen, with how to enter a warp code at the PASSWORD REQUIRED disc, the 16 codes by mission with where each warps to, and the Weasel and Orcus warp bonuses. The game waits while it shows. Each code was checked in MAME and against the list in the program ROM, and the prototypes use the same codes.
 - **Twin-stick fire** from B1-B4 (two together fire diagonally) or the right analog stick.
+- **Opposite directions**: Up with Down and Left with Right never reach the game, on the move stick or the fire stick; the one pressed last wins.
 - **Start/Bomb**: Start also throws a bomb in a game.
 - **Coin 3** on the third controller's Coin button.
 
@@ -135,7 +139,7 @@ Mortal Kombat has the most game-specific extras, then Total Carnage; the rest ar
 | [High Impact Football](HighImpactFootball.md) | Octopus Bookkeeping | Short Coinage menu; coins 3 and 4 |
 | [Super High Impact](SuperHighImpact.md) | Octopus Bookkeeping | Short Coinage menu; coins 3 and 4 |
 | [Strike Force](StrikeForce.md) | None | Short DIP labels; coins 3 and 4 |
-| [Mortal Kombat](MortalKombat.md) | Finishing Moves, Move List, EJB Menu, 3 Reptile options | Button layout; coin 3 |
+| [Mortal Kombat](MortalKombat.md) | Finishing Moves, Move List, Fixed AI Difficulty, EJB Menu, 3 Reptile options | Button layout; coin 3 |
 | [Terminator 2](Terminator2.md) | Gun Control | Stick, d-pad or mouse aiming; coins 3 and 4 |
 | [Total Carnage](TotalCarnage.md) | Passwords | Twin-stick fire; Start/Bomb; coin 3 |
 | [Y-Unit Test ROM](YUnitTestROM.md) | Hidden Items shows an unused item | Own MRA |
