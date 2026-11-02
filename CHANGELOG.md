@@ -4,6 +4,23 @@ What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's 
 
 Build numbers count the core's development builds in order. Released RBF files are named by date. Builds 1 to 12 were named Arcade-MidwayY.
 
+## Build 97 (2026-10-30)
+
+**Docs & tools**
+- README: the resource figures are now those of the Build 96 compilation: 29,546 ALMs (70 %), 437 M10K blocks (79 %), 65 DSP blocks (58 %). The timing figures were already Build 96's.
+- No change to the core: the program is Build 96's.
+
+## Build 96 (2026-10-30)
+
+**Fixed**
+- The one timing check that failed at fitter seed 1 is met. In Build 92 the 96 MHz setup check missed by 0.129 ns, inside the framework's composite / S-Video encoder (`yc_out`, in `sys/`). `sys/yc_out.sv` is now the current MiSTer framework version (Template_MiSTer master): it looks up the sine of the colour carrier one clock earlier, so the multiplier that follows starts from a register instead of a table lookup. Composite and S-Video output are unchanged: the old and the new encoder were run side by side in simulation for 1.44 million clock cycles (NTSC and PAL, composite and separate Y/C, video-like and random syncs, random pictures, phase steps and colour-burst ranges) and gave the same output on every cycle.
+
+**Changed**
+- Fitter seed 1 again (Build 93 had set seed 2 to get around that check). With the encoder fixed, every timing check is met at seed 1: 96 MHz setup slack 0.195 ns and no failed path. The program (the RTL) is Build 93's.
+
+**Docs & tools**
+- README: the timing figures are those of this compilation: setup slack 0.195 ns (96 MHz) and 0.573 ns (HDMI PLL), at least 3.3 ns on every other clock; hold, recovery, removal and minimum pulse width met. The resource figures are still those of Build 93's compilation; this build adds about nine flip-flops to the encoder.
+
 ## Build 95 (2026-10-29)
 
 **Docs & tools**
