@@ -53,21 +53,21 @@ listed in [Extra content](docs/ExtraContent.md).
 
 Built with Quartus Prime 17.0.2 Lite for the DE10-Nano (Cyclone V
 5CSEBA6U23I7), timing model Slow 1100 mV 100 C. Timing and resource use are
-from the Build 93 compilation.
+from the Build 96 compilation.
 
 Timing is met on every clock, and on every hold, recovery, removal and minimum
 pulse width check. The margins move a little with every compilation.
 
 | Clock | Frequency | Setup slack |
 |---|---|---|
-| System (core PLL) | 96 MHz | 0.477 ns |
-| HDMI PLL | 148.54 MHz | 0.283 ns |
+| System (core PLL) | 96 MHz | 0.195 ns |
+| HDMI PLL | 148.54 MHz | 0.573 ns |
 
-Every other clock has at least 2.7 ns of setup slack.
+Every other clock has at least 3.3 ns of setup slack.
 
 | Resource | Used |
 |---|---|
-| Logic (ALMs) | 29,246 / 41,910 (70 %) |
+| Logic (ALMs) | 29,546 / 41,910 (70 %) |
 | Block RAM (M10K blocks) | 437 / 553 (79 %) |
 | DSP blocks | 65 / 112 (58 %) |
 
