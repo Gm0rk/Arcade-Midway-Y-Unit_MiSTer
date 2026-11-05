@@ -15,6 +15,7 @@ from xml.sax.saxutils import escape, quoteattr
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from yunit_roms import parse_driver, build_image, RomSource, REGION_BASE, SOUND_CPU, OKI
 import yunit_fmoves
+import yunit_cheats
 
 MAMEVERSION = '0289'
 RBF = 'Arcade-Midway-Y-Unit'
@@ -65,7 +66,7 @@ def patch_bytes(words):
 	return b''.join(w.to_bytes(2, 'little') for w in words)
 
 # main set of each family (goes in the mra folder, clones in _alternatives)
-MAIN_SETS = {'trog', 'trogpa4', 'smashtv', 'hiimpact', 'shimpact', 'strkforc', 'mkla4', 'term2', 'totcarn', 'yunittst'}
+MAIN_SETS = {'trog', 'smashtv', 'hiimpact', 'shimpact', 'strkforc', 'mkla4', 'term2', 'totcarn', 'yunittst'}
 
 FAMILY = {
 	'trog': 'Trog', 'smashtv': 'Smash T.V.', 'hiimpact': 'High Impact Football',
@@ -522,7 +523,7 @@ def main():
 	games = parse_games(src_text)
 	bynm = {g['name']: g for g in games}
 	src = RomSource(zips) if zips else None
-	stamp = datetime.date.today().strftime('%Y%m%d')
+	stamp = os.environ.get('MRA_STAMP') or datetime.date.today().strftime('%Y%m%d')     # MRA_STAMP: the date to put in the files
 	report = []
 
 	for g in games:
@@ -586,6 +587,7 @@ def main():
 		mra.extend(parts.lines)
 		mra.append('\t</rom>')
 		mra.append('\t<nvram index="2" size="32768"/>')
+		mra.extend(yunit_cheats.mra_lines(name, img[:0x100000] if verified else None))
 		mra.append('</misterromdescription>')
 		xml = '\n'.join(mra) + '\n'
 
