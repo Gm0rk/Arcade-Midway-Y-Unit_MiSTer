@@ -4,6 +4,67 @@ What changed in the Arcade-Midway-Y-Unit core, newest build first. Each build's 
 
 Build numbers count the core's development builds in order. Released RBF files are named by date. Builds 1 to 12 were named Arcade-MidwayY.
 
+## Build 104 (2026-11-05)
+
+**Docs & tools**
+- Extra content, the Cheats text on the eight game pages and the DIP Switches text on the Terminator 2 page no longer describe the order of their lists.
+- No change to the core: the program is Build 102's.
+
+## Build 103 (2026-11-05)
+
+**Docs & tools**
+- README: the timing and resource figures are now those of the Build 102 compilation: setup slack 0.564 ns (96 MHz) and 0.626 ns (HDMI PLL), at least 4.3 ns on every other clock; hold, recovery, removal and minimum pulse width met; 30,522 ALMs (73 %), 437 M10K blocks (79 %), 65 DSP blocks (58 %). Builds 101 and 102 were compiled together; the figures changed little from Build 99's (0.410 / 0.481 ns, 30,538 ALMs).
+- No change to the core: the program is Build 102's.
+
+## Build 102 (2026-11-05)
+
+**Changed**
+- Cheat names the OSD cut off are shorter: Enable 1-Round Matches, Hit Anywhere (P1 + P2), Pit Bottom in Lineup and View Ending after 1P Win on Mortal Kombat, P1 / P2 Infinite 3-Way Missile on Terminator 2. The cheats do the same as before.
+- The Trog prototype rev 4.00 MRA moved to the `_alternatives/_Trog` folder with the other prototypes.
+
+**Removed**
+- Reptile Hints Always is gone from Hidden Items: the Cheats menu has Always have Reptile Clues for it. Reptile Fight Next and Moon Silhouettes Always stay. The cheat is the game's own hint code switched on, so while it is on the game clears its audit counters (the EJB Menu's bookkeeping) before every round, as it does when Reptile shows up by himself; the old item skipped that.
+
+**Docs & tools**
+- The Mortal Kombat page and Extra content list two Reptile lines in Hidden Items and say what the Reptile clues cheat does to the audits; the cheat tables carry the new names (the MAME name is in the second column); the Strike Force and Terminator 2 pages no longer say "one to 1 units".
+- The MRA generator puts the Trog prototype in the alternatives and rejects a cheat name over 25 characters or a cheat list out of alphabetical order.
+
+## Build 101 (2026-11-05)
+
+**Changed**
+- The Cheats menu lists the cheats in alphabetical order in every game (it followed the order of the MAME cheat files). Which cheats each set has is unchanged.
+- Hidden Items shows only what the revision has. The EJB Menu line is no longer shown on Mortal Kombat prototype 4.0, and the Octopus Bookkeeping line is no longer shown on the High Impact Football prototype, the three Super High Impact prototypes and the Y-Unit Test ROM: on those it only answered "Not in this revision of the game". The Hidden Items page itself is not shown when none of its lines is left. The other revisions, and the Reptile lines, are as before.
+
+**Docs & tools**
+- The 51 MRAs with cheats and `tools/yunit_cheat_data.py` list the cheats in the new order; the units are unchanged.
+- The cheat tables on the eight game pages are in the same order, and the pages that told of the "Not in this revision" message (Mortal Kombat, High Impact Football, Super High Impact, Extra content) and the Y-Unit Test ROM page now say the item is not shown.
+
+## Build 100 (2026-11-02)
+
+**Docs & tools**
+- README: the timing and resource figures are now those of the Build 99 compilation, the one with the cheat engine: setup slack 0.410 ns (96 MHz) and 0.481 ns (HDMI PLL), at least 4.4 ns on every other clock; hold, recovery, removal and minimum pulse width met; 30,538 ALMs (73 %), 437 M10K blocks (79 %), 65 DSP blocks (58 %). The engine takes about 1,000 ALMs more than Build 96's 29,546, and no timing check fails.
+- No change to the core: the program is Build 99's.
+
+## Build 99 (2026-11-01)
+
+**Added**
+- Cheats menu. The OSD has a "Cheats" item that lists the cheats of the loaded game; switch any of them on or off while you play, nothing restarts. The menu is greyed out for the two games that have none (Y-Unit Test ROM and Saurian Front). 51 of the 53 MRA files carry the cheats, from the MAME cheat collection: Mortal Kombat 10 to 23 per set, Terminator 2 13, Total Carnage 11, High Impact Football 6, Super High Impact 6, Trog and its bootleg 5, Smash T.V. 4, Strike Force 4. README, Extra content and the game pages list them and name who made them.
+- The cheat engine (`rtl/yunit_cheat.sv`). It takes the units the MRA sends (up to 16 changes to a word of the game's memory or of its program at once, and 4 one-shot writes) and applies them as the CPU reads: a cheat changes only the bits it controls, and the rest of the word stays the game's. Changes to the program take effect when the CPU fetches an instruction, so the ROM check still sees the original ROM. A one-shot cheat (Drain All Energy Now!, Finish Quarter Now!, and so on) writes to the game's RAM once when you switch it on. The cheats are suspended in the Y-Unit's test menu.
+
+**Changed**
+- Loading a cheat does not restart the game: the boot hold ignores the cheat transfer (ROM index 255) the way it ignores the NVRAM one.
+- With every cheat off the core behaves as before: the full-system simulation of the program is byte for byte the same as Build 96's (Builds 97 and 98 changed no RTL).
+
+**Docs & tools**
+- New `tools/yunit_cheats.py` (the unit format, checks of the tables against each ROM, the MRA text) and `tools/yunit_cheat_data.py` (the cheats of each set, generated from the MAME cheat files); `tools/mra_gen.py` writes the `<cheats>` section and takes the date stamp of the MRAs from `MRA_STAMP` when it is set.
+- README (Features, OSD table), Extra content and the pages of the eight games: the Cheats menu and a table of each game's cheats.
+
+## Build 98 (2026-11-01)
+
+**Docs & tools**
+- README: a "Cheat credits" subsection under Credits and references names who made the cheats for each game, from the cheat.txt of the MAME cheat collection (27 July 2025 release, mamecheat.co.uk): Mortal Kombat (Steph Humbert and ugetab, Abystus, Pugsy, nolberto82), Smash T.V. (Pugsy and ugetab), Total Carnage and Trog (Pugsy). cheat.txt names no author for High Impact Football, Super High Impact, Strike Force or Terminator 2 (Section 6 credits ROM cheats only, and those games have RAM cheats), so the table points to its contributor list. The credits are in ahead of the Cheats menu itself.
+- No change to the core: the program is Build 96's.
+
 ## Build 97 (2026-10-30)
 
 **Docs & tools**
