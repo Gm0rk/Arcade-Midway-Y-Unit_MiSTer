@@ -336,8 +336,10 @@ def scan(prog_bytes):
 #   0x40-0x5F    Reptile (Mortal Kombat, the sets that have him): 8 program
 #                ROM patches of 4 words, {ROM word [15:0]}, {option [10:8],
 #                ROM word [18:16]}, new word, original word (option 0: no
-#                patch, 1 Reptile Fight Next, 2 Moon Silhouettes Always, 3
-#                Reptile Hints Always; rtl/midway_yunit.sv applies them)
+#                patch, 1 Reptile Fight Next, 2 Moon Silhouettes Always; 3
+#                was Reptile Hints Always, removed in Build 102 (the Cheats
+#                menu has "Always have Reptile Clues"), the board ignores it;
+#                rtl/midway_yunit.sv applies them)
 #   0x60-0x61    the word address of the Reptile flag (set when his fight
 #                starts: Reptile Fight Next is then used up)
 #   0x62         Fixed AI Difficulty (Mortal Kombat): the main RAM word address
@@ -363,8 +365,7 @@ FORMAT = 1
 
 
 # --------------------------------------------------------------------------
-# Reptile (Hidden Items page: Reptile Fight Next, Moon Silhouettes Always,
-# Reptile Hints Always)
+# Reptile (Hidden Items page: Reptile Fight Next, Moon Silhouettes Always)
 # --------------------------------------------------------------------------
 #
 # Rev 3.0, 4.0 and the Turbo hacks have Reptile; the older revisions, the
@@ -395,14 +396,15 @@ FORMAT = 1
 #   Moon Silhouettes Always the moon's cooldown test and the check's are
 #                           NOPs: the silhouettes cross on every Pit match and
 #                           the check needs only its other conditions
-#   Reptile Hints Always    the counter's test is a NOP and a jump skips the
-#                           audit clearing: a hint before every round
+#   (Reptile Hints Always, Build 30 to 101: the counter's test a NOP and a
+#   jump over the audit clearing, a hint before every round; the Cheats menu
+#   has the first half of it, "Always have Reptile Clues")
 # Turbo 3.1 and 3.0 (hacks) changed the check (no one-player test, Turbo
 # 3.0 no cooldown or block test, Turbo 3.1 The Pit or the second stage, no
 # flawless rounds); the patches follow what is there. Checked in MAME 0.289
 # on mkla4, mkla3, mkyturbo and mkyturboe (work/reptile/rverify.py).
 
-OPT_NEXT, OPT_MOON, OPT_HINT = 1, 2, 3
+OPT_NEXT, OPT_MOON = 1, 2           # option 3 (Hints) is gone, see above
 NOP, SETC, RETS = 0x0300, 0x0DE0, 0x0960
 
 
@@ -448,41 +450,21 @@ def reptile_scan(p):
     for i in _find(p, [0x05A0, w[m[0] + 7], w[m[0] + 8], 0x0B40, 0xFFD7, X], chk, chk + 40):
         if w[i + 5] >> 8 == 0xCB:                                  # check: CMPI 28h / JRNE
             out.append((OPT_MOON, i + 5, NOP, w[i + 5]))
-    # hints: CMPI 7D0h,A1 / JRC / MMFM SP,A0 / MOVE A0,-*A12 / MOVI 10h,A0 / CALLA clear ...
-    # MOVI 201Eh,A1 (the hint process)
-    h = _find(p, [0x0B41, 0xF82F, X, 0x09AF, 0x0001, 0xA20C, 0x09C0, 0x0010])
-    if len(h) != 1 or w[h[0] + 2] >> 8 != 0xC8:
-        return None
-    out.append((OPT_HINT, h[0] + 2, NOP, w[h[0] + 2]))
-    t = _find(p, [0x09C1, 0x201E], h[0] + 6, h[0] + 30)
-    disp = t[0] - (h[0] + 7) if len(t) == 1 else 0
-    if not 0 < disp < 0x80:
-        return None
-    out.append((OPT_HINT, h[0] + 6, 0xC000 | disp, w[h[0] + 6]))   # JR over the clearing
     return out, flag
 
 
 # What reptile_scan finds in each set (MAME 0.289), used when the ROMs are not
 # at hand: "option:ROM word=new:original ..." and the flag address
 REP_SETS = {
-    'mkla4': ('1:04B1C2=0DE0:05A0 1:04B1C3=0960:D540 2:04B88B=0300:CB08 2:04B1CD=0300:CB1A '
-              '3:04A130=0300:C81D 3:04A134=C009:09C0', 0x0104E660),
-    'mkla3': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 2:04B1AD=0300:CB1A '
-              '3:04A11C=0300:C81D 3:04A120=C009:09C0', 0x0104E660),
-    'mkla3bl': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 2:04B1AD=0300:CB1A '
-                '3:04A11C=0300:C81D 3:04A120=C009:09C0', 0x0104E660),
-    'mkyawdim': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 2:04B1AD=0300:CB1A '
-                 '3:04A11C=0300:C81D 3:04A120=C009:09C0', 0x0104E660),
-    'mkyawdim2': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 2:04B1AD=0300:CB1A '
-                  '3:04A11C=0300:C81D 3:04A120=C009:09C0', 0x0104E660),
-    'mkyawdim3': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 2:04B1AD=0300:CB1A '
-                  '3:04A11C=0300:C81D 3:04A120=C009:09C0', 0x0104E660),
-    'mkyawdim4': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 2:04B1AD=0300:CB1A '
-                  '3:04A11C=0300:C81D 3:04A120=C009:09C0', 0x0104E660),
-    'mkyturbo': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 '
-                 '3:04A11C=0300:C81D 3:04A120=C009:09C0', 0x0104E660),
-    'mkyturboe': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 '
-                  '3:04A11C=0300:C81D 3:04A120=C009:09C0', 0x0104E660),
+    'mkla4': ('1:04B1C2=0DE0:05A0 1:04B1C3=0960:D540 2:04B88B=0300:CB08 2:04B1CD=0300:CB1A', 0x0104E660),
+    'mkla3': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 2:04B1AD=0300:CB1A', 0x0104E660),
+    'mkla3bl': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 2:04B1AD=0300:CB1A', 0x0104E660),
+    'mkyawdim': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 2:04B1AD=0300:CB1A', 0x0104E660),
+    'mkyawdim2': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 2:04B1AD=0300:CB1A', 0x0104E660),
+    'mkyawdim3': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 2:04B1AD=0300:CB1A', 0x0104E660),
+    'mkyawdim4': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08 2:04B1AD=0300:CB1A', 0x0104E660),
+    'mkyturbo': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08', 0x0104E660),
+    'mkyturboe': ('1:04B1A2=0DE0:05A0 1:04B1A3=0960:D540 2:04B86B=0300:CB08', 0x0104E660),
 }
 
 
