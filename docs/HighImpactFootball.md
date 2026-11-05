@@ -13,11 +13,25 @@
 
 ## Extra content
 
-- **[Octopus Bookkeeping shortcut](#hidden-developer-menu-octopus-bookkeeping)** (Hidden Items, revisions LA1-LA5): the core plays the two switch combinations for you, in about 4 seconds, any time in attract mode. A message reports "code entered", "Not now: the code works in the attract mode", "Code not taken: try again" or "Not in this revision of the game" (the prototype has no menu). It follows the Players DIP switch (4 or 2 players).
+- **[Cheats](#cheats)** (Cheats menu): 6 cheats: infinite time for each of the four players and for the quarter, and Finish Quarter Now.
+- **[Octopus Bookkeeping shortcut](#hidden-developer-menu-octopus-bookkeeping)** (Hidden Items, revisions LA1-LA5): the core plays the two switch combinations for you, in about 4 seconds, any time in attract mode. A message reports "code entered", "Not now: the code works in the attract mode" or "Code not taken: try again". The prototype has no menu and does not show the item. It follows the Players DIP switch (4 or 2 players).
 - **Readable Coinage menu**: Coinage lists the USA settings so every one can be reached from the OSD, written short, for example "2C/1C - 4C/3C".
 - **Coins 3 and 4** on the third and fourth controllers' Coin buttons.
 
 The [core-wide extras](ExtraContent.md#core-wide-features) (CRT Adjust, CRT V-Size, Video Timing, DIP Switches, Service Mode and the rest) apply to every game.
+
+## Cheats
+
+The Cheats item in the OSD lists the cheats of the game; switch on as many as you like. A cheat of kind On works for as long as it is on; a cheat of kind Once acts one time, when you switch it on, and switching it off and on again repeats it. The cheats come from the MAME cheat collection ([credits](../README.md#cheat-credits)). They are off while a test menu is selected (Service Mode, the Test button or the Test Switch DIP) and come back when it is left. The core takes up to 16 cheat units and 4 one-shot writes at once (a cheat is one to 2 units), so with many cheats on at the same time the last ones are ignored.
+
+| Menu name | MAME cheat | Kind | Not in |
+|---|---|---|---|
+| Finish Quarter Now | Finish Quarter Now! | Once | - |
+| Infinite Quarter Time | same | On | - |
+| P1 Infinite Time | same | On | - |
+| P2 Infinite Time | same | On | - |
+| P3 Infinite Time | same | On | - |
+| P4 Infinite Time | same | On | - |
 
 ## Controls
 
@@ -46,8 +60,8 @@ OSD closes. A button turns the page. The prototype has no such menu.
 
 A message says how it went: "Octopus Bookkeeping: code entered" when the
 pages open, "Not now: the code works in the attract mode" during a game (the
-code is not entered), "Code not taken: try again" if they did not open, and
-"Not in this revision of the game" on the prototype.
+code is not entered), and "Code not taken: try again" if they did not open.
+The prototype does not show the item (Hidden Items is empty there).
 
 By hand: hold P2 Down + P3 Up and press P3 Action for about a second; let go,
 and within a second hold P2 Right + P3 Left and press P2 Action. Nothing else
