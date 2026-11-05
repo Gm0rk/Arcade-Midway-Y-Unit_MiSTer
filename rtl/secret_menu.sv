@@ -54,7 +54,9 @@
 //  play the code and says when it works (when_attract / when_shi); a code
 //  played is followed by ok (the menu opened during the code or the 90
 //  frames after it) or fail. Word 0x34: 0 no data (an older MRA: the code
-//  plays, no messages), 1 the set has the menu, 2 it does not (not_here).
+//  plays, no messages), 1 the set has the menu, 2 it does not (no_menu: the OSD
+//  does not show the shortcut; not_here, the message, is for a trigger that
+//  still arrives).
 //
 //  Copyright (C) 2026 Gm0rk - GPL-3.0-or-later
 //============================================================================
@@ -92,7 +94,11 @@ module secret_menu
 	output reg        fail,
 	output reg        when_attract,
 	output reg        when_shi,
-	output reg        not_here
+	output reg        not_here,
+
+	// the MRA says the loaded revision has no menu (word 0x34 = 2): the top
+	// level hides the shortcut
+	output            no_menu
 );
 
 localparam GM_NONE = 2'd0, GM_MK = 2'd1, GM_SHI = 2'd2, GM_HI = 2'd3;
@@ -112,6 +118,7 @@ reg  [4:0] k;                        // code step, 0-26
 
 reg [27:0] c_state, c_page;          // word addresses
 reg  [1:0] c_mode;                   // word 0x34
+assign no_menu = (c_mode == 2'd2);
 reg        w_v;
 reg [27:0] w_a;
 reg [15:0] w_d;
