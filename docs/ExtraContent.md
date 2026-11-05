@@ -24,7 +24,8 @@ Every game gets the video, OSD, input and loading extras below.
 - **Service Mode**: the cabinet's test switch, on the main page.
 - **Pause when OSD is open**: on by default.
 - **Reset and Reset and close OSD**: Reset keeps the OSD open.
-- **Hidden Items page**: shortcuts to the hidden developer menus of the games that have one (listed per game below), with a message saying whether the code was entered, when it works, or that the revision has none.
+- **Cheats menu**: the game's cheats, in alphabetical order, from the MAME cheat collection; switch any of them on or off (see each game's page for its list). A cheat either works for as long as it is on or acts once when it is switched on. The cheats are off while a test menu is selected. The menu is greyed out for the two sets that have no cheats (Saurian Front and the Y-Unit Test ROM). The core takes up to 16 cheat units and 4 one-shot writes at once.
+- **Hidden Items page**: shortcuts to the hidden developer menus of the games that have one (listed per game below), with a message saying whether the code was entered or when it works. A revision that has no such menu does not show the item, and the page itself shows only when it has a line.
 - **Information window**: a page drawn over the dimmed, paused game, used for the Mortal Kombat Move List and the Total Carnage Passwords (see those games).
 
 ### Saves and inputs
@@ -42,18 +43,20 @@ Every game gets the video, OSD, input and loading extras below.
 
 The game's own page: [Trog](Trog.md).
 
-Trog has no game-specific OSD items; it gets the core-wide extras plus two input conveniences.
+Trog has one game-specific OSD item, the Cheats menu, and gets the core-wide extras plus two input conveniences.
 
+- **Cheats** (Cheats menu): 5 cheats: invincibility and infinite lives for each of the four players.
 - **4-way stick filter**: on a diagonal the direction pressed last wins, like the cabinet's 4-way joysticks.
-- **Prototype rev 4.00** (trogpa4) has its own MRA, with an 8-way stick and a Bone button in place of Punch.
+- **Prototype rev 4.00** (trogpa4) has its own MRA among the alternatives, with an 8-way stick and a Bone button in place of Punch.
 - **Four players**, with coin 3 on the third controller's Coin button.
 
 ## Smash T.V.
 
 The game's own page: [Smash T.V.](SmashTV.md).
 
-Smash T.V. gets the core-wide extras and a gamepad-friendly twin-stick layout.
+Smash T.V. gets the core-wide extras, a Cheats menu and a gamepad-friendly twin-stick layout.
 
+- **Cheats** (Cheats menu): 4 cheats: infinite ammo, invincibility after dying, and infinite lives for each player.
 - **Fire from buttons or the right stick**: B1-B4 fire up, down, left and right (two together fire diagonally), or the right analog stick fires in the direction it points.
 - **Opposite directions**: Up with Down and Left with Right never reach the game, on the move stick or the fire stick; the one pressed last wins.
 - **Coin 3** on the third controller's Coin button.
@@ -62,7 +65,8 @@ Smash T.V. gets the core-wide extras and a gamepad-friendly twin-stick layout.
 
 The game's own page: [High Impact Football](HighImpactFootball.md).
 
-- **Octopus Bookkeeping shortcut** (Hidden Items, revisions LA1-LA5): the core plays the two switch combinations for you, in about 4 seconds, any time in attract mode. A message reports "code entered", "Not now: the code works in the attract mode", "Code not taken: try again" or "Not in this revision of the game" (the prototype has no menu). It follows the Players DIP switch (4 or 2 players).
+- **Cheats** (Cheats menu): 6 cheats: infinite time for each of the four players and for the quarter, and Finish Quarter Now.
+- **Octopus Bookkeeping shortcut** (Hidden Items, revisions LA1-LA5): the core plays the two switch combinations for you, in about 4 seconds, any time in attract mode. A message reports "code entered", "Not now: the code works in the attract mode" or "Code not taken: try again". The prototype has no menu and does not show the item. It follows the Players DIP switch (4 or 2 players).
 - **Readable Coinage menu**: Coinage lists the USA settings so every one can be reached from the OSD (Free Play and the 2-coin settings were out of reach before), written short, for example "2C/1C - 4C/3C".
 - **Coins 3 and 4** on the third and fourth controllers' Coin buttons.
 
@@ -70,7 +74,8 @@ The game's own page: [High Impact Football](HighImpactFootball.md).
 
 The game's own page: [Super High Impact](SuperHighImpact.md).
 
-- **Octopus Bookkeeping shortcut** (Hidden Items, revisions LA2 and LA1): the core plays the 27-press code for you, in about 3 seconds. The game accepts it only while attract mode shows HIGHEST PAID SUPERSTARS, so the core says "Not now" at any other time instead of spoiling the code. The prototypes have no menu and the message says so.
+- **Cheats** (Cheats menu): 6 cheats: infinite time for each of the four players and for the quarter, and End Quarter Now.
+- **Octopus Bookkeeping shortcut** (Hidden Items, revisions LA2 and LA1): the core plays the 27-press code for you, in about 3 seconds. The game accepts it only while attract mode shows HIGHEST PAID SUPERSTARS, so the core says "Not now" at any other time instead of spoiling the code. The prototypes have no menu and do not show the item.
 - **Readable Coinage menu**: the USA settings, so all six can be reached from the OSD, written short.
 - **Coins 3 and 4** on the third and fourth controllers' Coin buttons.
 
@@ -78,8 +83,9 @@ The game's own page: [Super High Impact](SuperHighImpact.md).
 
 The game's own page: [Strike Force](StrikeForce.md).
 
-Strike Force has no game-specific OSD items.
+Strike Force has one game-specific OSD item, the Cheats menu.
 
+- **Cheats** (Cheats menu): 4 cheats: infinite lives and infinite weapons for each player (not in Saurian Front).
 - **Short DIP labels**: Coin A's two-step settings are written short ("1C/1C - 2C/3C") and "Points for Extra Ship" is "Extra Ship Points", so the value fits on the DIP menu line.
 - **Coins 3 and 4** on the third and fourth controllers' Coin buttons.
 - **Saurian Front** (the prototype v5.0) has its own MRA among the alternatives.
@@ -88,8 +94,9 @@ Strike Force has no game-specific OSD items.
 
 The game's own page: [Mortal Kombat](MortalKombat.md).
 
-Mortal Kombat has the most extras: five OSD features and its own button layout.
+Mortal Kombat has the most extras: six OSD features and its own button layout.
 
+- **Cheats** (Cheats menu): 23 cheats, among them infinite energy, one button fatalities, hit anywhere, no blocking, single round matches and Reptile's clues. They are the T-Unit game's, found in each Y-Unit ROM by matching the code, so the older revisions and prototypes have fewer.
 - **Finishing Moves** (main page): pick a fighter's fatality, and the core enters it on the round winner's controls at the next FINISH HIM, for either player. The distance is measured the way the game does it, from the fighters' centres. Messages say when the fighter is too far or too close, the move waits for another fighter's FINISH HIM, FINISH HIM is over, the move was not taken, or it was cleared. **Clear the set move** drops it. Checked in MAME on all 11 Mortal Kombat sets.
 - **Move List** (Off, On): a reference window over the dimmed title screen with each fighter's special moves, fatality and the distance it needs, and The Pit's uppercut in the footer. Page 1 is Johnny Cage to Sonya, page 2 Raiden to Scorpion; close the OSD to see it in full screen and press Left or Right to turn the page. The game waits while it shows.
 - **Fixed AI Difficulty** (main page: Off, 0 to 9; Off by default): holds the CPU opponent at one of the game's ten levels, 0 (easiest) to 9, from the first fight to the last, as the Fixed AI Difficulty of Mortal Kombat: Legacy Kollection does. Off is the game's own curve, which starts easy and gets harder with every match you win. Set it in the OSD before you press Start to begin a game. Shang Tsung follows it like any fighter; Goro much less. See the [Mortal Kombat page](MortalKombat.md#fixed-ai-difficulty).
@@ -97,7 +104,6 @@ Mortal Kombat has the most extras: five OSD features and its own button layout.
 - **Reptile on demand** (Hidden Items, rev 3.0, rev 4.0, the Turbo hacks, the Victor bootleg of rev 3.0 and the Yawdim bootlegs):
   - **Reptile Fight Next**: Reptile comes after the next match you win in a 1-player game. One time, and select it again to cancel.
   - **Moon Silhouettes Always**: every match on The Pit has the silhouettes, and with them the chance of Reptile.
-  - **Reptile Hints Always**: Reptile drops in with a hint before every round.
   - The core changes a few of the game's instructions as the CPU fetches them. Nothing is written to the ROM or the CMOS.
 - **Button layout**: High Punch, Low Punch, High Kick, Low Kick, Block, then Start, Coin, Test, Pause. The board's second Block input stays unused, as the cabinet has one block button per player.
 - **Coin 3** on the third controller's Coin button.
@@ -108,6 +114,7 @@ The game's own page: [Terminator 2: Judgment Day](Terminator2.md).
 
 Terminator 2 gets its gun control as an OSD entry in the DIP Switches menu.
 
+- **Cheats** (Cheats menu): 13 cheats: for each player infinite energy, gun power, missiles, 3-way missiles, the plasma pulse energizer and no human casualties, and Equipment Intact to 0 Now.
 - **Gun Control**: Joystick or Mouse for player 1.
 - **Aiming**: each player's gun is aimed with the left analog stick (it points directly) or the d-pad (it moves the aim); player 1 can also use the mouse. The crosshairs on screen are the game's own.
 - **Coins 3 and 4** on the third and fourth controllers' Coin buttons.
@@ -116,6 +123,7 @@ Terminator 2 gets its gun control as an OSD entry in the DIP Switches menu.
 
 The game's own page: [Total Carnage](TotalCarnage.md).
 
+- **Cheats** (Cheats menu): 11 cheats: infinite ammo, orbital, shields and speedboots, no sprite collisions, no cluster bomb duds, all keys, and infinite lives and bombs for each player.
 - **Passwords** (main page, Off or On): a window over the game, on Total Carnage's own title screen, with how to enter a warp code at the PASSWORD REQUIRED disc, the 16 codes by mission with where each warps to, and the Weasel and Orcus warp bonuses. The game waits while it shows. Each code was checked in MAME and against the list in the program ROM, and the prototypes use the same codes.
 - **Twin-stick fire** from B1-B4 (two together fire diagonally) or the right analog stick.
 - **Opposite directions**: Up with Down and Left with Right never reach the game, on the move stick or the fire stick; the one pressed last wins.
@@ -126,7 +134,7 @@ The game's own page: [Total Carnage](TotalCarnage.md).
 
 The game's own page: [Y-Unit Test ROM](YUnitTestROM.md).
 
-Midway's board diagnostic (yunittst, v1.40) is itself an addition: it has its own MRA and runs with the Super High Impact board settings and controls. Its tests are picked with the DIP switches in the OSD. Its sound and graphics ROMs were never dumped, so it has no sound or graphics to check. The Hidden Items page also shows "Octopus Bookkeeping" for it, because it shares Super High Impact's settings; the item does nothing here.
+Midway's board diagnostic (yunittst, v1.40) is itself an addition: it has its own MRA and runs with the Super High Impact board settings and controls. Its tests are picked with the DIP switches in the OSD. Its sound and graphics ROMs were never dumped, so it has no sound or graphics to check. It has no game-specific OSD items.
 
 ## At a glance
 
@@ -134,12 +142,12 @@ Mortal Kombat has the most game-specific extras, then Total Carnage; the rest ar
 
 | Game | OSD extras | Input and menu extras |
 | --- | --- | --- |
-| [Trog](Trog.md) | None | 4-way stick filter; prototype 4.00 MRA |
-| [Smash T.V.](SmashTV.md) | None | Twin-stick fire from buttons or right stick; coin 3 |
-| [High Impact Football](HighImpactFootball.md) | Octopus Bookkeeping | Short Coinage menu; coins 3 and 4 |
-| [Super High Impact](SuperHighImpact.md) | Octopus Bookkeeping | Short Coinage menu; coins 3 and 4 |
-| [Strike Force](StrikeForce.md) | None | Short DIP labels; coins 3 and 4 |
-| [Mortal Kombat](MortalKombat.md) | Finishing Moves, Move List, Fixed AI Difficulty, EJB Menu, 3 Reptile options | Button layout; coin 3 |
-| [Terminator 2](Terminator2.md) | Gun Control | Stick, d-pad or mouse aiming; coins 3 and 4 |
-| [Total Carnage](TotalCarnage.md) | Passwords | Twin-stick fire; Start/Bomb; coin 3 |
-| [Y-Unit Test ROM](YUnitTestROM.md) | Hidden Items shows an unused item | Own MRA |
+| [Trog](Trog.md) | Cheats | 4-way stick filter; prototype 4.00 MRA |
+| [Smash T.V.](SmashTV.md) | Cheats | Twin-stick fire from buttons or right stick; coin 3 |
+| [High Impact Football](HighImpactFootball.md) | Octopus Bookkeeping, Cheats | Short Coinage menu; coins 3 and 4 |
+| [Super High Impact](SuperHighImpact.md) | Octopus Bookkeeping, Cheats | Short Coinage menu; coins 3 and 4 |
+| [Strike Force](StrikeForce.md) | Cheats | Short DIP labels; coins 3 and 4 |
+| [Mortal Kombat](MortalKombat.md) | Finishing Moves, Move List, Fixed AI Difficulty, EJB Menu, 3 Reptile options, Cheats | Button layout; coin 3 |
+| [Terminator 2](Terminator2.md) | Gun Control, Cheats | Stick, d-pad or mouse aiming; coins 3 and 4 |
+| [Total Carnage](TotalCarnage.md) | Passwords, Cheats | Twin-stick fire; Start/Bomb; coin 3 |
+| [Y-Unit Test ROM](YUnitTestROM.md) | None | Own MRA |
