@@ -13,19 +13,52 @@
 
 ## Extra content
 
-Mortal Kombat has the most extras: five OSD features and its own button layout.
+Mortal Kombat has the most extras: six OSD features and its own button layout.
 
+- **[Cheats](#cheats)** (Cheats menu): 23 cheats, among them infinite energy, one button fatalities, hit anywhere, no blocking, single round matches and Reptile's clues. They are the T-Unit game's, found in each Y-Unit ROM by matching the code.
 - **[Finishing Moves](#finishing-moves)** (main page): pick a fighter's fatality, and the core enters it on the round winner's controls at the next FINISH HIM, for either player. The distance is measured the way the game does it, from the fighters' centres. Messages say when the fighter is too far or too close, the move waits for another fighter's FINISH HIM, FINISH HIM is over, the move was not taken, or it was cleared. **Clear the set move** drops it.
 - **[Move List](#move-list)** (Off, On): a reference window over the dimmed title screen with each fighter's special moves, fatality and the distance it needs, and The Pit's uppercut in the footer. With the OSD closed, Left or Right turns to the other page. The game waits while it shows.
 - **[Fixed AI Difficulty](#fixed-ai-difficulty)** (main page: Off, 0 to 9; Off by default): holds the CPU opponent at one of the game's ten levels, 0 (easiest) to 9, from the first fight to the last, as the Fixed AI Difficulty of Mortal Kombat: Legacy Kollection does. Off is the game's own curve, which starts easy and gets harder with every match you win. Set it in the OSD before you press Start to begin a game. Shang Tsung follows it like any fighter; Goro much less (see [Fixed AI Difficulty](#fixed-ai-difficulty)).
 - **[EJB Menu shortcut](#hidden-developer-menu-ejb-menu)** (Hidden Items, every revision except prototype 4.0): plays the 27-press code on the two Block buttons in about 3 seconds, for diagnostics, audits, enter initials and character endings. The game takes the code only in attract mode, not during a game or the game-over screens that follow it. Start 1 and 2 are held released while it plays so a Start press cannot spoil it. Messages report the result.
-- **[Reptile on demand](#reptile)** (Hidden Items, rev 3.0, rev 4.0, the Turbo hacks, the Victor bootleg and the Yawdim bootlegs): Reptile Fight Next, Moon Silhouettes Always and Reptile Hints Always. The core changes a few of the game's instructions as the CPU fetches them; nothing is written to the ROM or the CMOS.
+- **[Reptile on demand](#reptile)** (Hidden Items, rev 3.0, rev 4.0, the Turbo hacks, the Victor bootleg and the Yawdim bootlegs): Reptile Fight Next and Moon Silhouettes Always (the Cheats menu has Always have Reptile Clues). The core changes a few of the game's instructions as the CPU fetches them; nothing is written to the ROM or the CMOS.
 - **Button layout**: High Punch, Low Punch, High Kick, Low Kick, Block, then Start, Coin, Test, Pause. The board's second Block input stays unused, as the cabinet has one block button per player.
 - **Coin 3** on the third controller's Coin button.
 
 The [core-wide extras](ExtraContent.md#core-wide-features) (CRT Adjust, CRT V-Size, Video Timing, DIP Switches, Service Mode and the rest) apply to every game.
 
 The game draws a few stray pixels in the first line of the picture: at the left of the title screen, and a couple that blink during a fight. A cabinet's overscan hides them; on HDMI, turn on [HDMI Top Row Pixel Fix](ExtraContent.md#video-output) in Video Settings to hide that line (the analog output does not change).
+
+## Cheats
+
+The Cheats item in the OSD lists the cheats of the game; switch on as many as you like. A cheat of kind On works for as long as it is on; a cheat of kind Once acts one time, when you switch it on, and switching it off and on again repeats it. The cheats come from the MAME cheat collection ([credits](../README.md#cheat-credits)). They are off while a test menu is selected (Service Mode, the Test button or the Test Switch DIP) and come back when it is left. The core takes up to 16 cheat units and 4 one-shot writes at once (a cheat is one to 7 units), so with many cheats on at the same time the last ones are ignored.
+
+| Menu name | MAME cheat | Kind | Not in |
+|---|---|---|---|
+| Always Get Fatality Bonus | same | On | The two Nifty Kombo hacks, prototypes 8.0 and 9.0, rev 1.0, rev 2.0, prototype 4.0 |
+| Always have Reptile Clues | same | On | The two Nifty Kombo hacks, prototypes 8.0 and 9.0, rev 1.0, rev 2.0, prototype 4.0, the Reptile Man hack |
+| Always Secret Game Over | Always have Secret Game Over Screen | On | The two Nifty Kombo hacks, prototypes 8.0 and 9.0, prototype 4.0 |
+| Attract Mode Volume Never | Attract Mode Volume Never Decreases | On | The two Nifty Kombo hacks, prototypes 8.0 and 9.0, rev 1.0, rev 2.0, prototype 4.0 |
+| Bloody Floors | same | On | The two Nifty Kombo hacks, prototypes 8.0 and 9.0, rev 1.0, prototype 4.0 |
+| Break Test Your Might | Always Break Test Your Might Challenge Object | On | Prototype 4.0 |
+| CPU Performs Fatalities | CPU always finishes with a Fatality | On | The two Nifty Kombo hacks, prototypes 8.0 and 9.0, rev 1.0, rev 2.0, prototype 4.0 |
+| CPU Players Won't Block | CPU Players Don't Avoid or Block Your Attacks | On | - |
+| Disable Blocking | Disable Blocking Both Players | On | - |
+| Enable 1-Round Matches | Enable Single Round Matches | On | - |
+| Get Double Flawless Bonus | same | On | - |
+| Hit Anywhere (P1 + P2) | Hit Anywhere (Both Players) | On | - |
+| I Am Reptile. Find Me! | Restore I Am Reptile. Find Me! Clue | On | The two Nifty Kombo hacks, prototypes 8.0 and 9.0, rev 1.0, rev 2.0, prototype 4.0 |
+| Infinite Fatality Time | same | On | The four Yawdim bootlegs, the two Turbo hacks, the two Nifty Kombo hacks, prototypes 8.0 and 9.0, rev 3.0 and the Victor bootleg, rev 1.0, rev 2.0, prototype 4.0 |
+| Infinite Time | same | On | - |
+| One Button Fatalities | same | On | The four Yawdim bootlegs, the two Turbo hacks, the two Nifty Kombo hacks, prototypes 8.0 and 9.0, rev 3.0 and the Victor bootleg, rev 1.0, rev 2.0, prototype 4.0 |
+| P1 Drain All Energy Now! | same | Once | - |
+| P1 Infinite Energy | same | On | - |
+| P2 Drain All Energy Now! | same | Once | - |
+| P2 Infinite Energy | same | On | - |
+| Pit Bottom in Lineup | Pit Bottom Included In Stage Lineup | On | The two Nifty Kombo hacks, prototypes 8.0 and 9.0, rev 1.0, prototype 4.0 |
+| Single Opponent Endurance | Enable Single Opponent Endurance Matches | On | The four Yawdim bootlegs, the two Turbo hacks, the two Nifty Kombo hacks, prototypes 8.0 and 9.0, rev 3.0 and the Victor bootleg, rev 1.0, rev 2.0, prototype 4.0 |
+| View Ending after 1P Win | Defeat Any CPU Opponent To View Ending | On | The two Nifty Kombo hacks, prototypes 8.0 and 9.0, rev 1.0, rev 2.0, prototype 4.0 |
+
+These are the cheats of the T-Unit game (rev 5.0 in the collection). Most of them change an instruction of the program ROM, so each was found in every Y-Unit ROM by matching the code around it; a cheat is offered in a set only where that code matched and held the same original instruction, which is why the older revisions and prototypes have fewer. The energy, drain and flawless cheats use the RAM variables the core already knows for each set. The core changes the instruction only as the CPU fetches it, so the ROM checksums see the ROM unchanged. They are placed by code matching and have not been played on hardware yet. Night Mode, in the T-Unit file, is not offered: its code is not in the Y-Unit ROMs. Always have Reptile Clues makes Reptile drop in with a hint before every round; it is in the sets that have Reptile, and the Reptile Man hack already has it on. While it is on the game also clears its audits (the EJB Menu's bookkeeping) before every round, as it does when Reptile shows up by himself, so leave it off if you want to keep them. P2 Drain All Energy Now! sets the energy only: the T-Unit cheat also writes a second value that has no known place in the Y-Unit game.
 
 ## Controls
 
@@ -207,8 +240,8 @@ attract mode, whether the core enters it or you do by hand:
 A message says how it went: "EJB Menu: code entered" when the menu opens,
 "Not now: the code works in the attract mode" when the game is not in attract
 mode (during a game or the game-over sequence; the code is not entered),
-"Code not taken: try again" if the menu did not open, and "Not in this revision
-of the game" on prototype 4.0.
+and "Code not taken: try again" if the menu did not open. Prototype 4.0 has no
+such menu, so its OSD has no Hidden Items page.
 
 By hand: press P1 Block (0) and P2 Block (1) in the order
 `0 0 0 0 0 1 1 1 1 1 1 1 1 1 1 0 0 1 0 0 1 1 1 0 0 0 0`, each press within
@@ -229,22 +262,22 @@ round Reptile very rarely drops in with a hint ("LOOK TO LA LUNA", "BLOCKING
 WILL GET YOU NOWHERE", ...): rev 4.0 counts every round the cabinet plays in
 the CMOS (the GREEN NINJA COUNTER audit) and sends him at 2000.
 
-On these sets **OSD → Hidden Items** has three more lines:
+On these sets **OSD → Hidden Items** has two more lines:
 
 | Item | |
 |---|---|
 | Reptile Fight Next | Reptile comes after the next match you win in a 1-player game, wherever it is and however you won. Select it again to cancel; it is used up when his fight starts |
 | Moon Silhouettes Always | Every match on The Pit has the silhouettes, and with them the chance: the flawless, no-block, fatality win there brings Reptile |
-| Reptile Hints Always | Reptile drops in with a hint before every round |
 
 Messages: "Reptile fight set: win a match in a 1-player game" and "Reptile
-fight cleared". The two Always options stay on until you turn them off. The
+fight cleared". Moon Silhouettes Always stays on until you turn it off. The
 core changes a few of the game's instructions as the CPU fetches them
 (nothing is written to the ROM or the CMOS, and the game's ROM checks still
 see the original), so turning an option off puts the game back at once.
-One difference with the real hints: when Reptile shows up by himself the
-game also clears its audits (the EJB Menu's bookkeeping); with Reptile Hints
-Always the core skips that, so the audits are kept.
+For a hint before every round, switch on the cheat Always have Reptile Clues
+in the Cheats menu. When Reptile shows up by himself the game also clears its
+audits (the EJB Menu's bookkeeping), and the cheat does the same before every
+round.
 
 The Turbo hacks changed the rules: Turbo 3.0 drops the moon and block
 conditions, Turbo 3.1 also lets two players and the second stage bring
