@@ -13,13 +13,26 @@
 
 ## Extra content
 
-Trog has no game-specific OSD items.
+Trog has one game-specific OSD item, the Cheats menu.
 
+- **[Cheats](#cheats)** (Cheats menu): 5 cheats: invincibility and infinite lives for each of the four players.
 - **4-way stick filter**: on a diagonal the direction pressed last wins, like the cabinet's 4-way joysticks.
-- **Prototype rev 4.00** (trogpa4) has its own MRA, with an 8-way stick and a Bone button in place of Punch.
+- **Prototype rev 4.00** (trogpa4) has its own MRA among the alternatives, with an 8-way stick and a Bone button in place of Punch.
 - **Four players**, with coin 3 on the third controller's Coin button.
 
 The [core-wide extras](ExtraContent.md#core-wide-features) (CRT Adjust, CRT V-Size, Video Timing, DIP Switches, Service Mode and the rest) apply to every game.
+
+## Cheats
+
+The Cheats item in the OSD lists the cheats of the game; switch on as many as you like. A cheat of kind On works for as long as it is on; a cheat of kind Once acts one time, when you switch it on, and switching it off and on again repeats it. The cheats come from the MAME cheat collection ([credits](../README.md#cheat-credits)). They are off while a test menu is selected (Service Mode, the Test button or the Test Switch DIP) and come back when it is left. The core takes up to 16 cheat units and 4 one-shot writes at once (a cheat is one to 6 units), so with many cheats on at the same time the last ones are ignored.
+
+| Menu name | MAME cheat | Kind | Not in |
+|---|---|---|---|
+| Invincibility | same | On | - |
+| P1 Infinite Lives | same | On | - |
+| P2 Infinite Lives | same | On | - |
+| P3 Infinite Lives | same | On | - |
+| P4 Infinite Lives | same | On | - |
 
 ## High scores
 
