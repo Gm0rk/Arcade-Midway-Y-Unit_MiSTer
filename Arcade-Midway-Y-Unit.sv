@@ -73,13 +73,13 @@ localparam CONF_STR = {
 	"H5-;",
 	"H7-;",
 	"DIP;",
+	"C,Cheats;",
 	"H4P2,Hidden Items;",
 	"P2-;",
 	"H2P2T[16],EJB Menu;",
 	"H3P2T[16],Octopus Bookkeeping;",
 	"H6P2T[17],Reptile Fight Next;",
 	"H6P2O[18],Moon Silhouettes Always,Off,On;",
-	"H6P2O[19],Reptile Hints Always,Off,On;",
 	"O[9],Service Mode,Off,On;",
 	"O[8],Pause when OSD is open,On,Off;",
 	`FMOVES_PAGES,
@@ -116,6 +116,9 @@ wire        ioctl_wait;
 reg   [4:0] game_id;
 wire        is_t2;
 wire        sec_ejb, sec_octo;              // the game has a hidden menu (see secret_menu.sv)
+wire        sec_no_menu;                    // ... but this revision does not (the MRA says so)
+wire        sec_item_ejb, sec_item_octo;    // the Hidden Items shortcuts this revision has
+wire        sec_item_page;                  // the Hidden Items page has a line to show
 wire        is_mk;                          // Mortal Kombat: Move List and Finishing Moves
 wire        is_tc;                          // Total Carnage: Passwords
 wire        rep_items;                      // Mortal Kombat with Reptile: his Hidden Items lines
@@ -135,7 +138,7 @@ hps_io #(.CONF_STR(CONF_STR), .CONF_STR_BRAM(1), .WIDE(1)) hps_io
 
 	.buttons             (buttons),
 	.status              (status),
-	.status_menumask     ({4'd0, ~lvl_items, status[30:28], ~is_tc, ~rep_items, ~is_mk, ~(sec_ejb | sec_octo), ~sec_octo, ~sec_ejb, ~status[101], 1'b0}),
+	.status_menumask     ({4'd0, ~lvl_items, status[30:28], ~is_tc, ~rep_items, ~is_mk, ~sec_item_page, ~sec_item_octo, ~sec_item_ejb, ~status[101], 1'b0}),
 	.info_req            (info_req),
 	.info                (info),
 
@@ -195,10 +198,11 @@ end
 // boots on an empty CMOS that is about to be replaced. DIP switch transfers
 // (index 254, sent each time a switch is changed in the OSD) do not reset
 // the game: the DIP menu says "Reset to apply", and Service Credit and Tilt
-// live there.
+// live there. Cheat transfers (index 255, sent each time a cheat is switched
+// in the Cheats menu) do not either.
 reg  [25:0] boot_hold;
 always @(posedge clk_sys) begin
-	if (ioctl_download && ioctl_index != 16'd254)
+	if (ioctl_download && ioctl_index != 16'd254 && ioctl_index != 16'd255)
 		boot_hold <= 26'd48_000_000;
 	else if (boot_hold != 26'd0)
 		boot_hold <= boot_hold - 26'd1;
@@ -784,6 +788,12 @@ assign sec_ejb  = (game_id == G_MK) | (game_id == G_MKPROT) | (game_id == G_MKTU
                 | (game_id == G_YAWDIM) | (game_id == G_YAWDIM2);
 assign sec_octo = (game_id == G_HIIMPACT) | (game_id == G_SHIMPACT);
 assign is_mk    = sec_ejb;
+// Hidden Items shows only what the revision has: the prototypes without the
+// menu (Mortal Kombat 4.0, High Impact, Super High Impact) and the test ROM
+// show no shortcut, and the page goes when none of its lines is left
+assign sec_item_ejb  = sec_ejb  & ~sec_no_menu;
+assign sec_item_octo = sec_octo & ~sec_no_menu;
+assign sec_item_page = sec_item_ejb | sec_item_octo | rep_items;
 assign is_tc    = (game_id == G_TOTCARN);
 
 // the board's completed CPU accesses (the menus and the fight, followed by
@@ -830,20 +840,23 @@ secret_menu secret_menu
 	.fail         (sec_fail),
 	.when_attract (sec_when),
 	.when_shi     (sec_when_shi),
-	.not_here     (sec_not_here)
+	.not_here     (sec_not_here),
+	.no_menu      (sec_no_menu)
 );
 
 //////////////////////////////////////////////////////////////////
 // Reptile (Mortal Kombat rev 3.0, 4.0 and the Turbo hacks)
 //
-// Three Hidden Items lines, shown when the MRA gives the set's Reptile
+// Two Hidden Items lines, shown when the MRA gives the set's Reptile
 // patches (ROM index 1 words 0x40-0x5F, tools/yunit_fmoves.py): "Reptile
 // Fight Next" (T[17]) sets or clears a one-time Reptile fight after the next
 // match won in a 1-player game; it is used up when his fight starts (the
 // CPU writes 1 to his flag, words 0x60-0x61; other code writes other values
-// there in attract mode). "Moon Silhouettes Always" (O[18]) and "Reptile
-// Hints Always" (O[19]) stay on. Each turns on its program patches in the
-// board (rtl/midway_yunit.sv, "Program ROM patches").
+// there in attract mode). "Moon Silhouettes Always" (O[18]) stays on. Each
+// turns on its program patches in the board (rtl/midway_yunit.sv, "Program
+// ROM patches"). A third line, "Reptile Hints Always" (O[19], patch option
+// 3), was removed in Build 102 (the Cheats menu has "Always have Reptile
+// Clues"); MRAs of earlier builds still carry its patches, which stay off.
 //////////////////////////////////////////////////////////////////
 
 reg         rep_has = 1'b0;      // the set has Reptile patches
@@ -879,7 +892,7 @@ end
 
 assign rep_items = is_mk & rep_has;
 
-wire [2:0] rep_patch_en = {3{rep_items}} & {status[19], status[18], rep_arm};
+wire [2:0] rep_patch_en = {3{rep_items}} & {1'b0, status[18], rep_arm};
 
 //////////////////////////////////////////////////////////////////
 // Fixed AI Difficulty (Mortal Kombat)
@@ -907,6 +920,8 @@ end
 
 assign lvl_items = is_mk && (lvl_wa != 16'd0);
 wire [3:0] lvl_opt = status[113:110];
+wire        ch_ovf;                          // the last cheat transfer held more units than the engine takes
+wire  [5:0] ch_units;                        // units held by the cheat engine
 wire       lvl_test = test_sw | ~dsw[8];     // the test menu is selected (Service Mode, Test button, Test Switch DIP)
 wire       lvl_on  = lvl_items && !lvl_test && (lvl_opt != 4'd0) && (lvl_opt <= 4'd10);
 wire [3:0] lvl_val = lvl_opt - 4'd1;
@@ -1054,6 +1069,15 @@ midway_yunit board
 	.lvl_on         (lvl_on),
 	.lvl_val        (lvl_val),
 	.lvl_wa         (lvl_wa),
+
+	.ch_clr         (rom_download),
+	.ch_dl          (ioctl_download && ioctl_index == 16'd255),
+	.ch_wr          (ioctl_wr && ioctl_index == 16'd255),
+	.ch_wi          (ioctl_addr[26:1]),
+	.ch_wd          (ioctl_dout),
+	.ch_en          (!lvl_test),
+	.ch_ovf         (ch_ovf),
+	.ch_units       (ch_units),
 
 	.in_ports       (in_ports),
 	.gun_p1_x       (~gun_x[0]),
