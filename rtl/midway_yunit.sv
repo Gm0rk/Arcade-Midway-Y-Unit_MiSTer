@@ -57,6 +57,16 @@ module midway_yunit
 	input       [3:0] lvl_val,       // 0 (easiest) to 9
 	input      [15:0] lvl_wa,        // the level word's main RAM word address (bit address >> 4)
 
+	// cheats (MRA <cheats>, ioctl index 255; see rtl/yunit_cheat.sv)
+	input             ch_clr,        // a new ROM download: forget the cheats
+	input             ch_dl,         // a cheat transfer is running
+	input             ch_wr,
+	input      [25:0] ch_wi,         // word index in the transfer
+	input      [15:0] ch_wd,
+	input             ch_en,         // cheats on (off while the test menu is selected)
+	output            ch_ovf,        // the transfer held more units than the engine takes
+	output      [5:0] ch_units,      // units held
+
 	// inputs (active low as the CPU reads them), port 0-5
 	input      [95:0] in_ports,
 	input       [7:0] gun_p1_x,      // gun positions for the T2 ADC
@@ -532,6 +542,49 @@ function automatic [15:0] patched(input [15:0] w, input hit, input [15:0] orig, 
 	patched = (hit && w == orig) ? nw : w;
 endfunction
 
+//----------------------------------------------------------------------------
+// Cheats (rtl/yunit_cheat.sv). The engine sees the registered bus address;
+// its match is ready one clock later, when the data comes back from the RAM
+// or the ROM cache. ROM units act on instruction fetches only: the word read
+// is the CPU's PC or one or two words after it (an immediate).
+//----------------------------------------------------------------------------
+
+wire [18:0] ch_fdelta = wa[18:0] - b_pc[22:4];
+wire        ch_fetch  = (b_pc[31:23] == 9'h1FF) && (ch_fdelta < 19'd3);
+wire [15:0] ch_mask, ch_data;
+wire        ch_pk_rd, ch_pk_we;
+wire [15:0] ch_pk_wa, ch_pk_wd;
+// no CPU access begun or pending: the poke may use the main RAM port
+wire        ch_bus_free = (bstate == S_IDLE) && !b_rd && !b_wr && !mem_ack && !b_stale && !c_clr;
+
+yunit_cheat cheat
+(
+	.clk      (clk),
+	.reset    (reset),
+	.clr      (ch_clr),
+	.en       (ch_en),
+	.dl       (ch_dl),
+	.dl_wr    (ch_wr),
+	.dl_wi    (ch_wi),
+	.dl_data  (ch_wd),
+	.wa       (wa),
+	.fetch    (ch_fetch),
+	.ch_mask  (ch_mask),
+	.ch_data  (ch_data),
+	.bus_free (ch_bus_free),
+	.ram_q    (ram_q),
+	.pk_rd    (ch_pk_rd),
+	.pk_wa    (ch_pk_wa),
+	.pk_we    (ch_pk_we),
+	.pk_wd    (ch_pk_wd),
+	.ovf      (ch_ovf),
+	.units    (ch_units)
+);
+
+function automatic [15:0] cheated(input [15:0] w, input [15:0] m, input [15:0] d);
+	cheated = (w & ~m) | d;
+endfunction
+
 // the cache is cleared by walking it after reset (a ROM reload is followed
 // by a reset, so stale lines never survive a game change)
 reg         c_clr;
@@ -924,6 +977,7 @@ wire        t2_hack_hit = (t2_hack != 3'd0) && sel_ram && (wa[15:1] == 15'h5507)
 always @(*) begin
 	ram_ra = wa[15:0];
 	if (bstate == S_PROT) ram_ra = 16'hA439;   // 0x010A4390 >> 4
+	if (ch_pk_rd)         ram_ra = ch_pk_wa;   // a cheat poke reads the word to merge
 end
 
 always @(posedge clk) begin
@@ -1079,14 +1133,14 @@ always @(posedge clk) begin
 			S_BRAM: begin
 				// the read address went to the RAMs with the request
 				mem_ack   <= 1'b1;
-				mem_rdata <= (bram_src == 2'd0) ? ram_q : (bram_src == 2'd1) ? cmos_q : pal_q;
+				mem_rdata <= (bram_src == 2'd0) ? cheated(ram_q, ch_mask, ch_data) : (bram_src == 2'd1) ? cmos_q : pal_q;
 				bstate    <= S_IDLE;
 			end
 
 			S_ROM: begin
 				if (ct_q == {1'b1, rom_line[16:11]}) begin
 					mem_ack   <= 1'b1;
-					mem_rdata <= patched(cd_q[{wa[1:0], 4'b0000} +: 16], p_hit, p_hit_orig, p_hit_new);
+					mem_rdata <= cheated(patched(cd_q[{wa[1:0], 4'b0000} +: 16], p_hit, p_hit_orig, p_hit_new), ch_mask, ch_data);
 					bstate    <= S_IDLE;
 				end
 				else begin
@@ -1102,7 +1156,7 @@ always @(posedge clk) begin
 				c_wd      <= cpu_sd_data;
 				c_wt      <= {1'b1, rom_line[16:11]};
 				mem_ack   <= 1'b1;
-				mem_rdata <= patched(cpu_sd_data[{wa[1:0], 4'b0000} +: 16], p_hit, p_hit_orig, p_hit_new);
+				mem_rdata <= cheated(patched(cpu_sd_data[{wa[1:0], 4'b0000} +: 16], p_hit, p_hit_orig, p_hit_new), ch_mask, ch_data);
 				bstate    <= S_IDLE;
 			end
 
@@ -1175,6 +1229,14 @@ always @(posedge clk) begin
 
 			default: bstate <= S_IDLE;
 		endcase
+
+		// a cheat poke: the engine asks only in clocks the CPU leaves the main
+		// RAM port alone (ch_bus_free), so nothing above wrote in this clock
+		if (ch_pk_we) begin
+			ram_we <= 1'b1;
+			ram_wa <= ch_pk_wa;
+			ram_wd <= ch_pk_wd;
+		end
 	end
 end
 
