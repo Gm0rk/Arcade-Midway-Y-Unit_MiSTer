@@ -53,21 +53,21 @@ listed in [Extra content](docs/ExtraContent.md).
 
 Built with Quartus Prime 17.0.2 Lite for the DE10-Nano (Cyclone V
 5CSEBA6U23I7), timing model Slow 1100 mV 100 C. Timing and resource use are
-from the Build 96 compilation.
+from the Build 102 compilation.
 
 Timing is met on every clock, and on every hold, recovery, removal and minimum
 pulse width check. The margins move a little with every compilation.
 
 | Clock | Frequency | Setup slack |
 |---|---|---|
-| System (core PLL) | 96 MHz | 0.195 ns |
-| HDMI PLL | 148.54 MHz | 0.573 ns |
+| System (core PLL) | 96 MHz | 0.564 ns |
+| HDMI PLL | 148.54 MHz | 0.626 ns |
 
-Every other clock has at least 3.3 ns of setup slack.
+Every other clock has at least 4.3 ns of setup slack.
 
 | Resource | Used |
 |---|---|
-| Logic (ALMs) | 29,546 / 41,910 (70 %) |
+| Logic (ALMs) | 30,522 / 41,910 (73 %) |
 | Block RAM (M10K blocks) | 437 / 553 (79 %) |
 | DSP blocks | 65 / 112 (58 %) |
 
@@ -96,6 +96,9 @@ Every other clock has at least 3.3 ns of setup slack.
   Difficulty (see the [Mortal Kombat page](docs/MortalKombat.md))
 - Total Carnage: a Passwords page with every warp code (see the
   [Total Carnage page](docs/TotalCarnage.md))
+- Cheats menu: the MAME cheat collection's cheats for the games, 4 to 23 per
+  set, each switched on or off in the OSD (see each game's page and the
+  [cheat credits](#cheat-credits))
 
 ## OSD
 
@@ -106,6 +109,7 @@ Every other clock has at least 3.3 ns of setup slack.
 | Finishing Moves | Mortal Kombat: enters the chosen fatality at the next FINISH HIM/HER |
 | Fixed AI Difficulty | Mortal Kombat: Off, or 0 (easiest) to 9; set it in the OSD before you press Start to begin a game; Shang Tsung follows it like any fighter, Goro much less |
 | Passwords | Total Carnage: shows the warp codes over the game |
+| Cheats | The game's cheats; switch any of them on or off |
 | DIP Switches | The game's DIP switches, with Service Credit and Tilt |
 | Hidden Items | Hidden developer menus and extras, for the games that have them |
 | Service Mode | The cabinet's test switch |
@@ -135,6 +139,25 @@ games.  Use **merged** ROM sets. Files are found by CRC.  Put the zips in `games
   [MiSTer-CRT-Adjust](https://github.com/rmonic79/MiSTer-CRT-Adjust)
 - ppriest: [MiSTer-CoreSkill](https://github.com/ppriest/MiSTer-CoreSkill),
   the arcade core guidance used while developing and checking this core
+
+### Cheat credits
+
+The cheats for these games come from the MAME cheat collection (the cheat.txt
+of the 27 July 2025 release, for MAME 0.279;
+[mamecheat.co.uk](https://www.mamecheat.co.uk)), kept by Martin Pugh (Pugsy)
+with the cheat finders named in its contributor list. The Cheats menu offers
+them; the Mortal Kombat cheats are the T-Unit game's, placed in each Y-Unit
+ROM by matching the code. cheat.txt names the author of a game's ROM cheats;
+RAM cheats are credited to the contributor list as a whole. Per game, as
+cheat.txt gives it:
+
+| Game | Credit in cheat.txt |
+|---|---|
+| Mortal Kombat | Steph (Steph Humbert, Ultimate Patchers) and ugetab: the original cheats. Abystus: ROM cheats (various). Martin Pugh (Pugsy): Clues, Secret Game Over, CPU Fatality and EJB Menu. nolberto82: Hit Anywhere and One Button Fatalities |
+| Smash T.V. | Pugsy and ugetab |
+| Total Carnage | Pugsy |
+| Trog | Pugsy |
+| High Impact Football, Super High Impact, Strike Force, Terminator 2 | no author is named for these games: the contributor list |
 
 ## License
 
