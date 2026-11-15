@@ -119,7 +119,7 @@ wire        sec_ejb, sec_octo;              // the game has a hidden menu (see s
 wire        sec_no_menu;                    // ... but this revision does not (the MRA says so)
 wire        sec_item_ejb, sec_item_octo;    // the Hidden Items shortcuts this revision has
 wire        sec_item_page;                  // the Hidden Items page has a line to show
-wire        is_mk;                          // Mortal Kombat: Move List and Finishing Moves
+wire        is_mk;                          // Mortal Kombat: Move List and Auto Finishing Moves
 wire        is_tc;                          // Total Carnage: Passwords
 wire        rep_items;                      // Mortal Kombat with Reptile: his Hidden Items lines
 wire        lvl_items;                      // Mortal Kombat with the CPU level's address: Fixed AI Difficulty
@@ -528,7 +528,7 @@ wire       adpcm_irq;
 wire       sec_active;
 wire [15:0] sec_in0, sec_in1;
 
-// finishing-move player (OSD Finishing Moves page): while it plays a move it
+// finishing-move player (OSD Auto Finishing Moves page): while it plays a move it
 // replaces the winner's controls
 wire  [1:0] fm_drive;
 wire  [8:0] fm_keys;                        // {BL, LK, HK, LP, HP, Right, Left, Down, Up}
@@ -804,7 +804,8 @@ wire [15:0] cpu_wd, cpu_rdata;
 
 // ROM index 1 (tools/yunit_fmoves.py): word 0 the game id, words 0x10-0x2F
 // the finishing moves' fight variables, 0x30-0x34 the Hidden Items page's
-// state word, 0x40-0x61 Reptile (program patches, his flag)
+// state word, 0x40-0x61 Reptile (program patches, his flag), 0x70-0x7D the
+// fatality handlers' sites (direct finishers)
 reg  cfg1_dl_d = 1'b0;
 wire cfg1_dl   = ioctl_download && ioctl_index == 16'd1;
 always @(posedge clk_sys) cfg1_dl_d <= cfg1_dl;
@@ -929,7 +930,7 @@ wire [3:0] lvl_val = lvl_opt - 4'd1;
 //////////////////////////////////////////////////////////////////
 // Finishing moves (Mortal Kombat)
 //
-// The Finishing Moves page picks a fighter (O[30:28]; the menu mask's bits
+// The Auto Finishing Moves page picks a fighter (O[30:28]; the menu mask's bits
 // 8-10 show that fighter's lines) and one of its moves (R[32] the fatality,
 // R[40] clears the set move). (The main page's Move List, O[41], is a
 // window over the picture: see Video.) rtl/yunit_fmoves.sv
@@ -943,6 +944,9 @@ reg         fm_sel;
 reg   [3:0] fm_slot;
 wire        fm_msg_req;
 wire  [4:0] fm_msg;
+wire        fm_fp_en;                       // direct finisher: the board flips the handler's jump
+wire [18:0] fm_fp_addr;
+wire        fm_fp_rd, fm_fp_flip;           // the board read / turned round that ROM word
 
 integer fi;
 always @(posedge clk_sys) begin
@@ -964,6 +968,8 @@ yunit_fmoves fmoves
 	.dl_start  (cfg1_start),
 	.dl_wr     (cfg1_wr && ioctl_addr[26:9] == 18'd0 && cfg1_word >= 8'h10 && cfg1_word <= 8'h2F),
 	.dl_addr   (5'(cfg1_word - 8'h10)),
+	.dir_wr    (cfg1_wr && ioctl_addr[26:9] == 18'd0 && cfg1_word >= 8'h70 && cfg1_word <= 8'h7D),
+	.dir_addr  (4'(cfg1_word - 8'h70)),
 	.dl_data   (ioctl_dout),
 
 	.sel       (fm_sel),
@@ -979,6 +985,10 @@ yunit_fmoves fmoves
 
 	.drive     (fm_drive),
 	.keys      (fm_keys),
+	.fp_en     (fm_fp_en),
+	.fp_addr   (fm_fp_addr),
+	.fp_rd     (fm_fp_rd),
+	.fp_flip   (fm_fp_flip),
 	.msg_req   (fm_msg_req),
 	.msg       (fm_msg)
 );
@@ -1065,6 +1075,11 @@ midway_yunit board
 	.patch_wa       (5'(cfg1_word - 8'h40)),
 	.patch_wd       (ioctl_dout),
 	.patch_en       (rep_patch_en),
+
+	.fp_en          (fm_fp_en),
+	.fp_addr        (fm_fp_addr),
+	.fp_rd          (fm_fp_rd),
+	.fp_flip        (fm_fp_flip),
 
 	.lvl_on         (lvl_on),
 	.lvl_val        (lvl_val),
