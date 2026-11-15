@@ -1,7 +1,7 @@
 //============================================================================
 //  Finishing moves (Mortal Kombat), from the OSD
 //
-//  The OSD's "Finishing Moves" page lists each fighter's fatality. A pick
+//  The OSD's "Auto Finishing Moves" page lists each fighter's fatality. A pick
 //  sets the move; this module enters it on the winner's controls at the next
 //  FINISH HIM where the winner is that fighter, and says in an OSD message
 //  when it cannot (another fighter, too far or too close, FINISH HIM over,
@@ -36,6 +36,25 @@
 //  Out of the window it says so once and waits, leaving the controls to the
 //  player, who can step in or out: the move starts when the distance fits.
 //
+//  Direct finishers. Each fighter's fatality handler asks the game's joystick
+//  matcher whether the history fits the combination and jumps over the move
+//  when it does not (CALLR matcher / JRNC). While a move's program plays, the
+//  board (rtl/midway_yunit.sv, fp_en / fp_addr) turns bit 8 of that jump's
+//  opcode round as the CPU reads it, and the handler carries on as if the
+//  combination had been entered: the program only taps the move's trigger
+//  key, up to five times (the patch goes off as soon as the game starts the
+//  fatality). The game still does its own checks: FINISH HIM, the distance,
+//  the loser dizzy, the winner standing. The board also says when it read the
+//  jump's ROM word (fp_rd) and when it turned it round (fp_flip), so that a
+//  move that is not taken can say why (Build 108). The sites are found in
+//  each set's program ROM by tools/yunit_fmoves.py and sent with the MRA (ROM
+//  index 1 words 0x70-0x7D, one per character). A move's program is
+//      READY, DIRECT n, <trigger taps>, END, <the combination>, END
+//  DIRECT turns the patch on when the set has a site for the move's fighter
+//  and runs on into the taps; without one it skips n steps, to the
+//  combination (the way the moves were played before Build 105).
+//  (This is the T-Unit core's direct finisher, rtl/tunit_fmoves.sv there.)
+//
 //  Programs (rtl/yunit_fmoves_tab.svh, from tools/yunit_fmoves.py): steps
 //  {op[2:0], arg[12:0]}, one starting per frame at most:
 //    0 END
@@ -48,9 +67,17 @@
 //  Keys {BL, LK, HK, LP, HP, B, F, D, U}; F and B are toward and away from
 //  the loser, turned into Right / Left each frame from the two centers.
 //
-//  After the program the finish flag says whether the game took the move.
-//  Taken, the move is done; not taken, a message says so. Either way the
-//  set move is cleared. A move set outside FINISH HIM (or for another
+//    6 DIRECT   see "Direct finishers" below: arg[7:0] steps to skip when the
+//               set has no direct site for the move
+//
+//  After the program the finish flag says whether the game took the move: the
+//  game writing a non-zero value to it since the move started (a value left
+//  there from an earlier fatality does not count). Taken, the move is done;
+//  not taken, a message says so, and for a direct move which of three things
+//  happened: the game never ran the handler (the jump was never read), the
+//  jump's word is not a jump (the site is wrong), or the handler took the
+//  jump and the game still refused (the distance, or one of its other
+//  checks). Either way the set move is cleared. A move set outside FINISH HIM (or for another
 //  fighter) waits for the right one; a FINISH HIM that ends first leaves it
 //  set.
 //
@@ -66,10 +93,13 @@ module yunit_fmoves
 	input             reset,
 	input             game_mk,       // Mortal Kombat is loaded
 
-	// ROM index 1 words 0x10-0x2F: the set's fight variables
+	// ROM index 1 words 0x10-0x2F: the set's fight variables, and words
+	// 0x70-0x7D: the direct finishers' sites (dir_addr = word - 0x70)
 	input             dl_start,      // pulse: ROM index 1 is about to arrive
 	input             dl_wr,
 	input       [4:0] dl_addr,
+	input             dir_wr,
+	input       [3:0] dir_addr,
 	input      [15:0] dl_data,
 
 	// OSD
@@ -89,6 +119,14 @@ module yunit_fmoves
 	// controls: while drive[n], player n+1's controls are keys (active high)
 	output      [1:0] drive,
 	output reg  [8:0] keys,          // {BL, LK, HK, LP, HP, Right, Left, Down, Up}
+
+	// direct finisher: while fp_en, the board turns bit 8 of the program ROM
+	// word fp_addr (ROM word address) round as the CPU reads it; fp_rd /
+	// fp_flip: one clock when it read / turned round that word
+	output            fp_en,
+	output     [18:0] fp_addr,
+	input             fp_rd,
+	input             fp_flip,
 	output reg        msg_req,       // one clock: show OSD message msg
 	output reg  [4:0] msg
 );
@@ -96,7 +134,7 @@ module yunit_fmoves
 `include "yunit_fmoves_tab.svh"
 
 localparam OP_END = 3'd0, OP_TAP = 3'd1, OP_PRESS = 3'd2, OP_RELEASE = 3'd3, OP_WAIT = 3'd4,
-           OP_READY = 3'd5;
+           OP_READY = 3'd5, OP_DIRECT = 3'd6;
 localparam [12:0] GAP = 13'd3;            // frames up after a tap or a release
 localparam [7:0] CHECK_FRAMES = 8'd192;
 localparam [2:0] SETTLE = 3'd4;
@@ -136,6 +174,25 @@ always @(posedge clk) begin
 	end
 end
 
+// the direct finishers' sites, one per character (0-6): the ROM word address
+// of the handler's jump, and whether the set has one. Words 0x70 + 2c: ROM
+// word [15:0]; 0x71 + 2c: {valid [8], ROM word [18:16]}
+reg  [18:0] s_a [0:6];
+reg   [6:0] s_v;
+integer k;
+always @(posedge clk) begin
+	if (dl_start)
+		s_v <= 7'd0;
+	else if (dir_wr)
+		for (k = 0; k < 7; k = k + 1) begin
+			if (dir_addr == 4'(2 * k))     s_a[k][15:0]  <= dl_data;
+			if (dir_addr == 4'(2 * k + 1)) begin
+				s_a[k][18:16] <= dl_data[2:0];
+				s_v[k]        <= dl_data[8];
+			end
+		end
+end
+
 //----------------------------------------------------------------------------
 // The fight, from the CPU's writes and reads
 //----------------------------------------------------------------------------
@@ -151,7 +208,10 @@ always @(posedge clk) begin
 	r_d <= cpu_rdata;
 end
 
-reg  [15:0] v_state, v_c1, v_c2, v_e1, v_e2, v_flag;
+reg  [15:0] v_state, v_c1, v_c2, v_e1, v_e2;
+reg         took;                 // the game wrote the finish flag (non-zero) since the move began
+reg         run_go;               // one clock: the move begins (the player, below)
+reg         s_rd, s_fl;           // the board read / turned round the direct site since the move began
 reg  [31:0] v_o [1:2];            // object pointers (bit addresses)
 reg  [31:0] v_p [1:2];            // process pointers
 reg  [15:0] v_x [1:2], v_fl [1:2], v_w [1:2], v_ax [1:2];
@@ -177,7 +237,9 @@ always @(posedge clk) begin
 
 	if (reset || !c_ok) begin
 		v_state <= 16'd0;
-		v_flag  <= 16'd0;
+		took    <= 1'b0;
+		s_rd    <= 1'b0;
+		s_fl    <= 1'b0;
 		v_xv    <= 2'b00;
 		v_flv   <= 2'b00;
 		v_wv    <= 2'b00;
@@ -192,7 +254,7 @@ always @(posedge clk) begin
 			if (w_a == c_a[2])  v_c2    <= w_d;
 			if (w_a == c_a[3])  v_e1    <= w_d;
 			if (w_a == c_a[4])  v_e2    <= w_d;
-			if (w_a == c_a[10]) v_flag  <= w_d;
+			if (w_a == c_a[10] && w_d != 16'd0) took <= 1'b1;
 			for (p = 1; p <= 2; p = p + 1) begin
 				// a new object: nothing of it known yet
 				if (w_a == c_a[4 + p] || w_a == c_a1[4 + p]) begin
@@ -225,6 +287,15 @@ always @(posedge clk) begin
 					v_ax[p]  <= r_d;
 					v_axv[p] <= 1'b1;
 				end
+		end
+
+		// what the board did with the direct site; a move begins with none of it
+		if (fp_rd)   s_rd <= 1'b1;
+		if (fp_flip) s_fl <= 1'b1;
+		if (run_go) begin
+			took <= 1'b0;
+			s_rd <= 1'b0;
+			s_fl <= 1'b0;
 		end
 	end
 end
@@ -276,6 +347,12 @@ wire [29:0] rec = fm_rec(sel_id);
 reg   [2:0] m_char;
 reg   [8:0] m_dmin, m_dmax;
 reg   [7:0] m_start;
+reg         m_site_v;            // the set has a direct site for the move's fighter
+reg  [18:0] m_site_a;
+always @(posedge clk) begin
+	m_site_v <= (m_char < 3'd7) && s_v[m_char];
+	m_site_a <= s_a[m_char];
+end
 
 wire        too_close = sep < {7'd0, m_dmin};
 wire        too_far   = sep > {7'd0, m_dmax};
@@ -300,8 +377,15 @@ reg   [7:0] chk_n;
 reg   [8:0] held, tap;           // relative keys {BL, LK, HK, LP, HP, B, F, D, U}
 reg         pwho;                // whose controls
 reg         begun;               // past the ready point: the move is being entered
+reg         ran_direct;          // the program went the direct way (the set has a site)
 
-wire        taken = (v_flag != 16'd0);                // the game began a fatality
+wire        taken = took;                             // the game began a fatality
+
+// the direct finisher's patch: on from the DIRECT step while the program
+// plays, off as soon as the game takes the move
+reg         dir_on;
+assign fp_en   = dir_on && st == S_RUN && !taken;
+assign fp_addr = m_site_a;
 
 assign drive = own ? (pwho ? 2'b10 : 2'b01) : 2'b00;
 
@@ -325,20 +409,23 @@ wire        both_ready = opp_dizzy && (fin_stance || held != 9'd0);
 
 always @(posedge clk) begin
 	msg_req <= 1'b0;
+	run_go  <= 1'b0;
 	sel_d   <= sel;
 	sel_id  <= {sel_line, sel_slot[2:0]};
 	sel_clr <= (sel_slot == 4'd15);
 
 	if (reset || !game_mk) begin
-		st   <= S_IDLE;
-		own  <= 1'b0;
-		held <= 9'd0;
-		tap  <= 9'd0;
+		st     <= S_IDLE;
+		own    <= 1'b0;
+		held   <= 9'd0;
+		tap    <= 9'd0;
+		dir_on <= 1'b0;
 	end
 	else if (sel_d && c_ok) begin
-		own  <= 1'b0;
-		held <= 9'd0;
-		tap  <= 9'd0;
+		own    <= 1'b0;
+		held   <= 9'd0;
+		tap    <= 9'd0;
+		dir_on <= 1'b0;
 		if (sel_clr) begin
 			if (st != S_IDLE) begin msg_req <= 1'b1; msg <= MSG_CLEARED; end
 			st <= S_IDLE;
@@ -371,6 +458,9 @@ always @(posedge clk) begin
 					settle <= 3'd0;
 					warned <= 2'd0;
 					begun  <= 1'b0;
+					dir_on <= 1'b0;
+					run_go <= 1'b1;                    // the flag and the site start afresh
+					ran_direct <= 1'b0;
 				end
 			end
 
@@ -383,6 +473,7 @@ always @(posedge clk) begin
 					own     <= 1'b0;
 					held    <= 9'd0;
 					tap     <= 9'd0;
+					dir_on  <= 1'b0;
 				end
 				else if (!fin) begin
 					// over while it played (the game took the move): see what came of it
@@ -391,6 +482,7 @@ always @(posedge clk) begin
 					own          <= 1'b0;
 					held         <= 9'd0;
 					tap          <= 9'd0;
+					dir_on       <= 1'b0;
 				end
 				else begin
 					// a tap's keys go up after its frames
@@ -451,12 +543,22 @@ always @(posedge clk) begin
 								end
 							end
 						end
+						OP_DIRECT: begin
+							if (m_site_v) begin
+								dir_on <= 1'b1;            // the patch on, then the trigger taps
+								ran_direct <= 1'b1;
+								ptr    <= ptr + 8'd1;
+							end
+							else
+								ptr    <= ptr + 8'd1 + stp[7:0];   // the combination
+						end
 						default: begin                     // END
 							st           <= S_CHECK;
 							chk_n        <= CHECK_FRAMES;
 							own          <= 1'b0;
 							held         <= 9'd0;
 							tap          <= 9'd0;
+							dir_on       <= 1'b0;
 						end
 					endcase
 				end
@@ -467,7 +569,10 @@ always @(posedge clk) begin
 					st <= S_IDLE;
 				else if (chk_n == 8'd0) begin
 					msg_req <= 1'b1;
-					msg     <= MSG_NOT_TAKEN;
+					// a direct move: what the board saw of the handler's jump
+					msg     <= !ran_direct ? MSG_NOT_TAKEN :
+					           s_fl        ? MSG_REFUSED   :
+					           s_rd        ? MSG_NOT_JUMP  : MSG_NO_RUN;
 					st      <= S_IDLE;
 				end
 				else
