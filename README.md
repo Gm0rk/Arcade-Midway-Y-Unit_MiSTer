@@ -12,8 +12,6 @@ Mortal Kombat and Terminator 2.
 - [Hardware](#hardware)
 - [Games](#games)
 - [Timing and resources](#timing-and-resources)
-- [Features](#features)
-- [OSD](#osd)
 - [ROMs](#roms)
 - [Credits and references](#credits-and-references)
 - [License](#license)
@@ -53,68 +51,23 @@ listed in [Extra content](docs/ExtraContent.md).
 
 Built with Quartus Prime 17.0.2 Lite for the DE10-Nano (Cyclone V
 5CSEBA6U23I7), timing model Slow 1100 mV 100 C. Timing and resource use are
-from the Build 102 compilation.
+from the Build 110 compilation.
 
 Timing is met on every clock, and on every hold, recovery, removal and minimum
 pulse width check. The margins move a little with every compilation.
 
 | Clock | Frequency | Setup slack |
 |---|---|---|
-| System (core PLL) | 96 MHz | 0.564 ns |
-| HDMI PLL | 148.54 MHz | 0.626 ns |
+| System (core PLL) | 96 MHz | 0.378 ns |
+| HDMI PLL | 148.54 MHz | 0.206 ns |
 
-Every other clock has at least 4.3 ns of setup slack.
+Every other clock has at least 3.9 ns of setup slack.
 
 | Resource | Used |
 |---|---|
-| Logic (ALMs) | 30,522 / 41,910 (73 %) |
+| Logic (ALMs) | 30,684 / 41,910 (73 %) |
 | Block RAM (M10K blocks) | 437 / 553 (79 %) |
 | DSP blocks | 65 / 112 (58 %) |
-
-## Features
-
-- CRT Adjust by rmonic79, with CRT V-Size (experimental): makes the picture
-  taller or shorter in up to 7 steps of 3 lines, in PVM mode (changes the
-  lines per frame, for monitors that follow line rate changes) or Cabinet mode
-  (keeps the native timing and blends neighbouring lines)
-- Video Timing: the board's own 54.7 Hz, or 57 Hz for TVs that do not hold
-  54.7 Hz (games run about 4 % faster, audio pitch is unchanged)
-- HDMI Top Row Pixel Fix: hides the picture's first line on HDMI, which hides
-  the stray pixels Mortal Kombat draws at the top left (a cabinet's overscan
-  normally hides them). The analog output is unchanged
-- CMOS saved as NVRAM: settings, audits and high scores survive power-off
-  (saved when the OSD is opened, if the game changed it). "Today's Best"
-  scores still reset at power-up, as on real hardware
-- DIP switches in the OSD, taken from MAME; changes apply after a reset
-- Service Mode, Service Credit and Tilt in the OSD; pause from a button or
-  while the OSD is open
-- Shortcuts to the hidden developer menus of the games that have one
-- Opposite directions held together (Up with Down, Left with Right) never
-  reach the game: the one pressed last wins. This covers every player's stick
-  and the fire sticks of Smash T.V. and Total Carnage
-- Mortal Kombat: Move List, Finishing Moves, Reptile on demand and Fixed AI
-  Difficulty (see the [Mortal Kombat page](docs/MortalKombat.md))
-- Total Carnage: a Passwords page with every warp code (see the
-  [Total Carnage page](docs/TotalCarnage.md))
-- Cheats menu: the MAME cheat collection's cheats for the games, 4 to 23 per
-  set, each switched on or off in the OSD (see each game's page and the
-  [cheat credits](#cheat-credits))
-
-## OSD
-
-| Item | |
-|---|---|
-| Video Settings | Aspect ratio, scandoubler, scale, HDMI Top Row Pixel Fix, Video Timing, CRT Adjust |
-| Move List | Mortal Kombat: shows each fighter's moves over the game; with the OSD closed, Left or Right turns the page |
-| Finishing Moves | Mortal Kombat: enters the chosen fatality at the next FINISH HIM/HER |
-| Fixed AI Difficulty | Mortal Kombat: Off, or 0 (easiest) to 9; set it in the OSD before you press Start to begin a game; Shang Tsung follows it like any fighter, Goro much less |
-| Passwords | Total Carnage: shows the warp codes over the game |
-| Cheats | The game's cheats; switch any of them on or off |
-| DIP Switches | The game's DIP switches, with Service Credit and Tilt |
-| Hidden Items | Hidden developer menus and extras, for the games that have them |
-| Service Mode | The cabinet's test switch |
-| Pause when OSD is open | On by default |
-| Reset / Reset and close OSD | Reset keeps the OSD open |
 
 ## ROMs
 
