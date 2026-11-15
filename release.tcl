@@ -2,11 +2,14 @@
 #
 # release.tcl - Quartus post-flow script: file the finished core
 #
-# After a successful compilation, renames output_files/Arcade-Midway-Y-Unit.rbf
-# to Arcade-Midway-Y-Unit_YYYYMMDD.rbf (the local date) and moves it to
-# releases/. A second build on the same day replaces that day's file.
+# After a successful compilation, renames output_files/<revision>.rbf to
+# <revision>_YYYYMMDD.rbf (the local date) and moves it to releases/. A second
+# build on the same day replaces that day's file. The revision is
+# Arcade-Midway-Y-Unit (the core, Arcade-Midway-Y-Unit_YYYYMMDD.rbf) or
+# Arcade-Midway-Y-Unit_test (the test project, Arcade-Midway-Y-Unit_test_YYYYMMDD.rbf),
+# so a test core and a production core can sit in one folder.
 #
-# Run by post_flow.tcl, which Arcade-Midway-Y-Unit.qsf hooks up as the
+# Run by post_flow.tcl, which the project's .qsf hooks up as the
 # project's one post-flow script:
 #   set_global_assignment -name POST_FLOW_SCRIPT_FILE "quartus_sh:post_flow.tcl"
 # (it can still be hooked up on its own as "quartus_sh:release.tcl"). Quartus
@@ -21,9 +24,9 @@
 #
 # --------------------------------------------------------------------------
 
-set release_revision "Arcade-Midway-Y-Unit"
-set output_dir       "output_files"
-set release_dir      "releases"
+set release_revisions {Arcade-Midway-Y-Unit Arcade-Midway-Y-Unit_test}
+set output_dir        "output_files"
+set release_dir       "releases"
 
 proc release_msg {type text} {
 	if {[catch {post_message -type $type "release.tcl: $text"}]} {
@@ -56,7 +59,7 @@ proc release_core {revision} {
 
 set revision [lindex $quartus(args) 2]
 
-if {$revision eq $release_revision} {
+if {[lsearch -exact $release_revisions $revision] >= 0} {
 	if {[catch {release_core $revision} err]} {
 		release_msg error "could not release the core: $err"
 	}
