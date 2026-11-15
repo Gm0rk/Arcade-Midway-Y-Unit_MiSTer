@@ -1,16 +1,17 @@
 # --------------------------------------------------------------------------
 #
-# post_flow.tcl - Quartus post-flow script of Arcade-Midway-Y-Unit
+# post_flow.tcl - Quartus post-flow script of Arcade-Midway-Y-Unit and of its
+# test project, Arcade-Midway-Y-Unit_test
 #
 # Quartus runs one post-flow script per project, so this one does the jobs in
 # turn after a compilation:
 #
 #   1. release.tcl: files the finished core under releases/.
-#   2. tools/timing_paths.tcl: writes output_files/Arcade-Midway-Y-Unit.paths.txt
+#   2. tools/timing_paths.tcl: writes output_files/<revision>.paths.txt
 #      (the 100 worst setup paths of every clock, then the 10 worst in full).
 #      It is run with quartus_sta, which takes a minute or two.
 #
-# Hooked up in Arcade-Midway-Y-Unit.qsf:
+# Hooked up in the project's .qsf:
 #   set_global_assignment -name POST_FLOW_SCRIPT_FILE "quartus_sh:post_flow.tcl"
 # Quartus runs it from the project folder with
 #   $quartus(args) = {flow project revision}.
@@ -25,8 +26,8 @@
 #
 # --------------------------------------------------------------------------
 
-set post_revision "Arcade-Midway-Y-Unit"
-set post_dir      [file dirname [file normalize [info script]]]
+set post_revisions {Arcade-Midway-Y-Unit Arcade-Midway-Y-Unit_test}
+set post_dir       [file dirname [file normalize [info script]]]
 
 proc post_msg {type text} {
 	if {[catch {post_message -type $type "post_flow.tcl: $text"}]} {
@@ -94,7 +95,8 @@ if {[catch {source [file join $post_dir release.tcl]} err]} {
 }
 
 # 2. list the worst timing paths
-if {[lindex $quartus(args) 2] eq $post_revision} {
+set post_revision [lindex $quartus(args) 2]
+if {[lsearch -exact $post_revisions $post_revision] >= 0} {
 	if {[catch {post_timing_paths $post_revision} err]} {
 		post_msg warning "could not list the timing paths: $err"
 	}
