@@ -3,20 +3,28 @@
 # timing_paths.tcl - list the worst setup paths of the last compilation
 #
 # Run automatically after every compilation by post_flow.tcl (the project's
-# post-flow script, set in Arcade-Midway-Y-Unit.qsf). By hand, from the project
+# post-flow script, set in the project's .qsf). By hand, from the project
 # folder and without recompiling:
 #   quartus_sta -t tools/timing_paths.tcl
 # (quartus_sta is in the Quartus bin64 folder, e.g.
 #  C:\intelFPGA_lite\17.0\quartus\bin64\quartus_sta.exe)
 #
-# Writes output_files/Arcade-Midway-Y-Unit.paths.txt: a one-line summary of the
+# The project is the one .qpf in the folder the script runs from
+# (Arcade-Midway-Y-Unit.qpf, or Arcade-Midway-Y-Unit_test.qpf for the test
+# project), and its one revision has the same name.
+#
+# Writes output_files/<project>.paths.txt: a one-line summary of the
 # 100 worst setup paths of every clock, then the full detail of the 10 worst.
 # The compilation's own .sta.rpt also shows the worst path of each clock now
-# (TIMEQUEST_DO_REPORT_TIMING in Arcade-Midway-Y-Unit.qsf).
+# (TIMEQUEST_DO_REPORT_TIMING in the project's .qsf).
 #
 # --------------------------------------------------------------------------
 
-set project  "Arcade-Midway-Y-Unit"
+set qpf [glob -nocomplain *.qpf]
+if {[llength $qpf] != 1} {
+	error "timing_paths.tcl: expected one .qpf in [pwd], found [llength $qpf]"
+}
+set project  [file rootname [lindex $qpf 0]]
 set out_file "output_files/$project.paths.txt"
 
 project_open $project -revision $project
