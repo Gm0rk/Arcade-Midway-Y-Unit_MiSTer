@@ -7,8 +7,8 @@ data the core needs for them and for the Hidden Items page's messages
     python3 tools/yunit_fmoves.py --scan <prog.bin>...  addresses found in program ROMs
     python3 tools/yunit_fmoves.py --docs                docs/MortalKombat.md tables
 
-The OSD's "Finishing Moves" page picks a fighter; rtl/yunit_fmoves.sv enters
-the fighter's fatality on the winner's controls at the next FINISH HIM it
+The OSD's "Auto Finishing Moves" page picks a fighter (the list is alphabetical);
+rtl/yunit_fmoves.sv enters the fighter's fatality on the winner's controls at the next FINISH HIM it
 fits. (The Pit is not entered for you: it is the uppercut, D+HP; the Move
 List says so.) The main page's "Move List" option (Off, On) shows the
 fighters' special moves and fatalities, with the distance each needs, in a
@@ -19,8 +19,8 @@ script holds the lists and makes from them:
 
   - rtl/yunit_fmoves_tab.svh: the move records and their programs (the
     controls they press), included by rtl/yunit_fmoves.sv
-  - rtl/yunit_fmoves_osd.svh: the Move List option, the Finishing Moves
-    page and the core's info messages (CONF_STR lines), included by the
+  - rtl/yunit_fmoves_osd.svh: the Move List option, the Auto Finishing
+    Moves page and the core's info messages (CONF_STR lines), included by the
     top level
   - for tools/mra_gen.py, each set's ROM index 1 words (build()): the RAM
     addresses the move player follows, the game state word the Hidden
@@ -67,6 +67,22 @@ Each move was played in MAME 0.289 on every Y Unit set at center distances
 from the closest the fighters get (about 62) to 300, P1 and P2 the winner:
 taken inside the window, not outside it.
 
+Direct finishers (Build 105). Each fighter's fatality handler asks the game's
+joystick matcher whether the history fits the combination (MOVI pattern,A11 /
+CALLR matcher / JRNC skip-the-move). The move player (rtl/yunit_fmoves.sv) has
+the board turn bit 8 of that jump's opcode round (JRNC <-> JRC) as the CPU
+fetches it while the move's program plays, so the handler goes on as if the
+combination had been entered, and the program only taps the move's trigger key
+(DIRECT_TRIG). The game still checks FINISH HIM, the distance, the loser dizzy
+and the winner standing. direct_scan() finds each set's seven handlers (one per
+fighter) in the program ROM; build() sends their ROM word addresses (see
+"ROM index 1"). A move's program is
+    READY, DIRECT n, <trigger taps>, END, <the combination>, END
+and a set without sites plays the combination as before. In MAME 0.264 (all 17
+Y Unit sets, the Reptile Man hack with its MRA's patches; every fighter as P1,
+and as P2 on rev 4.0 and rev 3.0) the move was taken within the game's own
+distance limits and not outside them or without the flip.
+
 Program tokens (also the MAME harness's): "U D F B" tap a direction (F / B
 toward / away from the opponent), "HP LP HK LK BL" tap a button, "[X" press
 and hold, "]X" let go, "wN" wait N frames, "|" wait until the loser is
@@ -100,7 +116,7 @@ FIGHTERS = [
     ("Liu Kang", 3, [("Cartwheel", "D B U F D", "[BL D B U F ]BL D", 0, FAR)]),
     ("Scorpion", 4, [("Fire Breath", "(BL) U U", "[BL U U ]BL", 119, 158)]),
 ]
-# The Pit is not a Finishing Moves entry (it is the uppercut, D+HP, which the
+# The Pit is not an Auto Finishing Moves entry (it is the uppercut, D+HP, which the
 # player does); it is only named in the Move List's footer: (name, command,
 # min distance, max distance)
 PIT = ("The Pit", "D+HP uppercut", 0, 80)
@@ -156,8 +172,17 @@ def dist_words(dmin, dmax):
 
 
 def fighters():
-    """(name, id, moves) per OSD line: one fatality each."""
+    """(name, id, moves) in the select screen's order: one fatality each. The
+    Move List window (tools/yunit_window.py) uses this order."""
     return [(n, c, list(m)) for n, c, m in FIGHTERS]
+
+
+def osd_fighters():
+    """The same, in the order of the OSD's Fighter list: alphabetical by the
+    name shown, to find a fighter quickly (Build 110). A line's index here is
+    the option value (status[30:28]), the menu mask's fighter bits and the
+    move records' line."""
+    return sorted(fighters(), key=lambda f: f[0])
 
 
 # --------------------------------------------------------------------------
@@ -165,7 +190,16 @@ def fighters():
 # --------------------------------------------------------------------------
 
 KEYS = {'U': 0, 'D': 1, 'F': 2, 'B': 3, 'HP': 4, 'LP': 5, 'HK': 6, 'LK': 7, 'BL': 8}
-OP_END, OP_TAP, OP_PRESS, OP_RELEASE, OP_WAIT, OP_READY = range(6)
+OP_END, OP_TAP, OP_PRESS, OP_RELEASE, OP_WAIT, OP_READY, OP_DIRECT = range(7)
+
+# direct finishers: the key that starts each fighter's fatality once the
+# handler's combination test is turned round (tapped up to DIRECT_TAPS times,
+# the player stops when the game takes the move). Cage, Raiden, Sub-Zero: High
+# Punch; Kano: Low Punch; Liu Kang: Down; Scorpion: Up (no Block needed in
+# this game's code); Sonya: Block.
+DIRECT_TRIG = {0: 'HP', 1: 'LP', 2: 'HP', 3: 'D', 4: 'U', 5: 'HP', 6: 'BL'}
+DIRECT_TAPS = 5
+DIRECT_WAIT = 12                 # frames after the last tap
 
 
 def compile_prog(prog):
@@ -192,6 +226,18 @@ def compile_prog(prog):
             steps.append(OP_TAP << 13 | (n - 1) << 9 | m)
     steps.append(OP_END << 13)
     return steps
+
+
+def compile_move(prog, cid):
+    """A fatality's steps: READY, DIRECT n, the trigger taps, END, then the
+    combination (compile_prog without its READY) and its END. n = the steps
+    DIRECT skips when the set has no direct site: the taps and their END."""
+    legacy = compile_prog(prog)
+    if legacy[0] != OP_READY << 13:
+        raise ValueError('a fatality program starts with READY')
+    taps = [OP_TAP << 13 | (3 - 1) << 9 | 1 << KEYS[DIRECT_TRIG[cid]]] * DIRECT_TAPS
+    direct = taps + [OP_WAIT << 13 | DIRECT_WAIT, OP_END << 13]
+    return [legacy[0], OP_DIRECT << 13 | len(direct)] + direct + legacy[1:]
 
 
 # --------------------------------------------------------------------------
@@ -346,6 +392,11 @@ def scan(prog_bytes):
 #                (bit address >> 4, low 16 bits) of the CPU level word, 0 =
 #                none (see "Fixed AI Difficulty" below; the board stores the
 #                chosen level on every CPU write to it)
+#   0x70-0x7D   direct finishers (rtl/yunit_fmoves.sv, rtl/midway_yunit.sv): per
+#                character 0-6 two words, {ROM word address [15:0]} then {valid
+#                [8], ROM word address [18:16]}: the program ROM word of the
+#                fatality handler's JRNC (direct_scan); the ROM word address is
+#                (bit address - FF800000) >> 4
 # Only as many words as hold data are written (at least up to 0x34).
 # MRA game ids of the Mortal Kombat boards (6 rev 1-4, 7 prototypes, 8 Turbo
 # hacks, 14 the Victor bootleg of rev 3.0, 15 and 16 the Yawdim bootlegs)
@@ -355,7 +406,8 @@ CFG_SEC = 0x30
 CFG_REP = 0x40
 CFG_REP_FLAG = 0x60
 CFG_LVL = 0x62
-CFG_WORDS = 0x63
+CFG_DIRECT = 0x70
+CFG_WORDS = 0x7E
 CFG_MIN_WORDS = 0x35
 
 # sets whose program has the hidden menu's code (the others of the family
@@ -519,6 +571,88 @@ def level_scan(p):
     return p.u32(h[0] + 1) if len(h) == 1 else None
 
 
+# Direct finishers: the handler sites. Every Y Unit MK set has seven handlers
+# of this shape (rev 4.0, mkla4: FFD9BB30 Cage ... one per fighter):
+#     MOVE @state,A0 / CMPI 3,A0 / JRNE out        FINISH HIM only
+#     MOVI pattern,A11 / CALLR matcher / JRNC out  <-- the site
+#     distance test, MOVI entry,A7 ...
+# and the pattern is the fighter's table: the time window (frames), then the
+# joystick codes of the combination for each side, 6 each (0 = none). The 13
+# words of each table identify the fighter, and the round-state check before
+# the MOVI tells a fatality handler from another user of the same table.
+DIRECT_TABLES = {
+    0: [0x30, 2, 2, 2, 0, 0, 0, 4, 4, 4, 0, 0, 0],          # Johnny Cage
+    1: [0x30, 2, 3, 4, 0, 0, 0, 4, 3, 2, 0, 0, 0],          # Kano
+    2: [0x30, 4, 4, 4, 2, 0, 0, 2, 2, 2, 4, 0, 0],          # Raiden
+    3: [0x30, 3, 2, 1, 4, 3, 0, 3, 4, 1, 2, 3, 0],          # Liu Kang
+    4: [0x20, 1, 1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0],          # Scorpion
+    5: [0x38, 2, 3, 2, 0, 0, 0, 4, 3, 4, 0, 0, 0],          # Sub-Zero
+    6: [0x38, 4, 4, 2, 2, 0, 0, 2, 2, 4, 4, 0, 0],          # Sonya
+}
+
+
+def direct_scan(p, state):
+    """The program ROM word address of each fighter's fatality handler jump
+    (the JRNC / JRC after CALLR matcher), character 0-6, or None unless every
+    fighter has exactly one and all call the one matcher. state: the round
+    state's bit address."""
+    w = p.w
+    calls = []
+    for i in range(len(w) - 8):
+        # MOVI pattern,A11 / CALLR matcher / JRC or JRNC
+        if w[i] == 0x09EB and w[i + 3] == 0x0D3F and w[i + 5] >> 9 == 0x64:
+            calls.append((i, w[i + 1] | w[i + 2] << 16, i + 5 + _s16(w[i + 4])))
+    sites, matchers = [], set()
+    for cid in range(7):
+        hits = []
+        for i, pat, tgt in calls:
+            if pat < 0xFF800000 or pat & 15:
+                continue
+            k = (pat - 0xFF800000) >> 4
+            if k + 13 > len(w) or list(w[k:k + 13]) != DIRECT_TABLES[cid]:
+                continue
+            # the round-state check (MOVE @state,A0 / CMPI 3,A0 / JRNE: 05A0 sl sh 0B40 FFFC)
+            if any(w[j] == 0x05A0 and w[j + 3] == 0x0B40 and w[j + 4] == 0xFFFC and
+                   (w[j + 1] | w[j + 2] << 16) == state for j in range(max(0, i - 40), i)):
+                hits.append((i + 5, tgt))
+        if len(hits) != 1:
+            return None
+        sites.append(hits[0][0])
+        matchers.add(hits[0][1])
+    return sites if len(matchers) == 1 else None
+
+
+# What direct_scan finds in each set (MAME 0.264): the ROM word addresses of the
+# seven handlers' jumps, characters 0-6 (Cage, Kano, Raiden, Liu Kang,
+# Scorpion, Sub-Zero, Sonya); mra_gen.py uses it when the ROMs are not at hand
+# and checks it when they are.
+DIRECT_SETS = {
+    'mkla4':      '59BB3 59CE0 59B2D 59A84 59C2F 59B4D 59A1D',
+    'mkrep':      '59BB3 59CE0 59B2D 59A84 59C2F 59B4D 59A1D',
+    'mkla3':      '59B75 59CA2 59AEF 59A4B 59BF1 59B0F 599E4',
+    'mkyturbo':   '59B75 59CA2 59AEF 59A4B 59BF1 59B0F 599E4',
+    'mkyturboe':  '59B75 59CA2 59AEF 59A4B 59BF1 59B0F 599E4',
+    'mkla3bl':    '59B75 59CA2 59AEF 59A4B 59BF1 59B0F 599E4',
+    'mkyawdim':   '59B75 59CA2 59AEF 59A4B 59BF1 59B0F 599E4',
+    'mkyawdim2':  '59B75 59CA2 59AEF 59A4B 59BF1 59B0F 599E4',
+    'mkyawdim3':  '59B75 59CA2 59AEF 59A4B 59BF1 59B0F 599E4',
+    'mkyawdim4':  '59B75 59CA2 59AEF 59A4B 59BF1 59B0F 599E4',
+    'mkla2':      '595B7 596E4 59531 5948D 59633 59551 59426',
+    'mkla1':      '59125 59252 5909F 58FFB 591A1 590BF 58F94',
+    'mkprot9':    '58809 588ED 587A1 58725 58860 587C1 586D1',
+    'mknifty':    '58809 588ED 587A1 58725 58860 587C1 586D1',
+    'mknifty666': '58809 588ED 587A1 58725 58860 587C1 586D1',
+    'mkprot8':    '58431 58515 583C9 5834D 58488 583E9 582F9',
+    'mkprot4':    '580D8 581B2 58075 57FF9 5812A 58095 57FA5',
+}
+
+
+def direct_stored(setname):
+    """The seven handler sites of a set (ROM word addresses), or None."""
+    t = DIRECT_SETS.get(setname)
+    return [int(x, 16) for x in t.split()] if t else None
+
+
 def build(gid, setname, prog_bytes=None):
     """ROM index 1 words (bytes) and notes. gid: the MRA game id (MK_IDS, 3
     High Impact, 4 Super High Impact)."""
@@ -570,6 +704,19 @@ def build(gid, setname, prog_bytes=None):
                 raise ValueError('%s: the CPU level word is not in main RAM' % setname)
             w[CFG_LVL] = (lv >> 4) & 0xFFFF
             notes.append('Fixed AI Difficulty: CPU level word %08X' % lv)
+    if gid in MK_IDS:
+        ds = direct_stored(setname)
+        r = stored(setname)
+        if prog_bytes is not None and r:
+            sc = direct_scan(Prog(prog_bytes), r['state'])
+            if ds != sc:
+                raise ValueError('%s: the direct finisher sites differ from the stored ones' % setname)
+        if ds:
+            for c, a in enumerate(ds):
+                if a >= 1 << 19:
+                    raise ValueError('%s: a direct site is outside the program ROM' % setname)
+                w[CFG_DIRECT + 2 * c], w[CFG_DIRECT + 2 * c + 1] = a & 0xFFFF, 0x100 | a >> 16
+            notes.append('direct finishers: 7 handler sites')
     if gid in (3, 4) + MK_IDS:
         if setname in NO_MENU:
             w[CFG_SEC + 4] = 2
@@ -596,6 +743,9 @@ MESSAGES = [
     ('OVER', "FINISH HIM is over: the move\nwaits for the next one"),
     ('NOT_TAKEN', "Move not taken"),
     ('CLEARED', "Finishing move cleared"),
+    ('NO_RUN', "Not taken: the game never\nran the fatality handler"),
+    ('NOT_JUMP', "Not taken: the site is not\na jump (bad ROM data)"),
+    ('REFUSED', "Not taken: the game ran the\nhandler but refused it"),
     ('EJB_OK', "EJB Menu: code entered"),
     ('OCTO_OK', "Octopus Bookkeeping:\ncode entered"),
     ('CODE_FAIL', "Code not taken: try again"),
@@ -606,7 +756,7 @@ MESSAGES = [
     ('REPT_CLEARED', "Reptile fight cleared"),
 ]
 
-N_FM_MESSAGES = 7                # the move player's (rtl/yunit_fmoves.sv)
+N_FM_MESSAGES = 10               # the move player's (rtl/yunit_fmoves.sv)
 
 # OSD status bits (top level)
 SEL_BITS = (30, 28)              # O[30:28] fighter
@@ -631,28 +781,36 @@ def sel_prefix(li):
     return pre
 
 
-def label(name, cmd):
-    s = '%-12s %s' % (name, cmd) if cmd else name
+def dist_osd(dmin, dmax):
+    """A move's distance window for the OSD line, the Move List's words with
+    'to' as a hyphen ('Close-sweep'): the line has room for 27 characters."""
+    return dist_words(dmin, dmax).replace(' to ', '-')
+
+
+def label(name, dist):
+    """An OSD line of the Auto Finishing Moves page: the move, then the
+    distance it needs (names padded to 13 so the distances line up)."""
+    s = '%-13s %s' % (name, dist)
     if len(s) > 27 or ',' in s or ';' in s:
         raise ValueError('label too long or with , / ;: ' + s)
     return s
 
 
 def osd_lines():
-    """CONF_STR lines: the main page's Move List option and Finishing Moves
-    entry, the Finishing Moves page, and the I line."""
-    names = ','.join(n for n, _, _ in FIGHTERS)
+    """CONF_STR lines: the main page's Move List option and Auto Finishing
+    Moves entry, the Auto Finishing Moves page, and the I line."""
+    names = ','.join(n for n, _, _ in osd_fighters())
     fopt = 'O[%d:%d],Fighter,%s;' % (SEL_BITS[0], SEL_BITS[1], names)
     out = []
     out.append('H5O[%d],Move List,Off,On;' % LIST_BIT)
-    out.append('H5%s,Finishing Moves;' % PAGE_FM)
+    out.append('H5%s,Auto Finishing Moves;' % PAGE_FM)
     out.append('%s-;' % PAGE_FM)
     out.append(PAGE_FM + fopt)
     out.append('%s-;' % PAGE_FM)
-    for li, (name, cid, moves) in enumerate(fighters()):
+    for li, (name, cid, moves) in enumerate(osd_fighters()):
         pre = sel_prefix(li)
         for slot, (mname, cmd, prog, dmin, dmax) in enumerate(moves):
-            out.append('%s%sR[%d],%s;' % (pre, PAGE_FM, SLOT_BIT + slot, label(mname, cmd)))
+            out.append('%s%sR[%d],%s;' % (pre, PAGE_FM, SLOT_BIT + slot, label(mname, dist_osd(dmin, dmax))))
     out.append('%s-;' % PAGE_FM)
     out.append('%sR[%d],Clear the set move;' % (PAGE_FM, CLEAR_BIT))
     out.append('%s-;' % PAGE_FM)
@@ -669,11 +827,13 @@ def osd_lines():
 def tables():
     """Move records and steps: records[(line, slot)] and the step list."""
     steps, recs = [], {}
-    for li, (name, cid, moves) in enumerate(fighters()):
+    for li, (name, cid, moves) in enumerate(osd_fighters()):
         for slot, (mname, cmd, prog, dmin, dmax) in enumerate(moves):
             recs[(li, slot)] = dict(char=cid, dmin=dmin, dmax=dmax, start=len(steps),
                                     name='%s: %s' % (name, mname))
-            steps += compile_prog(prog)
+            steps += compile_move(prog, cid)
+    if len(steps) > 255:
+        raise ValueError('%d steps: a move record\'s first step is 8 bits' % len(steps))
     return recs, steps
 
 
@@ -721,7 +881,7 @@ def gen_tab():
 def gen_osd():
     lines, info = osd_lines()
     o = []
-    o.append('// yunit_fmoves_osd.svh - the Move List option, the Finishing Moves page,')
+    o.append('// yunit_fmoves_osd.svh - the Move List option, the Auto Finishing Moves page,')
     o.append('// the info messages')
     o.append('// Generated by tools/yunit_fmoves.py --gen; do not edit.')
     o.append('//')
@@ -752,10 +912,12 @@ def docs():
         if dmin == 0:
             return 'close (up to %d)' % dmax
         return '%d-%d' % (dmin, dmax)
-    o = ['| Fighter | Move | Command | Distance |', '|---|---|---|---|']
+    names = {'U': 'Up', 'D': 'Down', 'HP': 'High Punch', 'LP': 'Low Punch', 'BL': 'Block'}
+    o = ['| Fighter | Move | Command | Key tapped | Distance |', '|---|---|---|---|---|']
     for name, cid, moves in FIGHTERS:
         for n, (mname, cmd, prog, dmin, dmax) in enumerate(moves):
-            o.append('| %s | %s | %s | %s |' % (name if n == 0 else '', mname, cmd, dist(dmin, dmax)))
+            o.append('| %s | %s | %s | %s | %s |' % (name if n == 0 else '', mname, cmd,
+                                                   names[DIRECT_TRIG[cid]], dist(dmin, dmax)))
     o.append('')
     # the Move List window's pages (tools/yunit_window.py) as a table
     o.append('| Fighter | Move | Command | Distance |')
