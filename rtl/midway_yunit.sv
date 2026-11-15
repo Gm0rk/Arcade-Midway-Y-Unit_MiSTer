@@ -50,6 +50,16 @@ module midway_yunit
 	input      [15:0] patch_wd,
 	input       [2:0] patch_en,      // options 1-3 on
 
+	// Mortal Kombat's direct finishers (rtl/yunit_fmoves.sv; see "Direct
+	// finisher" below): while fp_en, a CPU read of the program ROM word
+	// fp_addr (the ROM word address) gets bit 8 turned round if the word is a
+	// JRcc. fp_rd / fp_flip: one clock each time that word was read / turned
+	// round (they tell the move player what became of the move)
+	input             fp_en,
+	input      [18:0] fp_addr,
+	output reg        fp_rd,
+	output reg        fp_flip,
+
 	// Mortal Kombat's CPU level pinned (ROM index 1 word 0x62; see "Fixed AI
 	// difficulty" below): while lvl_on, a CPU write to the main RAM word
 	// lvl_wa stores lvl_val
@@ -543,6 +553,35 @@ function automatic [15:0] patched(input [15:0] w, input hit, input [15:0] orig, 
 endfunction
 
 //----------------------------------------------------------------------------
+// Direct finisher (Mortal Kombat). Each fighter's fatality handler asks the
+// game's joystick matcher whether the history fits the move's combination
+// (CALLR matcher) and jumps over the move on "no" (JRNC; JRC in a few sets'
+// code, any 1100 100c dddddddd word): the move player gives the handler's
+// ROM word, and while a move plays the board turns bit 8 of that word round
+// as the CPU fetches it (JRNC <-> JRC, the displacement untouched, so the
+// instruction stays whole whatever its form). The handler then carries on as
+// if the combination had been entered, and the game still does all its own
+// checks (FINISH HIM, the distance, the loser dizzy, the winner standing).
+// It acts on what the ROM cache returns, not on the cache: the word is
+// turned round on the way to the CPU, so it takes effect and goes on the next
+// read. The match is the ROM word alone (Build 108; Builds 105-107 also asked
+// the CPU's PC to be that word, an instruction fetch): the word is code, the
+// game reads it only as an instruction, and only while a move plays (fp_en).
+//----------------------------------------------------------------------------
+
+reg         fp_hit;
+always @(posedge clk)
+	fp_hit <= fp_en && wa[18:0] == fp_addr;
+
+function automatic is_jrcc(input [15:0] w);
+	is_jrcc = (w[15:9] == 7'b1100100);
+endfunction
+
+function automatic [15:0] flipped(input [15:0] w, input hit);
+	flipped = (hit && is_jrcc(w)) ? w ^ 16'h0100 : w;
+endfunction
+
+//----------------------------------------------------------------------------
 // Cheats (rtl/yunit_cheat.sv). The engine sees the registered bus address;
 // its match is ready one clock later, when the data comes back from the RAM
 // or the ROM cache. ROM units act on instruction fetches only: the word read
@@ -992,6 +1031,8 @@ always @(posedge clk) begin
 	dma_reg_wr <= 1'b0;
 	adc_start  <= 1'b0;
 	prot_load  <= 1'b0;
+	fp_rd      <= 1'b0;
+	fp_flip    <= 1'b0;
 
 	if (reset) begin
 		mem_ack     <= 1'b0;
@@ -1140,7 +1181,9 @@ always @(posedge clk) begin
 			S_ROM: begin
 				if (ct_q == {1'b1, rom_line[16:11]}) begin
 					mem_ack   <= 1'b1;
-					mem_rdata <= cheated(patched(cd_q[{wa[1:0], 4'b0000} +: 16], p_hit, p_hit_orig, p_hit_new), ch_mask, ch_data);
+					mem_rdata <= cheated(flipped(patched(cd_q[{wa[1:0], 4'b0000} +: 16], p_hit, p_hit_orig, p_hit_new), fp_hit), ch_mask, ch_data);
+					fp_rd     <= fp_hit;
+					fp_flip   <= fp_hit && is_jrcc(cd_q[{wa[1:0], 4'b0000} +: 16]);
 					bstate    <= S_IDLE;
 				end
 				else begin
@@ -1156,7 +1199,9 @@ always @(posedge clk) begin
 				c_wd      <= cpu_sd_data;
 				c_wt      <= {1'b1, rom_line[16:11]};
 				mem_ack   <= 1'b1;
-				mem_rdata <= cheated(patched(cpu_sd_data[{wa[1:0], 4'b0000} +: 16], p_hit, p_hit_orig, p_hit_new), ch_mask, ch_data);
+				mem_rdata <= cheated(flipped(patched(cpu_sd_data[{wa[1:0], 4'b0000} +: 16], p_hit, p_hit_orig, p_hit_new), fp_hit), ch_mask, ch_data);
+				fp_rd     <= fp_hit;
+				fp_flip   <= fp_hit && is_jrcc(cpu_sd_data[{wa[1:0], 4'b0000} +: 16]);
 				bstate    <= S_IDLE;
 			end
 
