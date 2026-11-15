@@ -16,7 +16,7 @@
 Mortal Kombat has the most extras: six OSD features and its own button layout.
 
 - **[Cheats](#cheats)** (Cheats menu): 23 cheats, among them infinite energy, one button fatalities, hit anywhere, no blocking, single round matches and Reptile's clues. They are the T-Unit game's, found in each Y-Unit ROM by matching the code.
-- **[Finishing Moves](#finishing-moves)** (main page): pick a fighter's fatality, and the core enters it on the round winner's controls at the next FINISH HIM, for either player. The distance is measured the way the game does it, from the fighters' centres. Messages say when the fighter is too far or too close, the move waits for another fighter's FINISH HIM, FINISH HIM is over, the move was not taken, or it was cleared. **Clear the set move** drops it.
+- **[Auto Finishing Moves](#auto-finishing-moves)** (main page): pick a fighter's fatality, and the core enters it on the round winner's controls at the next FINISH HIM, for either player. The distance is measured the way the game does it, from the fighters' centres. Messages say when the fighter is too far or too close, the move waits for another fighter's FINISH HIM, FINISH HIM is over, the move was not taken, or it was cleared. **Clear the set move** drops it. The core does not type the combination: it has the game's own test of it answer yes while the move plays and taps only the move's key.
 - **[Move List](#move-list)** (Off, On): a reference window over the dimmed title screen with each fighter's special moves, fatality and the distance it needs, and The Pit's uppercut in the footer. With the OSD closed, Left or Right turns to the other page. The game waits while it shows.
 - **[Fixed AI Difficulty](#fixed-ai-difficulty)** (main page: Off, 0 to 9; Off by default): holds the CPU opponent at one of the game's ten levels, 0 (easiest) to 9, from the first fight to the last, as the Fixed AI Difficulty of Mortal Kombat: Legacy Kollection does. Off is the game's own curve, which starts easy and gets harder with every match you win. Set it in the OSD before you press Start to begin a game. Shang Tsung follows it like any fighter; Goro much less (see [Fixed AI Difficulty](#fixed-ai-difficulty)).
 - **[EJB Menu shortcut](#hidden-developer-menu-ejb-menu)** (Hidden Items, every revision except prototype 4.0): plays the 27-press code on the two Block buttons in about 3 seconds, for diagnostics, audits, enter initials and character endings. The game takes the code only in attract mode, not during a game or the game-over screens that follow it. Start 1 and 2 are held released while it plays so a Start press cannot spoil it. Messages report the result.
@@ -76,31 +76,70 @@ These are the cheats of the T-Unit game (rev 5.0 in the collection). Most of the
 The cabinet has one block button per player; the board's second block input
 ("Block 2" in MAME) is not used.
 
-## Finishing Moves
+## Auto Finishing Moves
 
-**OSD → Finishing Moves** lists each fighter's fatality. Pick the
-fighter in **Fighter**, then the move: the core enters it for you at the next
-FINISH HIM that fighter wins (either player), on the winner's controls. Stand
-at the right distance; the core says when you are too far or too close and
-waits while you step in or out, then takes the controls for about a second
-(your own are ignored meanwhile). A move set before FINISH HIM, or at another
-fighter's FINISH HIM, waits for the right one; it is used once. **Clear the
-set move** drops it.
+**OSD → Auto Finishing Moves** lists each fighter's fatality. Pick the
+fighter in **Fighter**, then the move: the core enters
+it for you at the next FINISH HIM that fighter wins (either player), on the
+winner's controls. Each line shows the distance the fighters must be apart,
+in the Move List's words: Close, Sweep, Jump ("Close-sweep" is Close to sweep,
+"Anywhere" has no limit; the pixel windows are in the table below). Stand at that distance; the core says
+when you are too far or too close and waits while you step in or out, then takes
+the controls for about a second (your own are ignored meanwhile). A move set
+before FINISH HIM, or at another fighter's FINISH HIM, waits for the right one;
+it is used once. **Clear the set move** drops it.
 
-| Fighter | Move | Command | Distance |
-|---|---|---|---|
-| Johnny Cage | Decapitation | F F F HP | close (up to 70) |
-| Kano | Heart Rip | B D F LP | close (up to 102) |
-| Sub-Zero | Spine Rip | F D F HP | close (up to 99) |
-| Sonya | Kiss of Death | F F B B BL | any |
-| Raiden | Electrocution | F B B B HP | 74-134 |
-| Liu Kang | Cartwheel | D B U F D | any |
-| Scorpion | Fire Breath | (BL) U U | 119-158 |
+The core does not type the combination. Each fighter's fatality has a
+handler in the game that asks its joystick matcher whether the combination
+was entered and skips the move when it was not. While the move plays, the
+core turns that one test round (one bit of the handler's jump instruction,
+as the CPU reads it), so the handler goes on as if the combination had been
+entered, and the core only taps the move's own key (the **Key tapped**
+column), up to five times, until the game starts the fatality. The game
+still does its own checks: FINISH HIM, the distance, the loser dizzy and the
+winner standing, so a move at the wrong moment is refused like a mistyped
+combination. The turned-round test is on only while the move plays and only
+for that one word of the program, so the rest of the game (the ROM checks
+included) sees the original program. The core knows the game took the move
+when the game writes its finish flag; a value the flag kept from an earlier
+fatality does not count. The seven handlers are found in every
+revision's program (all 17 Mortal Kombat sets); a set without them would
+get the combination typed instead.
+
+How far it was checked: the game's own side of this, in MAME 0.264, on all 17
+sets (the Reptile Man hack with the three program patches its MRA makes, which
+it needs to start) and every fighter as player 1, and as player 2 on rev 4.0
+(all seven fighters) and rev 3.0 (six of them). Each fight was played to FINISH HIM, then the same moment was
+replayed three ways: with the test turned round and the key tapped, the game took
+the move on the first tap; with the same taps and no turned-round test, it did
+not; and 8 pixels beyond the distance window it still refused the move (except
+Liu Kang's and Sonya's, which have no far limit). The core's side, the move
+player that turns the test round and taps, was run in simulation for all 17
+sets, both players.
+
+On a MiSTer, Johnny Cage's fatality plays on the original revisions, the Turbo hacks,
+the Yawdim and Victor bootlegs and the Reptile Man hack. It does not play yet on
+prototype 9.0 and the Nifty Kombo hacks: Johnny Cage punches the opponent and the
+game counts the move, but the fatality animation does not start. Johnny Cage is the
+fighter tested on those sets: the other fighters, and prototypes 8.0 and 4.0, are not
+known to work.
+
+| Fighter | Move | Command | Key tapped | Distance |
+|---|---|---|---|---|
+| Johnny Cage | Decapitation | F F F HP | High Punch | close (up to 70) |
+| Kano | Heart Rip | B D F LP | Low Punch | close (up to 102) |
+| Sub-Zero | Spine Rip | F D F HP | High Punch | close (up to 99) |
+| Sonya | Kiss of Death | F F B B BL | Block | any |
+| Raiden | Electrocution | F B B B HP | High Punch | 74-134 |
+| Liu Kang | Cartwheel | D B U F D | Down | any |
+| Scorpion | Fire Breath | (BL) U U | Up | 119-158 |
 
 The Pit is not entered for you: on that stage an uppercut (D+HP) up close does it (the Move List's footer says so).
 
-Commands are for a fighter facing right: F and B are toward and away from the
-opponent, (BL) means Block held over the directions. Distances are between
+The Command column is the game's own combination (the one you would enter by
+hand); the core taps only the key in the next column. Commands are for a
+fighter facing right: F and B are toward and away from the opponent, (BL)
+means Block held over the directions. Distances are between
 the two fighters' centres, in pixels of the 400-pixel-wide picture; standing
 as close as possible is about 62. They are the game's own limits (checked on
 every revision) less 2 pixels.
@@ -113,7 +152,10 @@ Messages (shown after the OSD closes):
 | Not this fighter's FINISH HIM: the move waits for a later one | Set while another fighter is finishing |
 | Too far: step closer / Too close: step back | The distance is outside the move's window |
 | FINISH HIM is over: the move waits for the next one | FINISH HIM ended before the move could start |
-| Move not taken | The game did not take it (the opponent was hit, the distance changed) |
+| Move not taken | The game did not take it (the opponent was hit, the distance changed); shown for a set without direct data (an MRA of an earlier build) |
+| Not taken: the game never ran the fatality handler | Direct move: the core never saw the game read the handler's jump (the game was not at that point, or the address is wrong) |
+| Not taken: the site is not a jump (bad ROM data) | Direct move: the word the core watches is not a jump instruction (a wrong address in the MRA) |
+| Not taken: the game ran the handler but refused it | Direct move: the jump was turned round and the game still said no (the distance, or another of its checks) |
 | Finishing move cleared | After Clear the set move |
 
 ## Move List
@@ -127,14 +169,14 @@ press **Left or Right** on either controller to turn to the other page (the
 d-pad steers the OSD while it is open, so the pages turn only with it
 closed). The list starts on page 1 each time it is switched On. The game
 waits while it is on; open the OSD and set Move List to **Off** to play on.
-It is for reference: the core does not enter these moves (Finishing Moves
+It is for reference: the core does not enter these moves (Auto Finishing Moves
 does that for the fatalities).
 
 Commands as the game reads them: F toward the opponent, B away; (BL B F)
 means Block held while you enter B F; X+Y pressed together. Distances in
 words: Close (touching to a little apart), Sweep (out to a sweep's reach),
 Jump (beyond a sweep, about a jump away); "Close to sweep" and "Sweep to
-jump" span two (the pixel windows are under Finishing Moves). The list is the
+jump" span two (the pixel windows are under Auto Finishing Moves). The list is the
 one of rev 4.0; the prototypes may differ.
 
 | Fighter | Move | Command | Distance |
@@ -291,13 +333,13 @@ Some sets of the `_alternatives` folder need a word:
   not working because its protection is not emulated, and patches that
   protection out when it starts the game; the MRA does the same with three
   `<patch>` entries after the program ROM, so the program the core runs is the
-  one MAME runs. Finishing Moves and the EJB Menu shortcut work as on rev 4.0;
+  one MAME runs. Auto Finishing Moves and the EJB Menu shortcut work as on rev 4.0;
   Hidden Items has no Reptile lines (see [Reptile](#reptile)).
 - **Victor bootleg of rev 3.0** (mkla3bl): rev 3.0's program with its sound,
   on a bootleg board whose graphics ROMs are three 2 MB files with the bytes of
   the original ROMs interleaved in pairs. MAME puts them back in order when it
   starts; the core does it while the ROMs load (the MRA lists the three files as
-  they are). Everything else is rev 3.0: Finishing Moves, the EJB Menu shortcut
+  they are). Everything else is rev 3.0: Auto Finishing Moves, the EJB Menu shortcut
   and the Reptile lines work as on it.
 - **Yawdim bootlegs** (mkyawdim, mkyawdim2, mkyawdim3, mkyawdim4: "Mortal Kombat
   (Yawdim bootleg, set 1)" to "set 4"): rev 3.0 (about 330 bytes of its program
@@ -318,7 +360,7 @@ Some sets of the `_alternatives` folder need a word:
   The bootleg board has a 48 MHz oscillator (MAME's driver runs the 34010 at 40 MHz),
   and the core runs it at 48 MHz, like Mortal Kombat. MAME marks sets 3 and 4 as
   having imperfect sound and says that some sound effects are missing on the real
-  PCB of set 2; the core plays what MAME plays. Finishing Moves, the EJB Menu
+  PCB of set 2; the core plays what MAME plays. Auto Finishing Moves, the EJB Menu
   shortcut and the Reptile lines work as on rev 3.0 (the game's variables are at the
   same addresses in all four sets). Sets 1 and 2 have the same program; sets 3 and 4
   differ from set 1 by 3 and 27 bytes.
